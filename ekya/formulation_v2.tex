@@ -1,0 +1,82 @@
+
+
+
+
+
+\subsection{Formulation of joint inference and retraining}
+\label{subsec:formulation}
+
+The problem of joint inference and retraining aims to maximize overall inference accuracy for all video streams $\mathcal{V}$ in a retraining window ${T}$ with duration $\lVert T \rVert$. 
+All work must be done in $\mathcal{G}$ GPUs.
+Thus, the total compute capability is $\mathcal{G}\lVert T \rVert$ GPU-time. Without loss of generality, let $\delta$ be the smallest granularity of GPU allocation.  %(e.g., if $\delta = 1\%$ of GPU, $150\delta =$ 1.5 GPU). Let $\Theta$ be the set of all possible GPU allocations $\Theta = \{0, 1, ..., \frac{\mathcal{G}}{\delta}\}$.
+Each video $v \in V$ has a set of \emph{retraining} configurations $\Gamma$
+and a set of \emph{inference} configurations $\Lambda$ (\S\ref{subsec:profiles}).
+Table \ref{tab:notations} (\S{\ref{appendix:scheduler}}) lists the notations. 
+
+
+
+\noindent\textbf{Decisions.} For each video $v\in\mathcal{V}$ in a window $T$, we decide: (1) the retraining configuration $\gamma\in\Gamma$ ($\gamma = \emptyset$ means no retraining); (2) the inference configuration $\lambda\in\Lambda$; and (3) how many GPUs (in multiples of $\delta$) % (in terms of GPU resource units $\delta$)
+to allocate for retraining ($\mathcal{R}$) %\in\Theta$) 
+and inference ($\mathcal{I}$). %\in\Theta$). 
+We use binary variables $\phi_{v\gamma\lambda\mathcal{R}\mathcal{I}}\in\{0,1\}$ to denote these decisions (see Table \ref{tab:notations} \S{\ref{appendix:scheduler}} for the definition). 
+These decisions require $C_T(v, \gamma, \lambda)$ GPU-time and yields overall accuracy of $A_T(v, \gamma, \lambda, \mathcal{R}, \mathcal{I})$. $A_T(v, \gamma, \lambda, \mathcal{R}, \mathcal{I})$ is averaged across the window $T$ (\S\ref{subsec:motivation-sched-example}), and the above decisions determine the inference accuracy at {\em each point in time}.
+%Specifically, let $a_t(v, \gamma, \lambda, \mathcal{R}, \mathcal{I})$ be the inference accuracy for video $v$ at a point in time $t$, % given retraining configuration $\gamma$, inference configuration $\lambda$, $\mathcal{R}\delta$ GPUs for retraining, and $\mathcal{I}\delta$ GPUs for inference, we have:
+%\[
+%\ A_T(v, \gamma, \lambda, \mathcal{R}, \mathcal{I}) = 
+%\frac{1}{\lVert T \rVert} \int_{t=0}^{\lVert T \rVert} a_t(v, \gamma, \lambda, \mathcal{R}, \mathcal{I})\ dt
+%\]
+
+
+%At each retraining window $t \in \mathcal{T}$, the system maintains a set of DNN instances $M_{v}^t$ for video $v$, where each $m_{v\gamma}^t \in M_{v}^t$ denotes a DNN instance that is trained based on configuration $\gamma$. Each DNN $m_{v\gamma}^0 \in M_{v}^0$ is pretrained with offline video data. 
+%The system can optionally retrain $m_{v\gamma}^t$ into $\hat{m}_{v\gamma}^t$ with training configuration $\gamma$ and the video data of $v$ at $t$, and the retraining cost is $C^R(v, t, \gamma)$.
+
+%The system must pick a DNN $m_{v\gamma}^t$ or $\hat{m}_{v\gamma}^t$ and an inference configuration $\lambda \in \Lambda$ to run inference for video $v$ at $t$.
+%The inference cost of such a decision is $C^I(v, t, \gamma, \lambda$), and the inference accuracy is $A(v, t, m, \lambda)$ where $m$ is the chosen DNN. 
+%We use binary variables $r_{vt\gamma g}$ and $i_{vt\gamma \lambda g}$ to indicate the decisions made by the system (see Table \ref{tab:notations} for their definitions).
+
+\noindent\textbf{Optimization.} Maximize the inference accuracy averaged across all videos in a retraining window within the GPU limit. 
+
+{\small
+\vspace{-12pt}
+\begin{equation}
+    \begin{aligned}
+    %\footnotesize
+       & \underset{\phi_{v\gamma\lambda\mathcal{R}\mathcal{I}}}{\arg\max}
+         \frac{1}{\lVert \mathcal{V} \rVert}
+         \sum_{\substack{\forall v\in\mathcal{V}, 
+                        \forall \gamma\in\Gamma,
+                        \forall \lambda\in\Lambda,\\
+                        \forall \mathcal{R}, \forall \mathcal{I} \in \{0, 1, ..., \frac{\mathcal{G}}{\delta}\} %\in \Theta,
+                        %\forall \mathcal{I} \in \Theta
+                        }}
+          \phi_{v\gamma\lambda\mathcal{R}\mathcal{I}} \cdot
+          A_T(v, \gamma, \lambda, \mathcal{R}, \mathcal{I})\\
+       & \text{subject to}\\
+       & 1. \sum_{\substack{\forall v\in\mathcal{V}, 
+                        \forall \gamma\in\Gamma,
+                        \forall \lambda\in\Lambda,\\
+                        \forall \mathcal{R}, \forall \mathcal{I}}}
+                        \phi_{v\gamma\lambda\mathcal{R}\mathcal{I}} \cdot
+                        C_T(v, \gamma, \lambda)
+                        \leq \mathcal{G}\lVert T \rVert \\
+      & 2. \sum_{\substack{\forall v\in\mathcal{V},
+                        \forall \gamma\in\Gamma,
+                        \forall \lambda\in\Lambda,\\
+                        \forall \mathcal{R}, \forall \mathcal{I}}}
+                           \phi_{v\gamma\lambda\mathcal{R}\mathcal{I}} \cdot
+                           (\mathcal{R} + \mathcal{I})
+                        \leq \frac{\mathcal{G}}{\delta} \\
+      & 3. \sum_{\substack{\forall \gamma\in\Gamma, 
+                           \forall \lambda\in\Lambda,\\ 
+                           \forall \mathcal{R}, %\in \Theta,
+                           \forall \mathcal{I}}} %\in \Theta}}
+           \phi_{v\gamma\lambda\mathcal{R}\mathcal{I}} \leq 1, 
+           \forall v\in\mathcal{V}
+    \end{aligned}
+    \label{eqn:optimization}
+\end{equation}
+}%
+
+The first constraint ensures that the GPU allocation does not exceed the available GPU-time $\mathcal{G}\lVert T \rVert$ in the retraining window. The second constraint limits the {\em instantaneous}  allocation (in multiples of $\delta$) to never exceed the available GPUs. 
+%The third constraint ensures that the system can only pick at most one retraining configuration/allocation and one inference configuration/allocation for each video $v$.
+The third constraint ensures that at most one configuration is picked for retraining and inference each for a video $v$.

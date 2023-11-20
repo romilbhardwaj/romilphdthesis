@@ -1,0 +1,18 @@
+
+\section{Limitations and Discussion}
+\label{sec:discussion}
+\revtext{
+%In this section, we discuss some limitations of \name and directions for future work needed to overcome these limitations. 
+
+% \textbf{Network Limitations.} As demonstrated in Section~\ref{subsec:eval-alternate}, Ekya delivers a higher accuracy than uploading training data to the cloud in real-world network settings. However, if there is sufficient bandwidth available to the cloud, such as a fiber link, then using the cloud to retrain the models may be more effective.
+
+%\textbf{Resource utilization.} The benefits of using Ekya are best demonstrated when the resources on the edge are oversubscribed, i.e. there are more jobs than resources. This oversubscription creates an opportunity to intelligently reallocate resources to jobs which can benefit more from the same resources. In situations when resources are underutilized, it is possible to allocate excess resources to retraining without hampering inference performance, which nullifies the need for a scheduling system like \name. However, these under-utilization situations are unlikely since the amount of resources provisioned at the edge is carefully set to minimize idle resources. 
+
+\textbf{Edge hierarchy with heterogeneous hardware.} While \name's allocates GPU resources on a single edge, in practice, deployments typically consist of a {\em hierarchy} of edge devices \cite{videoedge}. For instance, 5G settings include an on-premise edge cluster, followed by edge compute at cellular towers, and then in the core network of the operator. The compute resources, hardware (e.g., GPUs, Intel VPUs \cite{azure-percept}, and CPUs) and network bandwidths change along the hierarchy. % In addition, the network bandwidth to provision between the edge clusters in the hierarchy is also a concern for operators. 
+Thus, \name will have to be extended along two aspects: $(a)$ multi-resource allocation to include both compute and the network in the edge hierarchy; and $(b)$ heterogeneity in edge hardware.
+
+\textbf{Privacy of video data.} As explained in \S\ref{subsec:edge}, privacy of videos is important in real-world deployments, and \name's decision to retrain only on the edge device is well-suited to achieving privacy. However, when we extend \name to a hierarchy of edge clusters, care has to be taken to decide the portions of the retraining that can happen on edge devices that are {\em not} owned by the enterprise.  %This is to ensure that operations that may leak sensitive data only happen on the trusted on-premise edges. 
+Balancing the need for privacy with resource efficiency is a subject for future work.
+
+\textbf{Generality beyond vision workloads.} \name's thief scheduler is generally applicable to DNN models since it only requires that the resource-accuracy function be strictly increasing wherein allocation of more resources to training results in increasing accuracy. This property holds true for {\em most} workloads (vision and language DNNs). However, when this property does {\em not} hold, further work is needed to prevent \name{}'s microprofiler from making erroneous estimations and its thief scheduler from making sub-optimal allocations.
+}

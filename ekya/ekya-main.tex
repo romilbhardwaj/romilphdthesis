@@ -1,0 +1,107 @@
+%\renewcommand{\ttdefault}{cmtt}
+%\newcommand{\commentt}[1]{{\small\texttt{#1}}}
+%%\bibliographystyle{named}
+%
+%
+%
+%%\setlength{\intextsep}{9pt}  
+%%\setlength{\floatsep}{0.7em plus 0.3em minus 0.3em} % space left b/w floats 
+%% \setlength{\textfloatsep}{0.7em plus 0.3em minus 0.3em} % space left on top and bottom of an in-text float. 
+%
+%
+%% \SetKw{KwBy}{by}
+%% \SetKwInOut{Input}{Input}  
+%
+%\newcommand\mycommfont[1]{\footnotesize\ttfamily\textcolor{blue}{#1}}
+%% \SetCommentSty{mycommfont}
+%
+%\newlength\mylen
+%\newcommand\myinput[1]{%
+%	\settowidth\mylen{\KwIn{}}%
+%	\setlength\hangindent{\mylen}%
+%	\hspace*{\mylen}#1\\}
+%
+%%\usepackage[sort]{cite}
+% 
+%% ----------------- Macros: ---------------------
+%
+%% ---------------- Notes: -----------------------
+%\newcommand{\num}[1]{{\color{red}\bf {#1}}}
+%%\newcommand{\num}[1]{#1}
+%
+%\newcommand{\red}[1]{{\color{red}{#1}}}
+%
+%
+%
+%\newcommand{\junchen}[1]{{\color{red} [Junchen: {#1}]}}
+%\newcommand{\junchenedit}[1]{{\color{red} {#1}}}
+%\newcommand{\ga}[1]{{\color{orange} Ganesh: {#1}}}
+%\newcommand{\gaa}[1]{{\color{orange} {#1}}}
+%\newcommand{\ys}[1]{{\color{cyan}\bf Yuanchao: {#1}}}
+%\newcommand{\ysedit}[1]{\color{cyan}\bf {#1}}
+%\newcommand{\zhengxu}[1]{{\color{purple} Zhengxu: {#1}}}
+%\newcommand{\romil}[1]{{\color{green} Romil: {#1}}}
+%\newcommand{\romilc}[1]{{\color{green}\bf {#1}}}
+\newcommand{\revtext}[1]{{{#1}}}
+\newcommand{\cameratext}[1]{{{#1}}}
+%%\newcommand{\cameratext}[1]{{\color{blue}{#1}}}
+%%\newcommand{\revtext}[1]{{\color{blue}{#1}}}
+%\newcommand{\kh}[1]{{\color{magenta} {#1}}}
+%
+%
+%\newcommand{\fillme}{{\bf XXX}\xspace}
+%
+%% \baselineskip=12pt
+%\sloppy
+%
+%\newcounter{packednmbr}
+%\newenvironment{packedenumerate}{\begin{list}{\thepackednmbr.}{\usecounter{packednmbr}\setlength{\itemsep}{0.5pt}\addtolength{\labelwidth}{-4pt}\setlength{\leftmargin}{2ex}\setlength{\listparindent}{\parindent}\setlength{\parsep}{1pt}\setlength{\topsep}{0pt}}}{\end{list}}
+%\newenvironment{packeditemize}{\begin{list}{$\bullet$}{\setlength{\itemsep}{0.5pt}\addtolength{\labelwidth}{-4pt}\setlength{\leftmargin}{2ex}\setlength{\listparindent}{\parindent}\setlength{\parsep}{1pt}\setlength{\topsep}{0pt}}}{\end{list}}
+%\newenvironment{packedpackeditemize}{\begin{list}{$\bullet$}{\setlength{\itemsep}{0.5pt}\addtolength{\labelwidth}{-4pt}\setlength{\leftmargin}{\labelwidth}\setlength{\listparindent}{\parindent}\setlength{\parsep}{1pt}\setlength{\topsep}{0pt}}}{\end{list}}
+%\newenvironment{packedtrivlist}{\begin{list}{\setlength{\itemsep}{0.2pt}\addtolength{\labelwidth}{-4pt}\setlength{\leftmargin}{\labelwidth}\setlength{\listparindent}{\parindent}\setlength{\parsep}{1pt}\setlength{\topsep}{0pt}}}{\end{list}}
+
+
+
+\newcommand{\eg}{{\it e.g.,}\xspace}
+\newcommand{\ie}{{\it i.e.,}\xspace}
+\newcommand{\tbd}[1]{{\bf [[TBD: {#1}]]}}
+\newcommand{\eat}[1]{}
+\newcommand{\xref}[1]{\S\ref{#1}}
+\newcommand{\name}{{\tt Ekya}\xspace}
+\newcommand{\fair}{uniform\xspace}
+\newcommand{\Fair}{Uniform\xspace}
+\newcommand{\myparashort}[1]{\vspace{0.07cm}\noindent{\bf {#1}}~}
+\newcommand{\mypara}[1]{\vspace{0.07cm}\noindent{\bf {#1}:}~}
+\newcommand{\myparaq}[1]{\vspace{0.07cm}\noindent{\bf {#1}?}~}
+
+\chapter{Ekya: Continuous Learning of Video Analytics Models on Edge Compute Servers}
+\label{ch_ekya}
+
+Video analytics applications use edge compute servers for processing videos.  
+Compressed models that are deployed on the edge servers for inference suffer from {\em data drift} where the live video data diverges from the training data. Continuous learning handles data drift by periodically retraining the models on new data. Our work addresses the challenge of jointly supporting inference and retraining tasks on edge servers, which requires navigating the fundamental tradeoff between the retrained model's accuracy and the inference accuracy. 
+%because during retraining, resources are diverted away from inference tasks. %thereby lowering their accuracy. %We design a scheduling solution {\name} that balances this tradeoff, across multiple video streams simultaneously, and optimizes for the inference accuracy over the retraining window's duration. 
+Our solution \name balances this tradeoff across multiple models and uses a micro-profiler to identify the models most in need of retraining. {\name}'s accuracy gain compared to a baseline scheduler is $29\%$ higher, and the baseline requires $4\times$ more GPU resources to achieve the same accuracy as \name.
+
+
+\input{ekya/introduction}
+\input{ekya/background}
+\input{ekya/motivation}
+\input{ekya/solution} % ADD THIS
+%% \input{system}
+%%\input{microprofiling}
+%% \input{evaluation}
+%% \input{eval-new}
+\input{ekya/eval-newflow}
+\input{ekya/discussion}
+\input{ekya/related_work}
+\input{ekya/conclusion}
+
+
+%\bibliographystyle{abbrv}
+%\bibliography{sigproc}
+%
+\input{ekya/appendix}
+
+
+%\bibliographystyle{ACM-Reference-Format}
+%\bibliography{sigproc} 

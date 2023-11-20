@@ -1,0 +1,250 @@
+%% thesis.tex 2014/04/11
+%
+% Based on sample files of unknown authorship.
+%
+% The Current Maintainer of this work is Paul Vojta.
+
+\documentclass[oldfontcommands]{ucbthesis}
+\pdfsuppresswarningpagegroup=1 
+\usepackage{biblatex}
+\usepackage{rotating} % provides sidewaystable and sidewaysfigure
+
+% To compile this file, run "latex thesis", then "biber thesis"
+% (or "bibtex thesis", if the output from latex asks for that instead),
+% and then "latex thesis" (without the quotes in each case).
+
+% Double spacing, if you want it.  Do not use for the final copy.
+% \def\dsp{\def\baselinestretch{2.0}\large\normalsize}
+% \dsp
+
+% If the Grad. Division insists that the first paragraph of a section
+% be indented (like the others), then include this line:
+% \usepackage{indentfirst}
+
+\addtolength{\abovecaptionskip}{\baselineskip}
+
+\newtheorem{theorem}{Jibberish}
+
+\bibliography{romilthesisbib}
+
+\hyphenation{mar-gin-al-ia}
+\hyphenation{bra-va-do}
+
+% ======== Custom commands ===========
+\newcommand{\romil}[1]{{\color{green} Romil: {#1}}}
+
+% ========= Paper specific packages ==========
+\usepackage[T1]{fontenc} % Greater than less than
+% ========= Ekya packages ============
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage{authblk}
+\usepackage{booktabs} % For formal tables
+\usepackage{subcaption}
+\usepackage{graphicx, multirow, times}
+\usepackage{xurl}
+\usepackage{tikz}
+\usepackage{amsfonts, verbatim, mathtools, color, xspace, caption, amsmath}
+% \setlength{\abovecaptionskip}{3pt plus 3pt minus 2pt}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{alltt}
+% \usepackage[small,compact]{titlesec}
+\usepackage[labelfont=bf]{caption}
+\usepackage{mdwlist}
+\usepackage{listings}
+\usepackage{upgreek}
+\usepackage[normalem]{ulem}
+\usepackage{hyperref}
+
+% ========= Cilantro Packages ==========
+% \usepackage{usenix-2020-09}
+% \usepackage[english]{babel}
+\usepackage{blindtext}
+
+% \setlength{\emergencystretch}{2em} %prevent overruns to gutter
+
+% \usepackage[]{cite}           
+\usepackage{xcolor}     
+% \usepackage[utf8]{inputenc} % allow utf-8 input
+% \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+% \usepackage{authblk}
+\usepackage{booktabs}       % professional-quality tables
+% \usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+% \usepackage{microtype}      % microtypography
+\usepackage{amsthm}
+\usepackage{paralist}
+
+\usepackage[symbol]{footmisc} % For co-author
+\newcommand\Mark[1]{\textsuperscript{#1}}
+
+% \usepackage[sort,compress,numbers]{natbib}
+% \usepackage{times}
+\usepackage{calc}
+\usepackage{mathtools}
+\usepackage{color}
+% \usepackage{graphicx} % more modern
+
+% \usepackage{DejaVuSans}
+\usepackage{parskip}
+\usepackage{epsfig}
+% \usepackage{amsmath}
+\usepackage{verbatim}
+%\usepackage{xcolor}
+%\usepackage{colortbl}
+%\usepackage{listings}
+% 
+%\usepackage{subfigure}
+\usepackage{subcaption}
+% \usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+% \usepackage{algorithmic}
+%\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{bbm}
+\usepackage{multirow, makecell}
+% \usepackage{pifont}
+% \usepackage{wrapfig}
+\usepackage{longtable}
+\usepackage{threeparttable, tablefootnote}
+% \usepackage{eqparbox}
+% \usepackage{xspace}
+% Add my definitions file
+\usepackage{kk}
+\usepackage{defns_cilantro}
+
+
+\usepackage{url}
+% \usepackage{hyperref}               
+\usepackage{breakurl}
+
+% ========= ESCHER Packages ==========
+
+% \usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+% \usepackage{subcaption}
+\usepackage{tablefootnote}
+\usepackage{float}
+% \captionsetup[subfigure]{justification=centering}
+% \usepackage{algorithm2e}
+% \usepackage{listings}
+\usepackage{subcaption}
+% \usepackage{amsfonts}
+% \usepackage{amsmath}
+\usepackage{cleveref}
+% \usepackage{booktabs}
+\usepackage{etoolbox}
+\usepackage{minted}
+\usepackage{xtab,afterpage}
+%\usepackage{amssymb}
+\usepackage{pifont}
+%\usepackage{newtxtext,newtxmath}
+
+\usepackage{footnote}
+\usepackage{threeparttable, tablefootnote}
+\usepackage{paralist}
+\usepackage{enumitem}
+
+
+\begin{document}
+	
+	% Declarations for Front Matter
+	
+	\title{Efficient Resource Management for Machine Learning}
+	\author{Romil Bhardwaj}
+	\degreesemester{Fall}
+	\degreeyear{2023}
+	\degree{Doctor of Philosophy}
+	\chair{Professor Ion Stoica}
+	\othermembers{Professor Roger Spam \\
+		Associate Professor Michael Chex}
+	% For a co-chair who is subordinate to the \chair listed above
+	% \cochair{Professor Benedict Francis Pope}
+	% For two co-chairs of equal standing (do not use \chair with this one)
+	% \cochairs{Professor Richard Francis Sony}{Professor Benedict Francis Pope}
+	\numberofmembers{3}
+	% Previous degrees are no longer to be listed on the title page.
+	% \prevdegrees{B.A. (University of Northern South Dakota at Hoople) 1978 \\
+		%   M.S. (Ed's School of Quantum Mechanics and Muffler Repair) 1989}
+	\field{Computer Science}
+	% Designated Emphasis -- this is optional, and rare
+	% \emphasis{Colloidal Telemetry}
+	% This is optional, and rare
+	% \jointinstitution{University of Western Maryland}
+	% This is optional (default is Berkeley)
+	% \campus{Berkeley}	
+	% For a masters thesis, replace the above \documentclass line with
+	% \documentclass[masters]{ucbthesis}
+	% This affects the title and approval pages, which by default calls this
+	% document a "dissertation", not a "thesis".
+	
+	\maketitle
+	% Delete (or comment out) the \approvalpage line for the final version.
+	\approvalpage
+	\copyrightpage
+	
+	\include{abstract}
+	
+	\begin{frontmatter}
+		
+		\begin{dedication}
+			\null\vfil
+			\begin{center}
+				To my family
+			\end{center}
+			\vfil\null
+		\end{dedication}
+		
+		% You can delete the \clearpage lines if you don't want these to start on
+		% separate pages.
+		
+		\tableofcontents
+		\clearpage
+		\listoffigures
+		\clearpage
+		\listoftables
+		
+		\begin{acknowledgements}
+			Bovinely invasive brag; cerulean forebearance.
+			Washable an acre. To canned, silence in foreign.
+			Be a popularly. A as midnight transcript alike.
+			To by recollection bleeding. That calf are infant. In clause.
+			Buckaroo loquaciousness?  Aristotelian!
+			Masterpiece as devoted. My primal the narcotic. For cine?
+			In the glitter. For so talented. Which is confines cocoa accomplished.
+			Or obstructive, or purposeful.
+			And exposition? Of go. No upstairs do fingering.
+			
+		\end{acknowledgements}
+		
+	\end{frontmatter}
+	
+	\pagestyle{headings}
+	
+	% (Optional) \part{First Part}
+	
+
+	% Intro
+	\include{intro/intro}
+	
+	% Ekya
+    \include{ekya/ekya-main}
+	
+	% Cilantro
+	\include{cilantro/cilantro-main}
+	
+	% ESCHER
+	\include{escher/escher-main}
+	
+	% ESCHER
+	\include{conclusion/conclusion}
+	
+	\printbibliography
+	
+	% \appendix
+	% \chapter{More Monticello Candidates}
+	
+\end{document}

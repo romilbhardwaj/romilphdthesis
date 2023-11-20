@@ -1,0 +1,72 @@
+
+% This concludes the description of our policies.
+% We will next discuss some limitations and fallback options of Cilantro.
+% We wish to reiterate that Cilantro can handle any welfare or demand based policy in the multi-tenant
+% setting and any end-to-end performance criterion in the microservices setting.
+% Our only requirement is that each job's (microservice) performance  be
+% (at least approximately) non-decreasing in the amount
+% of resources allocated.
+% Before we proceed, we wish to mention fallback options for Cilantro if online job feedback cannot be
+% obtained and discuss some of its limitations.
+
+
+\section{Discussion}
+\label{sec:discussion}
+
+\cameratext{We now present a discussion on Cilantro's operation under various adversarial conditions that may occur in deployment.}
+
+\textbf{When online job feedback is unavailable.}
+Cilantro provides three fallback options when online feedback is not available.
+First, Cilantro allows a user to use a profiled model (using historical data) instead of
+online feedback.
+Second, it allows using proxy metrics from the Kubernetes API instead of real-world performance.
+In such cases, a user should specify how these proxies are tied to their utility
+and/or demand.
+% \kkcomment{using profiled data}
+Third, if neither of these is possible, we allow the user to directly submit an estimate for their resource
+demand  which will then be fed to the policy when determining allocations.
+In such cases, we assume that utility increases linearly up to the demand when computing
+allocations.
+We evaluate this fallback option in \S\ref{sec:microbenchmarks}.
+Due to Cilantro's decoupled design, these fallback options can be effected with simple modifications
+to a job's performance learner.
+% Finally, if accurate profiled information is available for a job,
+% this can also be directly submitted, which will be directly used instead of confidence bounds.
+% \kkcomment{mention modularity}
+
+\cameratext{\textbf{Learning in unpredictable environments.} Some situations, such as unexpected load spikes
+for web services or interference between jobs, are fundamentally hard to predict. 
+Cilantro's uncertainty-aware design provides a degree of resilience against these unpredictable changes,
+as we show in it's robustness to noise in load and resource demand estimates in Section \ref{sec:microbenchmarks}. 
+However, continued extreme fluctuations in the loads can negatively impact Cilantro's performance. 
+To avoid hysteresis when reallocating resources, future work can explore averaging loads over dynamically sized windows
+or including rules to temporarily override Cilantro's policy.}
+
+\cameratext{\textbf{Limitations and Future Work.}}
+Cilantro currently supports allocating only a single resource type. In our current implementation,
+multiple resource types can be bundled into grouping units, such as \cameratext{VM SKUs with a fixed ratio of CPU, Memory and GPUs}, which can then be scheduled
+by Cilantro. However, such bundling is not always possible, especially when different jobs have
+different resource requirements.
+Extending Cilantro to handle multiple resource types is possible for welfare-based
+policies.
+However, learning and optimization can be challenging since the search space is now very large.
+Another related limitation is that Cilantro cannot handle non-fungible resource types.
+Cilantro also does not support online learning versions of market-based resource allocation
+policies in the multi-tenant setting~\cite{zahedi2018amdahl,lai2005tycoon,varian1973equity}.
+These are avenues for future work to improve Cilantro. 
+\cameratext{Cilantro also assumes utilities increase with increasing resources, however some workloads may demonstrate inverse scaling, especially when allocated resources become fragmented across physical nodes. Future work can relax this assumption by applying learning techniques robust to non-convex utility shapes.}
+We also note that Cilantro can support multiple SLO parameters (e.g., for an inference job, ensuring a minimum latency and accuracy) by 
+wrapping them in a single utility function, and the design of such utility functions can be explored by future work.
+% Market-based policies are performance-aware and strategy-proof.
+% These policies are computationally expensive and the application of OFU
+% is not straightforward. \rbcomment{Say that these are opportunities for future work.}
+
+
+% \textbf{Queuing effects of changing allocations.} Lets skip this
+
+
+% \textbf{Preemption, eviction and other mechanisms.}
+
+
+
+

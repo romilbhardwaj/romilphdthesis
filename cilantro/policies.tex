@@ -1,0 +1,699 @@
+
+% KK todo: be conistent with verbiage: policy (instead of method/strategy), performance curves etc.
+
+\section{Policies}
+\label{sec:policies}
+
+% In this section, we will describe Cilantro's
+% our online learning
+We now describe our
+policies for performance-aware resource allocation in two settings:
+multi-tenant resource allocation in a fixed cluster (\S\ref{sec:polfc}),
+and
+allocating finite resources to constituent microservices of an application
+(\S\ref{sec:msal}).
+% We will first formally describe what we mean by performance.
+
+\textbf{Set up \& notation:}
+We will denote the number of jobs (or microservices) by $n$, the amount of resources by $\numres$,
+% If there are $n$ jobs in the system, % and $\numres$ resources,
+and an allocation by $\alloc=(\alloc_1,\dots,\alloc_n)$, where $\allocj$ is the
+amount of resources allocated to job (or microservice) $j$.
+A scheduler should allocate these resources so that $\sum_{j=1}^n \allocj \leq \numres$.
+% The sum of allocations is always less than the amount of
+% resources, i.e. $\sum_{j=1}^n \allocj \leq \numres$.
+
+
+\subsection{Resource allocation in shared clusters}
+\label{sec:polfc}
+
+% \kkcomment{This is how this section is organized.}
+
+
+Cilantro supports two classes of performance-aware allocation objectives in the multi-tenant
+setting:
+welfare-based, and demand-based. 
+Our primary contributions are in~\S\ref{sec:learningpolicies} where we derive uncertainty-aware
+online variants of these policy classes.
+But first, we will review some common examples of such objectives in
+\S\ref{sec:oracularpolicies}.
+% along with examples.
+% Then, in~\S\ref{sec:learningpolicies} we will derive uncertainty-aware policies to optimize for
+% these objectives.
+% Before this,
+For what follows,
+we will need to define the \emph{performance}, \emph{demand}, and \emph{utility} of a job.
+
+% \textbf{Performance:}
+\emph{Performance:}
+The \emph{resource/load-to-performance mapping} (henceforth simply performance or performance mapping)
+$\payoffj$  of a user's job $j$ refers to some raw metric of interest, which, say, can
+be obtained from a monitoring tool.
+% For instance, in a long-running serving job, the performance could the throughput (rate of task
+% completion), or in deadline-aware settings, the percentile of queries completed under a deadline.
+% one option for
+% the performance could be the throughput, i.e. rate of task completion.
+% Alternatively,
+% if we care about completing tasks under a tight deadline, the performance could be the percentile of
+% queries completed under a given deadline.
+% Similarly, it could refer to the average completion time of tasks, 
+We write the performance $\payoffj(\allocj, \volj)$ as a function of the resources received
+$\allocj$ and the load $\volj$.
+As we are allocating a single resource type, $\allocj$ is a single number,
+as is $\volj$.
+% So is $\volj$, which allows us to account for a job's external load shifts.
+% We will assume that for fixed loads, the performance $\payoffj$ is (at least approximately)
+% non-decreasing in the amount of resources received $\allocj$, and
+% for a fixed $\allocj$, the performance is  non-increasing with the load.
+For example, in a serving job with a P95, $100$ ms latency SLO,
+the performance may be the fraction of queries completed in under $100$ ms,
+and the load may refer to the external arrival  rate of queries.
+
+\emph{Demand:}
+If a job has a well-defined SLO, we define the
+\emph{demand} $\demj$ to be the
+minimum amount of resources needed to achieve this SLO.
+The demand depends on the job's performance curve $\payoffj$, SLO, and load $\volj$.
+% (at higher
+% loads, we need more resources to satisfy SLO).
+% In the multi-tenant setting, each user (job) has a performance $\payoffj$.
+
+
+
+
+\label{sec:utilities}
+
+
+% \textbf{Utility:}
+\emph{Utility:} The \emph{utility} $\utilj$ of a job is the
+\emph{practical value} derived due to its performance.
+Generally, $\utilj$ is a non-decreasing function of
+the performance and we can write
+$\utilj(\allocj,\volj) = \utilpi(\payoffj(\allocj,\volj))$ for some non-decreasing function
+$\utilpj$.
+% 
+
+%\begin{example}[Examples of utilities]
+\paragraph{Examples of utilities.}
+The simplest option is to set the utility to be equal to the performance $\utilj = \payoffj$,
+i.e., $\utilpj$ is the identity. 
+However, we may also choose a utility which is more applicable when there are well-defined SLOs.
+Fig.~\ref{fig:utilityillus} illustrates three  candidates for $\utilpj$:
+% for instance, if we care about throughput, an increase from 1000 to 2000 QPS might be more
+% significant in practice than an increase from 8000 to 9000 QPS.
+% For our evaluations,
+% where our primary focus is on long running jobs which have well-defined SLOs,
+% we consider the following forms for the utilities.
+the maximum utility for any job is set to $1$, which is achieved for any performance greater than
+the SLO; for performances below the SLO, we may set the utility to
+\emph{(a)} decrease proportionally with SLO violation,
+\emph{(b)} decrease sharply 
+in settings where small SLO violations are critical (e.g., with external customers
+where SLO violations can lead to penalties~\cite{awssla2021} and a loss of credibility),
+\emph{(c)} decrease gradually
+when small SLO violations are not critical (e.g., soft SLOs internal to
+an organization).
+Such utility forms which are `clipped' at the SLO
+provide a simple way to compare jobs with heterogeneous
+performance metrics and SLOs, such
+as latency and throughput.
+Prior work have also used similar forms of utility~\cite{kalim2018henge,ghodsi2012multi,wilkes2009utility}.
+% On the other hand, internal soft SLOs within an organization may be less severe.
+For these reasons, our experiments also use these  forms,
+although we emphasize that Cilantro can handle any utility form which increases with performance. 
+%\end{example}
+% further in \S\ref{sec:discussion}.
+
+
+
+\subsubsection{Review of multi-tenant allocation when performance mappings are known}
+\label{sec:oracularpolicies}
+% \vspace{-0.05in}
+
+% If there is no scarcity of resources in a fixed cluster, then a cluster manager can satisfy 
+% When the performance mappings $\payoffj$ (and hence utilities $\utilj$) are known,
+% Several policy-level
+% work~\cite{demers1989analysis,ghodsi2011dominant,kaneko1979nash,kelly1998rate,gutman2012fair}
+% for multi-tenant resource allocation,
+% try to balance between the performance and fairness when there is a scarcity of resources.
+We will first review two classes of multi-tenant
+allocation objectives supported
+in Cilantro---welfare-based and demand-based---and three examples of such objectives.
+In~\S\ref{sec:learningpolicies},
+we will develop online learning policies that achieve the same objectives
+when performance mappings are unknown.
+
+
+% \kkcomment{beef up contribution section here.}
+
+\textbf{Welfare-based objectives:}
+These policies aim to maximize a given cluster-wide \emph{welfare} function $W$, which
+is a function of the utility of each job,
+i.e., $W = W(\utilii{1},\dots,\utilii{n})$.
+% Generally speaking
+% Here, $W$ is increasing in each job's utility $\utili$, and consequently in each
+% performance $\payoffj$ as well.
+% Intuitively, if all else being equal,
+% a job has a higher performance, it has a higher utility, and the organization has better welfare.
+% \kkcomment{Is talking about the organization here distracting?}
+Below, we describe two common welfare-based objectives.
+
+
+
+% Before we delve into the learning policies which learn the performance curves online,
+% fly,
+% We will first review
+% three common fair allocation criteria when the performance curves are known.
+
+
+\emph{(i) Social welfare (a.k.a. Kelly mechanism~\cite{kelly1998rate}):}
+We choose the allocation $\alloc$ which maximizes the social welfare (the average utility),
+i.e. $\alloc = \argmax \socwel$, where,
+\vspace{-0.05in}
+\begin{align}
+\socwel = \frac{1}{n}\sum\nolimits_{j=1}^n \utilj(\allocj, \volj)
+        = \frac{1}{n}\sum\nolimits_{j=1}^n \utilpj(\payoffj(\allocj, \volj)).
+\label{eqn:socwel}
+\end{align}
+
+\cameratext{As we show in Figure~\ref{fig:strategycompare},
+this notion of fairness allocates more resources to ``high-performing'' users,
+i.e those who can generate large utility with a small amount of resources.}
+
+\emph{(ii) Egalitarian welfare:}
+Here, we choose the allocation $\alloc$ which maximizes the egalitarian welfare
+(minimum of all utilities),
+i.e. $\alloc = \argmax \egalwel$, where
+\vspace{-0.05in}
+\begin{align}
+\egalwel = \min_{j\in\{1,\dots,n\}} \utilj(\allocj, \volj)
+         = \min_{j\in\{1,\dots,n\}} \utilpj(\payoffj(\allocj, \volj)).
+\label{eqn:egalwel}
+\end{align}
+\cameratext{This allocates more resources to ``struggling'' jobs which need more resources to achieve large utility (Figure~\ref{fig:strategycompare}).}
+
+% Both the above criteria are welfare-based (see \S\ref{sec:related}),
+% in that they maximize a welfare function of all user's
+% utilities. Next, we will look at a different demand-based approach.
+% which is non-decreasing 
+%  allocation criterion can be written
+% as maximizing a welfare function
+
+% \kkcomment{Flip criterion and policy}
+
+\textbf{Demand-based policies:}
+% When jobs have well-defined SLOs and it is possible to define
+% its demand $\demj$, these policies compute an allocation based on the demands of all jobs.
+% Policies will in compute an allocation based on this demand. %allocation.
+These policies apply when jobs have a well-defined SLO and it is possible to define
+its demand $\demj$.
+Such policies will compute allocations based on the demands of all jobs.
+% \rbcomment{For a second I thought if demand is known, why do we need performance mapping? We should explain why do demand-based policies still need a resource-performance mapping}
+This requires knowledge of the demand, which in turn
+depends on the performance mapping.
+% and therefore its performance.
+% Below, we describe one common demand-based fairness policy.
+
+
+\insertFigStrategyCompare
+
+\emph{(iii) No justified complaints (NJC) fairness~\cite{demers1989analysis,dolev2012no,gutman2012fair}:}
+% One such algorithm which we use in our work proceeds iteratively as follows.
+% These jobs guarantee a certain share of the resource to a job.
+One class of demand-based policies which adopt the NJC fairness paradigm
+guarantee an equal share of $R/n$ for each job.
+If the job's demand is larger than $R/n$, it is allocated at least (but possibly more
+than) this share.
+But, if the job's demand is smaller, the excess resources may
+be allocated to other jobs to improve overall resource usage.
+A user can have no justified complaints since they are either guaranteed to
+satisfy their SLOs or their utility will be larger than if they were to have
+$R/n$ resources.
+To quantify this, we define the following metric.
+% to evaluate a policy on NJC fairness.
+The term inside the minimum measures the utility achieved by job $j$ with allocation
+$\allocj$ relative to the utility when using its fair share of $R/n$ resources.
+% We have:
+% For evaluating policies on NJC fairness, we define the following  metric:
+\begin{align}
+% \njcfair = 1 - \max_{j\in \{1,\dots,n\}}\left(\frac{\utilj(R/n, \volj) - \utilj(\allocj, \volj)}{\utilj(R/n, \volj)} \right)
+\njcfair = \min_{j\in \{1,\dots,n\}}\frac{\utilj(\allocj, \volj)}{\utilj(R/n, \volj)}
+         = \min_{j}\frac{\utilpj(\payoffj(\allocj, \volj))}{\utilpj(\payoffj(R/n, \volj))}
+\label{eqn:njcfair}
+\end{align}
+In contrast to metrics such as the Jain's index\cite{jain1998fairness},
+$\njcfair$ accounts for users'
+performance when evaluating fairness.
+This metric has a maximum value of $1$.
+% A naive resource fair allocation of $R/n$
+% resources to each job achieves $\njcfair=1$; however, it does poorly on other
+% performance metrics (as we will demonstrate in~\S\ref{sec:experiments}) as it may allocate more
+% resources than necessary to jobs with small demands.
+Below, we describe a demand-based policy~\cite{demers1989analysis} which achieves
+$\njcfair=1$ while also using the resources efficiently \cameratext{as also shown in Figure~\ref{fig:strategycompare}.}
+% The above-described NJC policy achieves this maximum value, 
+
+\emph{An NJC policy:}
+This policy proceeds iteratively.
+In the first round, it sets each user's ``share'' to be $R/n$.
+It allocates $\demj$ to each user $j$ for whom $\demj$ is smaller than the share.
+If $n'$ users were allocated $R'$ resources in the first round, in the second round it
+sets each user's share to be $(R-R')/(n-n')$.
+It repeats this until all the remaining
+users' demands are  larger than their share.
+It then divides up the remaining resources equally among the remaining users.
+While this policy may not maximize any welfare, it achieves Pareto-efficient user utilities. Another advantage 
+% When following this policy, a user can have no justified complaints since their utility will be at
+% least as much as if they were to simply have an equal share of $R/n$ of the resource;
+% this is because if a user's demand is larger than $R/n$, they are guaranteed to get at least $R/n$;
+% whereas, if it is smaller, they are guaranteed to receive their demand and achieve the
+% maximum possible utility of $1.0$, i.e. satisfy their SLOs (see Fig.~\ref{fig:utilityillus}).
+% SLOs.
+% utility of $1.0$.
+ of this policy 
+is that it is strategy-proof, i.e a user does not gain additional utility by falsely
+stating their demand~\cite{ghodsi2011dominant,gutman2012fair,kandasamy20online}. 
+
+
+This concludes our review of multi-tenant resource allocation objectives when performance mappings
+are known.
+% Achieving these objectives requires knowledge a job's performance mapping $\payoffj$
+% and/or quantities such as the demand and utility which depend on the performance.
+% It is worth pointing out
+We mention that prior work have used these objectives in
+various contexts with custom utilities.
+% For instance,
+For instance, social welfare has been used in stream processing~\cite{kalim2018henge}
+and wireless networks~\cite{tun2019wireless},
+egalitarian welfare in video streaming~\cite{nathan2019end},
+and several NJC policies are implemented in Mesos~\cite{hindman2011mesos}.
+% To prioritize some jobs over the others,
+% we may also look at weighted versions of Welfare, or NJC fairness mechanisms with unequal
+% guaranteed shares.
+% when the demands are known a priori.
+% % and stre
+% Hence~\cite{kalim2018henge} studies social welfare like criterion for a streaming application,
+% Minerva studies egalitarian welfare for video streaming,
+% while Mesos~\cite{hindman2011mesos} implements several demand-based NJC policies.
+% \kkcomment{Does Gandhiva maximize CPU utilization?}
+
+% The term inside the parantheses can be interpreted as a fairness violation for job $j$ as it
+% measures the loss in utility relative to its fair share of $R/n$ resources.
+
+% This policy satisfies the following 
+
+% % 
+% % One metric of interest in NJC fair division is the following,
+
+
+% As we have illustrated in Fig.~\ref{fig:strategycompare},
+% these three criteria can yield very different allocations with different outcomes.
+% The best policy might depend on the specific use case.
+
+% Therefore, while our evaluation focuses on these three policies,
+% we do not champion one over the others.
+% Cilantro's goal is to allow a practitioner to choose
+% an appropriate policy and provide an online learning mechanism to learn resource-performance curves
+% while simultaneously allocating according to this policy.
+% We discuss this further in Section~\ref{sec:learningpolicies}.
+
+% \subsubsection{From raw performance metrics to utilities}
+
+\subsubsection{Online learning policies in Cilantro}
+\label{sec:learningpolicies}
+%\vspace{-0.05in}
+
+
+% \kkcomment{motivate RFU more, why you cannot use estimate directly.}
+% In this section,
+We will now develop our online policies.
+Our policies will  operate on lower and upper confidence bounds obtained from the
+load forecasters and performance learners instead of the direct
+estimates;
+doing so accounts for the uncertainty in the learned models and encourages a policy to
+conservatively explore the space of allocations until the estimates become accurate.
+% 
+\cilantro's policies will proceed sequentially in allocation rounds.
+% As stated in~\S\ref{sec:method}, while it is desirable to keep the
+% time duration of each
+% round short to allow the policies to quickly  test out different allocations,
+% in practice, we will be constrained by the agility of the environment. %depend on the agility of the
+On round $r$, Cilantro chooses an allocation 
+$\alloc^{(r)}= (\allocii{1}^{(r)},\dots,\allocii{n}^{(r)})$
+% such that $\sum_{j=1}^n \allocii{j}^{(r)} \leq R$
+based on the feedback from all jobs up to now and the specific scheduling objective.
+
+% A detailed discussion of OFU is beyond the scopre of this manuscript, and
+% we refer
+% an interested reader to the above work.
+% Instead, we will state the OFU-derived policies for the allocation criterion.
+% 
+% We refer an interested reader to the above work for a detailed exposition.
+% We will now state the OFU-adapted policies for the three allocation criterion.
+
+% for \cilantros based on the above oracular policies,
+% when the jobs' performance mappings (and hence utilities) and
+% the load are unknown.
+% Instead, we need to rely on the utility learners and time series learners for
+% estimates (Fig.~\ref{fig:scheme}).
+
+
+\textbf{Welfare-based online policies:}
+For welfare-based policies, Cilantro adopts the % optimism in the face of uncertainty (OFU) principle.
+optimism in the face of uncertainty (OFU) principle~\cite{bubeck2012regret}.
+% from the online decision-making literature.
+OFU stipulates that, to maximize an uncertain function,
+ we should choose actions which maximize an upper confidence bound (UCB) on the function.
+% $\widehat{W}$ on the welfare function $W$.
+Both theoretically and empirically,
+OFU is known to outperform other strategies which use direct estimates or those which
+are pessimistic (i.e. maximize lower confidence bound).
+An in-depth exploration of OFU is beyond the scope of
+this work, but we refer the reader to relevant literature%
+~(e.g. ~\cite{auer2002using,bubeck2010x,snoek2012practical,gotovos2013active}).
+
+
+While OFU is a well established design paradigm,
+most OFU policies are designed for end-to-end systems which output a single reward signal.
+% \kkcomment{talk about generality here.}
+Adapting OFU for general welfare-based policies requires studying how the uncertainty in the performance and load
+translate to a UCB $\widehat{W}$ on the welfare $W$ which we wish to maximize.
+% percolates to the welfare.
+Since $W$ is non-decreasing in the utilities $\utilj$, we can obtain a UCB for $W$ by plugging in
+UCBs $\utilhatj$ for the utility $\utilj$,
+i.e $\widehat{W}=W(\utilhatii{1},\dots,\utilhatii{n})$.
+Similarly, since $\utilj$ is non-decreasing in the performance we can obtain a UCB by plugging
+in a UCB $\payoffhatj$ for $\payoffj$, i.e $\utilhatj = \utilpj(\payoffhatj)$.
+% (recall notation from beginning of this section).
+This leads to the following choice of allocation on round $r$.
+\vspace{-0.05in}
+% Noting that $\payoffhatj$ depends on the 
+%  which are in turn increasing in the performances
+% $\payoffj$, one can obta
+% curves, we can simply plug in 
+% We arrive at the following choice of allocation on round $r$.
+\begin{align*}
+\hspace{-0.05in}
+\alloc^{(r)}= \argmax_{a \in \Acal^{(r)}}
+    W\left(\utilpii{1}\big(\payoffii{1}\big(\allocii{1}, \volhatii{1}\big)\big),
+    \; \dots, \;\utilpii{1}\big(\payoffii{1}\big(\allocii{n}, \volhatii{n}\big)\big)\right)
+\numberthis
+\label{eqn:ofuwelfare}
+\\[-0.2in]
+\end{align*}
+Above,
+since the exact load cannot be known, we conservatively over-estimate it via a
+UCB $\volhatj$ on the load.
+Here, $\Acal^{(r)}$ is the allocation space on round $r$ which is defined by two constraints:
+first, the total allocation cannot be larger than $R$, i.e.
+$\sum_j \allocj\leq R$;
+second, the current allocation cannot deviate too much from the previous allocation, i.e.
+$\allocj^{(r-1)} - B \leq \allocj \leq \allocj^{(r-1)} + B$ for all $j$,
+where $B$ is a parameter to be specified.
+% $\alloc = (\allocii{1},\dots,\allocii{n})$ satisfies
+% and $\allocj^{(r-1)} - L \leq \allocj \leq \allocj^{(r-1)} + L$ (as we do not wish to deviate
+% too much from our current allocation).
+We impose the second constraint since 
+large changes to allocations can have unpredictable effects on a job's performance;
+moreover, they take a long time to actuate, resulting in unreliable feedback while resources are
+being scaled up/down.
+% \kkcomment{@Romil: can you look into the wording?}
+
+To optimize~\eqref{eqn:ofuwelfare}, one can use any off-the-shelf optimizer such as
+evolutionary algorithms, hill climbing, or integer programming which can handle the linear
+constraints for $\Acal^{(r)}$.
+In our implementation, we used an evolutionary algorithm (details in the appendix).
+Finally,  we describe instantiations of this principle for the two welfare-based policies
+we saw in~\S\ref{sec:oracularpolicies}.
+
+
+% \textbf{\emph{(i)} \cilantrosw}:
+\cilantropolicyheader{\emph{(i)} \cilantrosw}:
+% Our first online learning policy attempts to resemble the
+% social welfare policy in \S\ref{sec:oracularpolicies}.
+To emulate the social welfare policy in~\S\ref{sec:oracularpolicies},
+on round $r$, \cameratext{we use the UCB for $\hat{l}$ for load and $\hat{p}$ for performance}. Thus, we choose an allocation
+% $\alloc^{(r)}=(\alloc^{(r)}_1,\dots\alloc^{(r)}_n)$ such that:
+\begin{align*}
+\alloc^{(r)}
+%     = (\alloc^{(r)}_1,\dots\alloc^{(r)}_n) 
+%     = \argmax \sum\nolimits_{i=1}^n \utilhatj(\allocj, \volhati),
+       = \argmax_{(\alloc_1,\dots,\alloc_n)\in\Acal^{(r)}} \sum\nolimits_{j=1}^n \utilpj\big(\,\payoffhatj(\allocj, \volhatj)\,\big).
+\end{align*}
+
+
+% \textbf{\emph{(ii)} \cilantroew}:
+\cilantropolicyheader{\emph{(ii)} \cilantroew}:
+% Next, we design an OFU policy which resembles the
+% egalitarian welfare policy in \S\ref{sec:oracularpolicies}.
+To emulate the egalitarian welfare policy in~\S\ref{sec:oracularpolicies},
+on round $r$, we choose an allocation
+\begin{align*}
+\alloc^{(r)}
+%     = \argmax \min_{i\in\{1,\dots,n\}} \utilhatj(\allocj, \volhati),
+       = \argmax_{(\alloc_1,\dots,\alloc_n)\in\Acal^{(r)}} \min_{j\in\{1,\dots,n\}} \utilpj\big(\,\payoffhatj(\allocj, \volhati)\,\big),
+\end{align*}
+% We use an upper confidence bound $\volhati$ for the load
+% and $\utilhatj$ for the utility for similar reasons described above.
+
+% Next, $\utilhatj = \utilpj(\payoffhatj(\allocj, \volhatj))$ is a UCB on the utility of user $j$,
+% where
+% $\payoffhatj$ and$\volhatj$ are UCBs on the performance and load obtained
+% from the performance learners and load forecasters.
+
+% OFU policies operate on lower and upper confidence bounds instead of the direct
+% estimates; doing so accounts for the uncertainty in the learned models and encourages a policy to 
+% explore allocations.
+% % instead of coming to inaccurate conclusions with insufficient data.
+% \kkcomment{simplify }
+% This exploration is necessary in online settings to provide adequate diversity of data back to the
+% learners to improve the estimates over time.
+% OFU has been studied extensively in the online decision-making literature
+% and shown to perform other strategies which directly use the estimates or those which
+% adopt pessimistic principles.
+% An in-depth exploration of OFU and other classes of policies is beyond the scope of
+% this work, but we refer the reader to relevant literature%
+% ~\cite{auer2002using,bubeck2010x,snoek2012practical,gotovos2013active,kandasamy20online}
+% 
+% \cilantro's OFU-adapted online learning policy will proceed sequentially via allocation
+% rounds.
+% On round $r$ it chooses, $\alloc^{(r)}= \argmax W(\utilhatii{1},\dots,\utilhatii{n})$,
+% where
+% $\utilhatj = \utilpj(\payoffhatj(\allocj, \volhatj))$,
+% and $\payoffhatj, \volhatj$ are upper confidence bounds on the performance and load obtained
+% from the performance learners and load forecasters.
+% \kkcomment{how to optimize?}
+% By changing the allocation on each round, Cilantro is able to learn from and adapt to the feedback
+% obtained thus far and changes to the load.
+
+\insertFigDemRecIllus
+
+\textbf{Demand-based online policies:}
+For demand-based policies, 
+on round $r$, we will use the confidence intervals from the performance learners and load
+forecasters to obtain conservative recommendations
+$\demj^{(r)}$ for job $j$'s demand.
+Then, we compute the allocations $\alloc^{(r)}$ for this round by invoking the same demand-based
+policy with the recommended demands $\{\demii{1}^{(r)},\dots, \demii{n}^{(r)}\}$ instead of the true
+demands.
+
+Our method for obtaining demand recommendations is based on~\cite{kandasamy20online}.
+To describe this in more detail, observe that
+for demand-based policies it is sufficient to accurately estimate the demand well, i.e.
+it is not necessary to learn the entire performance mapping well.
+We have illustrated our strategy for obtaining the demand
+recommendation in Figure~\ref{fig:demandrecillus}.
+First, we will denote by $\demhatir$,
+the UCB for the demand obtained as shown in Figure~\ref{fig:demandrecillus}.
+As a conservative choice for this demand, we may wish to choose $\demhatir$ as the recommendation.
+However, we found that in practice this
+ was overly conservative  and the resulting allocations
+were very slow to adapt to feedback.
+Therefore, we also wish to use a more aggressive exploration strategy to reduce the uncertainty
+in our \emph{demand}.
+We use:
+\vspace{-0.05in}
+\begin{align}
+\hspace{-0.1in}
+\dembarjr = \argmax_{\allocj} \min\big(\,\payoffhatj(\allocj, \volhatj) - \textrm{SLO},\;
+\textrm{SLO} - \payoffcheckj(\allocj, \volhatj)\,\big)
+\label{eqn:ofudemand}
+\end{align}
+% \vspace{-0.15in}
+% 
+% By this rule we choose the point where we are most uncertain about
+% the performance; so if job $j$ were to receive
+% $\allocj^{(r)} = \dembarjr$ resources, then we are most likely to reduce this uncertainty.
+% \rbcomment{Isn't this the mean of $\payoffhatj$ and $\payoffcheckj$}
+To illustrate this rule, consider Figure~\ref{fig:demandrecillus} where
+$\min(\,\payoffhatj - \textrm{SLO},\; \textrm{SLO} - \payoffcheckj)$
+is negative for large allocations
+when the performance LCB $\payoffcheckj$ is larger than the SLO and for small allocations where
+the performance UCB $\payoffhatj$ is smaller than the SLO.
+By maximizing~\eqref{eqn:ofudemand}, we are choosing points inside the confidence interval
+for the demand where both  $\payoffcheckj,\payoffhatj$ are further away from the SLO;
+so if job $j$ were to receive 
+$\dembarjr$ resources, then we are most likely to reduce the demand uncertainty.
+% \rbcomment{Why does this minimize uncertainity?}
+However,
+choosing $\dembarjr$ as the recommendation can lead to overly aggressive exploration so
+our final recommendation $\demj^{(r)}$ is then obtained via,
+\begin{align}
+\hspace{-0.10in}
+\demj^{(r)} = {\rm clip}\Big( \beta\demhatjr + (1-\beta)\dembarjr, \;\;
+                \demj^{(r-1)} - B, \; \demj^{(r-1)} + B\Big)
+\label{eqn:demrec}
+\end{align}
+Here, $\beta\in(0,1)$ is a parameter to trade-off between $\demhatir$ and $\dembarir$.
+% As before,
+We clip this value between
+$\demj^{(r-1)} - B$ and $\demj^{(r-1)} + B$
+to control wide deviations in
+resource allocations (similar to before).
+% 
+Next, we formally state Cilantro's instantiation of the
+demand-based NJC procedure described in~\S\ref{sec:oracularpolicies}.
+
+% \textbf{\emph{(iii)} \cilantronjc}:
+\cilantropolicyheader{\emph{(iii)} \cilantronjc}:
+Here, we simply compute the recommended demand via~\eqref{eqn:ofudemand}, and then invoke the
+NJC procedure described in~\S\ref{sec:oracularpolicies},
+In \S\ref{sec:fixedclus} we show that \cilantronjc{} retains some of the
+strategy-proofness properties of NJC.
+
+
+% For a demand-based policy, OFU stipulates that we first choose recommendations
+% $\demj^{(r)}$ for job $j$'s demand $\demj$ on round $r$ as follows:
+% % for the demands as follows when
+% \begin{align}
+% \hspace{-0.05in}
+% \demj^{(r)} = \argmax_{\allocj} \min\big(\,\payoffhatj(\allocj, \volhatj) - \textrm{SLO},\;
+%                                        \textrm{SLO} - \payoffcheckj(\allocj, \volcheckj)\,\big)
+% \label{eqn:ofudemand}
+% \end{align}
+% Here
+% $\payoffhatj, \payoffcheckj$ are respectively upper and lower confidence bounds on the
+% performance mapping obtained from the performance learners,
+% while $\volhatj, \volcheckj$ are confidence bounds for the load obtained from the
+% load forecasters.
+% Then, we compute the allocations $\alloc^{(r)}$ on round $r$ by invoking the same demand-based
+% policy with the recommended demands $\{\demii{1}^{(r)},\dots, \demii{n}^{(r)}\}$ instead of the true
+% demands.
+
+
+% \kkcomment{Amp up the policy derivation,
+% how we arrive at an allocation via evoalg,
+% Talk more about the state space.
+% }
+
+% This completes the multi-tenant setting.
+
+% Unlike the two previous cases, in NJC fair sharing, there is no well-defined welfare function
+% that we can maximise to choose the next allocation.
+% Here, we adopt the method proposed in~\cite{kandasamy20online} which is shown to be able to
+% asymptotically generate fair and Pareto-efficient allocations.
+% Intuitively, this method uses the upper and lower confidence bounds on the
+% performance curves to estimate the amount of resources at which a job achieves its
+% maximum utility (e.g. achieves its SLOs).
+% Then it invokes the NJC fairness procedure to allocate resources based on this estimate.
+
+\subsection{Microservice resource allocation}
+\label{sec:msal}
+% \vspace{-0.05in}
+
+
+Now, we will look another use-case for Cilantro,
+where we wish to optimize an end-to-end performance metric $\payoff$
+of an application composed of several interdependent microservices (jobs).
+% When there are a finite amount of resources an application-level scheduler may choose to allocate
+% more of these resources to
+% critical microservices which bottleneck the system's performance.
+% In this setting,
+% we wish to maximize some application-specific performance function $\payoff$.
+% (if we instead wished to minimize a penalty, we can simply set the performance to be the
+% negative penalty).
+Examples for $\payoff$ include the total throughput of the application, the negative P99 latency,
+or even any combination of the two.
+\cameratext{Here, the entire fixed set of resources is available to the application and must be allocated between microservices for to maximize $p$.}
+% (e.g. throughput of the application),
+% 
+There are two main differences in this setting when compared to the multi-tenant setting which
+introduces new challenges.
+First, while assuming jobs run by different users are independent is reasonable when we aim to
+optimize for fairness, this is no longer true now since
+ microservices within an application may have complex dependency graphs (see
+Figure~\ref{fig:microservices}-Left).
+% Second, individual performance metrics for each microservice may be hard to obtain without making
+% invasive changes to the application. 
+Second, while an application's performance is clearly tied to the performance of individual
+microservices, it is not possible to write it explicitly,  as we did for the social or egalitarian
+welfare.
+
+We overcome these challenges by modeling the end-to-end performance $\payoff$ as a direct function
+of the allocation to each microservice and the external load faced by the application.
+That is, we write $\payoff(\alloc, \volsymbol)$,
+% Here, we can write $\payoff(\alloc, \vol)$,
+where, $\alloc=(\alloc_1,\dots,\alloc_n)$ is a vector of allocations for each microservice and
+$\volsymbol$ is the external load on the application.
+% 
+% When the performance function $\payoff$ is not known a priori, we may use Cilantro's
+% online learning policy.
+On allocation round $r$, our online learning policy, which adopts
+the OFU principle, chooses an allocation vector which maximizes an upper
+confidence bound $\payoffhat$ on the performance obtained from the performance learners:
+\vspace{-0.05in}
+\begin{align*}
+\alloc^{(r)} = \argmax_{a \in \Acal^{(r)}} \payoffhat(\alloc, \volsymbol).
+\numberthis
+\label{eqn:ofuappperf}
+\\[-0.2in]
+\end{align*}
+While this circumvents accounting for individual microservice performance and
+dependency graphs,
+we now face the challenge of optimizing for an $n$--dimensional allocation with
+just one feedback signal.
+In contrast, in the multi-tenant setting we had
+more feedback (one for each job).
+
+% \kkcomment{How have we solved the high dimensionality?}
+
+% or minimize some penalty function $\penl$ (e.g. end to end P99 latency).
+% In either case, we can write $\payoff(\alloc, \vol)$ or $\penl(\alloc, \vol)$,
+% where $\alloc=\{\allocj\}_j$ is a vector of allocations for each microservice and $\vol$ is the
+% external load faced by the application.
+
+
+% \subsection{Horizontal auto-scaling for latency SLOs}
+% \label{sec:polas}
+% \vspace{-0.05in}
+% 
+% Next, we will describe policies for auto-scaling a single job using Cilantro.
+% under variations of the load.
+% Deploying a large number of servers can help us meet this SLO even at the peak load, but this
+% can be very costly.
+% When such applications are deployed in the public cloud, we can scale up or down the number of
+% servers depending on the load so as to minimize the cost while still satisfying the SLO.
+% 
+% \emph{Oracular policy:}
+% When the performance curves and the load are known, the correct amount of
+% resources required can be computed for a given
+% latency SLO and load.
+% 
+% \cilantropolicyheader{\cilantroas:}
+% When neither the load nor the performance curves are known, we will try to imitate the above policy
+% using the estimates.
+% We first invoke the \gettsucb{} method of the time series learner to obtain a $90\%$
+% upper confidence bound on the load and then invoke the
+% \getallocforpl{} method of the performance learner using this estimated load to obtain
+% the allocation.
+% We use an upper confidence bound for the load for reasons explained previously: given the variations
+% in the load within an allocation round, conservatively using an upper confidence bound worked better
+% in practice.
+% 
+% It is worth noting that
+% unlike in fixed clusters, where we need to trade off between
+% the value derived from various jobs under resource contention,
+% in auto-scaling, the concept of utility is not necessary.
+% We may design a policy and evaluate it based on how well it attains a given SLO and
+% its cost.
+

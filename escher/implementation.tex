@@ -1,0 +1,69 @@
+\section{Implementation}
+\label{sec:impl}
+\name{} is a design that can be applied to both centralized and decentralized schedulers.
+We built two prototypes of \name{}, on Kubernetes~\cite{kubernetes}, a container orchestration framework with a centralized scheduler, and Ray~\cite{ray-osdi}, a distributed execution framework with a decentralized scheduler.
+% Similarly, ESCHER on Ray inherits Ray's sequential scheduling of queued tasks, but batch scheduling can be performed using the queuing primitive from Section \ref{sec:sched:primitive}.}
+
+ESCHER inherits the scheduling properties of the parent cluster framework. For instance, it can utilize fractional and heterogeneous resources on Ray and Kubernetes. Since Ray and Kubernetes have a task-by-task scheduler, our current implementation also schedules in a greedy, task-by-task manner. However, ESCHER's queuing primitive can be used to extend a task-by-task scheduler to do batch scheduling.
+
+Each framework handles isolation differently, which affects how ghost tasks are implemented. Ray does not enforce CPU affinity, so a ghost task can block the logical resource for the actual task without blocking the physical CPU. Kubernetes enforces isolation through cgroups. In this case, the ghost task reserves the CPU for its cgroup and when the actual task is scheduled, it is added to the same cgroup by running cgclassify in the task's preamble.
+The source code is available at \href{https://github.com/romilbhardwaj/escher}{https://github.com/romilbhardwaj/escher}.
+% \swang{strengthen the takeaway here: show that we can do it for existing schedulers, both centralized and decentralized}
+
+\noindent\textbf{Kubernetes Implementation.}
+% Describe the Kuberenetes scheduler's features and policies supported off-the-shelf
+%Kubernetes is a cluster orchestration system designed for managing and deploying containers across machines.
+%A task in Kubernetes comprises one or multiple containers grouped in a logical scheduling unit called a Pod.
+A Kubernetes task (pod) specifies its constraints in the form of two sets: a set of filtering policies, such as resource demands, to enforce hard constraints and a set of weights for these built-in policies to add soft constraints.
+%The filtering policies include resource capacity and node label checks which must necessarily be satisfied by the node where the Pod will be scheduled. The scoring policies specify good-to-have conditions such as inter-pod affinity and load balancing to achieve an priority ordering among multiple policies. 
+The scheduler first finds a set of candidate nodes, then computes a policy-weighted score for each node to find the best fit.
+
+Kubernetes also allows the definition of arbitrary string and integer pairs associated with nodes known as \textit{extended resources}. Extended resources are identical to regular resources in that they can be acquired and released by Pods, except they can be defined as arbitrary key value pairs.
+The extended resources API has conventionally been used by cluster operators for marking specialized hardware as a one-time operation when the cluster is initialized. In fact, application pods are not granted access to this API by default.  
+
+To implement the ESCHER \textit{set\_resource} API, we change the Kubernetes role-based access control to allow applications to directly invoke the extended resources API in Kubernetes. This grants applications the ability to create and update \textit{extended resources} directly using the \textit{patch\_node\_status} call.
+From a security perspective, ESCHER applications require access only to create and remove extended resources. The Kubernetes API should deny write access to physical resources. Additionally, we employ namespacing of resources to enforce isolation and prevent malicious applications from overriding other applications.
+
+To force the Kubernetes scheduler to act as a simple resource-matching scheduler, the scheduler is invoked with only hard resource constraints set in the filtering policy. Weights for all other policies are set to zero. Thus, the combination of \textit{extended resources} API with hard resource constraints makes it possible to implement ESCHER policies on Kubernetes \emph{without making any changes to the core Kubernetes scheduler}.
+% Instead, we can repurpose existing APIs and scheduler modes in Kubernetes.
+%It invokes the \textit{patch\_node\_status} method with an ADD operation on the node's resource set. If the resource does not exist, the ADD operation creates a resource, else updates the resource with the new capacity..
+
+% Note that this implementation requires no changes to the core Kubernetes source. ESCHER's generality allows it to re-purpose existing APIs and scheduler modes in Kubernetes.
+
+\noindent\textbf{Ray Implementation.}
+Ray runs a scheduler per node, which collectively implement a bottom-up decentralized resource matching mechanism~\cite{ray-osdi}. Each node in the cluster has a set of key-value pairs signifying resource labels and their quantity, e.g., \texttt{\{"cpu": 8, "gpu": 1\}}.
+Each task specifies its hard resource requirements with the same data structure.
+% A task can only be executed on a node whose available resources are a superset of the task's resource requirement.
+
+Ray nodes share a centralized log of the total resource capacity at each node, where each entry represents the capacity at a node.
+% In addition, each node emits periodic heartbeats containing the node's current resource availability.
+The Ray scheduler matches a task to resources by storing resource availabilities from other nodes in a map and allocating the first node which can satisfy the task's resource request.
+Since a scheduler's view of the global state is only eventually consistent, it can correct previous decisions by running the same logic to find another eligible node. To support ESCHER, we extend the Ray core to permit updates to each node's resource capacity at runtime.
+We restructure Ray's centralized log so that each entry stores only a \emph{delta}, instead of the absolute capacity at that node.
+This guarantees no race conditions occur between resource updates, while avoiding expensive coordination, e.g., via a distributed lock.
+
+% Ray runs one scheduler per node, which collectively implement a bottom-up distributed resource matching mechanism. Once a task enters this distributed scheduler, it is queued in the scheduler on some particular node. If the node's available resources exceed the task's resource requirements, the scheduler begins executing the task on that node. Otherwise, if a different node in the cluster has sufficient available resources to run the task, the task is forwarded to that node and the recipient node repeats the scheduling logic. If no node in the cluster has sufficient available resources to run the task, the task is queued at some node in the cluster until the required resources become available somewhere in the cluster.
+
+
+%Each node in the Ray cluster is configured at startup with a set of resources. 
+%Each resource is described with a name and capacity. The name, an arbitrary string, typically refers to specific hardware resources (e.g., ``cpu'', ``gpu''). Resource quantity is a positive scalar. Node resources are configured on startup and advertised when the node joins the cluster.
+%Similarly, each Ray task specifies its hard resource requirements. These requirements are a set of resource names and the corresponding required quantities. A given task can only be executed on a node whose configured resources are a superset of the task's resource requirement. Furthermore, the sum of the resource requirements of % all tasks executing concurrently on any given node must be a subset of the node's configured resource capacity.
+
+% Ray runs one scheduler per node, which collectively implement a bottom-up distributed resource matching mechanism. Once a task enters this distributed scheduler, it is queued in the scheduler on some particular node. If the node's available resources exceed the task's resource requirements, the scheduler begins executing the task on that node. Otherwise, if a different node in the cluster has sufficient available resources to run the task, the task is forwarded to that node and the recipient node repeats the scheduling logic (because each node has a stale view of each other node's available resources, it is possible that the relevant resources will no longer be available once the task arrives). If no node in the cluster has sufficient available resources to run the task, the task is queued at some node in the cluster until the required resources become available somewhere in the cluster.
+
+%is responsible for scheduling tasks on that node. When a task is created by an application, it is queued in one of the schedulers. That scheduler may then forward the task to another scheduler, may assign it for execution on that scheduler's node, or may leave it queued. If at least one node in the cluster has sufficient available resource capacity to execute the given task, then the task will be forwarded to a node with sufficient capacity and executed.
+
+%A task specification in Ray includes a resource vector, indicating the resources and their quantities required for the execution of the task. This resource vector is treated as a hard requirement and must be satisfied on the node where the task is scheduled. When a task is launched, it acquires the resources requested by it and releases them when the task is completed.
+
+%The scheduler design in Ray builds on distributed resource matching scheme where each node runs a local scheduler with a simple logic - match tasks to nodes where the resources requested are available. If the local node has sufficient resources for the task, it runs on the local node, else gets forwarded to a remote node which can satisfy the task's resource requirement. The remote node then repeats the scheduling logic. Infeasible tasks which cannot be scheduled due to insufficient resources wait in a queue till all requested resources are available in the cluster. 
+
+%\subsubsection{Dynamic resource state manipulation}
+% While the Ray scheduler design satisfies the scheduling requirements in \Cref{sec:arch:ephres}, resource management in Ray does not permit resource modification and updates at runtime. We now discuss the Ray resource tracking mechanisms and the challenges in adding dynamic resource update support to the Ray resource management subsystem.
+
+% For fault-tolerance and resource discovery, Ray maintains a centralized log of the total resource capacity available on each node. However, to make correct scheduling decisions, each per-node scheduler must have a real-time global view of the cluster resource utilization state. This is constructed by emitting periodic heartbeats from each node containing the node's real time resource state, which are consumed by other nodes to update their local view of the cluster state. Though this creates a loose but eventually consistent view, it does not adversely impact scheduler performance, since the heartbeat period is much smaller than an average task's lifespan. Even if a scheduler makes an incorrect decision, it gets corrected when the remote node re-runs the scheduling logic on the forwarded task.
+
+% In such a distributed resource management paradigm, manipulating resources at runtime can be challenging. The complexity arises from propagating resource updates and maintaining consistency of the global state across schedulers. While heartbeats would update resource state on every node, state stored in the central log would also need to be updated. This gets challenging when multiple resources on the same node are updated concurrently, since out-of-order updates may violate the consistency of the log.
+
+% A naive solution would be to enforce locks on the log, but that would negatively impact the resource update latency. Instead, we restructure the log to store only the diff of resource updates, called resource deltas. Since they are composed only of changes in resource capacities, resource deltas are commutative and their ordering in a log is inconsequential. This enables resource updates to be carried out without adding locks on the log. 
+
+%Creating resources at runtime can be challenging for frameworks that utilize distributed schedulers. The complexity arises from propagating resource updates and maintaining consistency of the global state across schedulers without compromising on the scheduling latency. In our implementation, resource state is stored in a central log which grants a unified view of the cluster and provides desirable fault tolerance properties. To avoid head-of-line blocking and maintain a low scheduling latency, all schedulers maintain a local replica of this state and update it whenever a resource update occurs. However, instead of just storing the entire resource vector for every entry in the log, the framework must store only resource updates (deltas). This is to avoid dropping resource updates at the scheduler level because of out-of-order messages that update the node's entire resource vector may overwrite other updates. % Todo: Need to explain better/ remove this para.

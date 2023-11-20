@@ -1,0 +1,56 @@
+%!TEX root = main.tex
+
+\section{Related Work}
+\label{sec:related_work}
+
+% Video analytics systems
+
+
+% edge compute systems
+
+
+
+% Model training systems
+
+
+
+% hyperparameter tuning
+
+
+
+% ML vision
+
+
+
+% learned DB
+
+
+%We discuss work related to \name\ in the following areas. 
+
+\noindent\textbf{1) ML training systems.} %System design for large-scale training has been a hot topic in recent years. In cloud settings, 
+For large scale scheduling of training in the cloud, model and data parallel frameworks \cite{DBLP:conf/nips/DeanCMCDLMRSTYN12, DBLP:journals/pvldb/LowGKBGH12, 199317, mxnet} %(from DistBelief~\cite{DBLP:conf/nips/DeanCMCDLMRSTYN12}, Distributed GraphLab~\cite{DBLP:journals/pvldb/LowGKBGH12} to TensorFlow~\cite{199317}, MxNet~\cite{mxnet} etc.), 
+and various resource schedulers \cite{DBLP:journals/corr/abs-1907-01484, DBLP:conf/osdi/XiaoBRSKHPPZZYZ18, DBLP:conf/nsdi/GuCSZJQLG19, DBLP:conf/eurosys/PengBCWG18, DBLP:conf/sigcomm/GrandlAKRA14, DBLP:conf/cloud/ZhangSOF17} %(\eg Themis \cite{DBLP:journals/corr/abs-1907-01484}, Gandiva~\cite{DBLP:conf/osdi/XiaoBRSKHPPZZYZ18}, Tiresias~\cite{DBLP:conf/nsdi/GuCSZJQLG19}, Optimus~\cite{DBLP:conf/eurosys/PengBCWG18}, Tetris~\cite{DBLP:conf/sigcomm/GrandlAKRA14} and SLAQ~\cite{DBLP:conf/cloud/ZhangSOF17}) 
+have been developed. These systems, however, target different objectives than {\name}, like maximizing parallelism, fairness, or minimizing average job completion. % and coordination overheads. 
+%More recently, various kinds of collaborative machine learning training mechanisms~\cite{DBLP:journals/corr/abs-1902-01046, DBLP:conf/edge/LuSTLZCP19} have also been proposed, which enable training on a large volume of decentralized data residing on devices like mobile phones. None of the existing work considers the scenarios of training ML models with coexistence of inference jobs. 
+Collaborative training systems \cite{DBLP:journals/corr/abs-1902-01046, DBLP:conf/edge/LuSTLZCP19} work on decentralized data on mobile phones. They focus on coordinating the training between edge and the cloud, and not on training alongside inference.
+
+% @romilb: Renamed analytics to processing to broaden the umbrella for LiveNAS
+\noindent\textbf{2) Video \cameratext{processing} systems.} Prior work has built low-cost, high-accuracy and scalable video \cameratext{processing} systems for the edge and cloud~\cite{videostorm,chameleon,noscope}. VideoStorm investigates quality-lag requirements in video queries~\cite{videostorm}. NoScope exploits difference detectors and cascaded models to speedup queries~\cite{noscope}. Focus uses low-cost models to index videos~\cite{DBLP:conf/osdi/HsiehABVBPGM18}. Chameleon exploits correlations in camera content to amortize {\em profiling costs}~\cite{chameleon}. \revtext{Reducto~\cite{reducto} and DDS~\cite{dds} seek to reduce edge-to-cloud traffic by intelligent frame sampling and video encoding.
+All of these works optimize only the inference accuracy or the system/network costs of DNN inference, unlike \name's focus on retraining.}\cameratext{ More recently, LiveNAS\cite{livenas} deploys continuous retraining to update video upscaling models, but focuses on efficiently allocating client-server bandwidth to different subsamples of a single video stream. Instead, Ekya focuses on GPU allocation for maximizing retrained accuracy across multiple video streams.}
+% All of these works optimize only the inference accuracy unlike \name's focus on retraining.
+%whereas \name\ solves the resource allocation and scheduling problem across the inference and retraining jobs.
+
+% LiveNAS Notes:
+% Use super resolution to upscale and solve ingest-side bandwidth constraints
+% Ground truth: subsample and send partial patches
+% Target allocation problem: Bandwidth. 
+
+\noindent\textbf{3) Hyper-parameter optimization.} %Optimizing hyper-parameters allows for balancing model training's accuracy and resource usage, a principle that we use in {\name}. 
+Efficient exploration of hyper-parameters is crucial in training systems to find the model with the best accuracy. Techniques range from simple grid or random search~\cite{DBLP:journals/jmlr/BergstraB12}, to more sophisticated approaches using random forests~\cite{DBLP:conf/lion/HutterHL11}, Bayesian optimization~\cite{DBLP:conf/nips/SnoekLA12, Swersky_scalablebayesian}, probabilistic modelling~\cite{DBLP:conf/middleware/RasleyH0RF17}, or non-stochastic infinite-armed bandits~\cite{DBLP:journals/jmlr/LiJDRT17}. Unlike the focus of these techniques on finding the hyper-parameters with the highest accuracy, our focus is on resource allocation. Further, we are focused on the inference accuracy over the retrained window, where producing the best retrained model often turns out to be sub-optimal.% \name\ takes as input the prediction results from hyper-parameter search to schedule training and inference jobs, hence naturally accommodates various hyper-parameter optimization techniques. 
+
+\noindent\textbf{4) Continuous learning.} Machine learning literature on continuous learning adapts models as new data comes in. %This is much needed given the fact that training larger model is getting prohibitively expensive and context-specific models are being widely deployed to resource-constrained devices due to their high accuracy and low inference time~\cite{DBLP:conf/mobisys/HanSPAWK16,DBLP:journals/pvldb/KangEABZ17}. 
+A common approach used is transfer learning~\cite{DBLP:journals/corr/RazavianASC14,DBLP:conf/edge/LuSTLZCP19,mullapudi2019,44873}. Research has also been conducted on handling catastrophic forgetting~\cite{DBLP:journals/corr/abs-1708-01547,datadrift-a}, using limited amount of training data~\cite{icarl-14,DBLP:journals/corr/abs-1905-10887}, and dealing with class imbalance~\cite{Belouadah_2019_ICCV,DBLP:journals/corr/abs-1905-13260}. 
+{\name} builds atop continuous learning techniques for its scheduling and implementation, to enable them in edge deployments. 
+%While orthogonal to systems that strive to maximize training performance, \name\ is different in that it aims to maximize the inference accuracy averaged over the ``retraining window'' and across all the video streams.
+
+%\noindent\textbf{5) Edge compute systems.} By deploying computation close to the data sources, edge computing benefits many applications, including video analytics \cite{edgevideo-1, ieee-computer, getmobile}. While there has been edge-based solutions for video processing~\cite{videoedge}, we enable joint optimization of video inference and retraining.

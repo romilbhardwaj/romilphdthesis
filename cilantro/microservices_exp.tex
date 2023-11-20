@@ -1,0 +1,85 @@
+
+\subsection{Resource allocation for Microservices}
+\label{sec:microservices}
+\vspace{-1mm}
+
+We now demonstrate the use of Cilantro to allocate resources for inter-dependent microservices
+serving an application.
+A query to the application triggers multiple queries to different microservices and the final result
+is returned to the user.
+Cilantro must observe a single end-to-end metric, the end-to-end query latency, and then allocate
+fixed cluster resources to different microservices to minimize the P99 latency of
+the application.
+% Only one end-to-end metric is available as feedback to the policy, in contrast to the multi-tenant
+% cluster sharing (\S\ref{sec:fixedclus}) where each job provides individual feedback.
+% We show that
+% Cilantro picks resource allocations which minimize the end-to-end latency of the application, while
+% outperforming baselines by $xx\times$ \rbcomment{Fill in}.
+We note that Cilantro does not require
+meta information about the microservices, such as their dependency and control flow graphs;
+Cilantro directly optimizes the end-to-end metric as described in \S\ref{sec:microservices}. %\rbcomment{This is a bit hand-wavy and grandiose, rephrase.}% learning model implicitly infers these through online learning.
+
+\textbf{Workload.}  We use the Hotel Reservation application from
+DeathStarBench\cite{deathstarbench}. It has 19 microservices, including 6 MongoDB
+databases, 3 memcached kv-stores and a nginx webserver running on a consul service
+mesh. The architecture is shown in Fig.~\ref{fig:microservices}-Left.
+Collectively, these microservices serve search, recommendation, rating, account management and
+geolocation queries from users. We use wrk2\cite{wrk2} to process and submit the query workload
+provided in \cite{deathstarbench}. We measure the end-to-end latency of queries submitted to the
+frontend microservice. All microservices experiments are run on a 160 CPU cluster with 20 AWS
+m5.2xlarge instances.
+
+\textbf{Baselines.}
+We compare Cilantro's end-to-end policy (\S\ref{sec:msal}) against three baselines.
+\equalsharems{} always equally allocates the resources among microservices.
+\evoalgms{} is an evolutionary algorithm which optimizes for the P99
+latency. 
+\epsilongreedyms{} randomly picks a new allocation with probability $1/3$,
+or uses the allocation with the smallest observed P99 latency with probability $2/3$.
+
+% \epsilongreedyms{} is a common policy used in
+% online decision-making~\citep{bubeck2012regret}, in which 
+% % Here, we maintain the average utility achieved by all previous resource allocations.
+% we either randomly pick a new allocation with probability $1/3$ at the start of a round,
+% or use the best allocation we have tried so far with probability $2/3$.
+% % Add why we dont use Sinan?
+
+\textbf{Results and Discussion.} 
+Fig.~\ref{fig:microservices}
+shows how the instantaneous and time-averaged P99 latency (computed in 30s intervals) evolves
+with time during the course of the experiment.
+% Table~\ref{tab:msp99} shows the time-averaged P99 latency during the entire  experiment and
+% Fig.~\ref{fig:avgmsp99} shows how this time-averaged value evolves with time.
+% 
+Both \cilantros and \evoalgmss explore early on (Fig.~\ref{fig:microservices}-Center),
+but as they find better values,
+exploration shrinks as they focus on testing more promising allocations.
+However, \cilantro's OFU-based online learning policy
+is able to do this more effectively than \evoalgms.
+\epsilongreedymss explores aggressively even in later stages and is unable to adequately exploit good
+candidates it may have discovered in the early stages. 
+Overall, \cilantro~achieves a mean P99 of 525ms, 
+compared to 930ms for \evoalgms, the next best baseline.
+% Finally, \equalsharems{}
+% allocates equal resources to all microservices irrespective of their actual performance
+% requirements, resulting in a high end-to-end latency.
+
+% Fig.~\ref{fig:avgmsp99} plots the time-averaged P99 latency of the Hotel Reservation application
+% over 6 hours. The Cilantro policy uses estimates from the performance learners to produce a
+% 19-dimensional resource-performance model. Over time as more allocation-latency data is available,
+% Cilantro converges to an allocation which minimizes the P99 latency. While \evoalgms is also fast in
+% its initial convergence, it and \epsilongreedyms get stuck in local optimum because they try to
+% greedily optimize the target function. \rbcomment{State how Cilantro is different?} \equalsharems
+% allocates equal resources to all microservices irrespective of their actual performance
+% requirements, resulting in a high end-to-end latency.
+% 
+% Zooming in, Figure \ref{fig:msp99} shows the individual latency of each baseline and Cilantro. At
+% the start, the performance learners have limited data points and estimating a high dimensional
+% function causes the produced confidence bounds to be very large. This results in Cilantro attempting
+% a range allocations in the early phases of the experiment. However, over time, Cilantro is able to
+% reduce variance as the confidence bounds shrink, whereas the \epsilongreedyms and \evoalgms continue
+% exploring new allocations, causing high variance till late in the experiment. Table \ref{tab:msp99}
+% highlights the mean and variance of the P99 latency over the duration of the experiment.
+% \equalsharems has the lowest variance since it uses fixed allocations and serves as the baseline
+% variance of the workload. Cilantro is able to minimize, both mean P99 latency and its variance. 
+

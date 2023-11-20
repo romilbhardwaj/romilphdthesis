@@ -1,0 +1,277 @@
+\section{Scheduling with \name{}}
+\label{policies}
+
+%\input{policy-table-v2.tex}
+
+% In this section, we first describe a taxonomy of scheduling policies (\cref{policies:taxonomy}) then show examples of how an application can use ephemeral resources to implement a variety of policies~(\Cref{policies:example1,policies:example2}, \Cref{fig:policycode}), including composite policies~(\Cref{policies:composition}) and policies with soft constraints~(\Cref{softconstr}).
+
+
+% \subsection{Casting policies as resource requirements}
+% \label{policies:taxonomy}
+
+%In this section, we describe how applications can use \name{} to implement scheduling policies.
+A scheduling policy is a mapping of tasks to resources which satisfies any spatial ("where") and temporal ("when") constraints.
+%These constraints can be spatial (\textit{where} a task must run) or temporal (\textit{when} a task must run). Spatial constraints specify the exact node where a task must run and temporal constraints specify a time dependency between tasks.
+We now describe how these constraints can be cast as resource requirements with \name{}. % Since \lstinline{set_resource} allows the creation of ephemeral resources on any node, even the most complex spatial constraint can be expressed by explicitly creating ephemeral resources on a targeted node. Since ephemeral resources are dynamic, temporal constraints can be expressed by modifying ephemeral resources at runtime.
+%For instance, creating a simple temporal dependency between two tasks $T_1$ and $T_2$ can be expressed by having task $T_1$ create an ephemeral resource $X$ when it completes, and requesting resource $X$ in task $T_2$'s resource requirements.
+
+%Given the set of all tasks $W$, a scheduler must provide a schedule in the form of a one-to-many mapping of $S_t$ from $W$ to resources $R$ over all instants of time $T$.
+%\[S_t: W \rightarrow R \quad \forall t \in T \]
+
+\begin{table*}[t]
+\small
+\begin{threeparttable}
+\begin{tabular}{|p{3.75cm}|p{2.5cm}|p{10.25cm}|}
+\hline
+\textbf{Policy Example}                            & \textbf{Primitive used}                  & \textbf{Implementation with ESCHER}                                 \\ \hline
+\textbf{Sequential}: Run $T_2$ after $T_1$.         & Signaling                         & $T_2$ requests ephemeral resource $E$ created by $T_1$ on completion. %creates an ephemeral resource $E$ when it finishes. $T_2$ requests $E$. 
+\\ \hline
+\textbf{Gang Scheduling}: Run $T_1$ and $T_2$ simultaneously.      & Locking, Signaling                         & Two ghost tasks $T_1^g$ and $T_2^g$ request 1 CPU each, and each creates an ephemeral resource $E_{CPU}$ of capacity one. When both $T_1^g$ and $T_2^g$ run, schedule $T_1$ and $T_2$, each requesting one unit of $E_{CPU}$. \\ \hline
+\textbf{Affinity}: Run $T_1$ and $T_2$ on the same node.           & Locality                         & A ghost task $T^g$ requests 2 CPUs, and creates an ephemeral resource $E$ with capacity 2. $T_1$ and $T_2$ request one unit of $E$ each. \\ \hline
+\textbf{Anti-affinity}: Run $T_1$ and $T_2$ on different nodes.    & Queues                         &  Every node in the cluster creates anti-affinity resource $E$ with capacity 1.  $T_1$ and $T_2$ request one unit of $E$ each.\tnote{1} \\ \hline
+\textbf{Load-balancing}: Evenly spread tasks across nodes.           & Queues                         & Create load-balancing resource $L$ with capacity 1 on each node. Each task requests one unit of $L$ each. When all $L$ resources are exhausted, increase capacity by 1. \\ \hline
+\textbf{Data-locality}: Run $T$ where its input $D$ is stored. & Locality                         & When storing $D$, create ephemeral resource $E_D$ on the same node. $T$ requests $E_D$. \\ \hline
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item [1] If $T_1$ and $T_2$ are long-running, the application cannot use the nodes they are running on for other anti-affinity placements. To avoid this, we have two short-lived ghost tasks $T_1^g$ and $T_2^g$ request 1 unit of $E$ each, create ephemeral resources $E_1$ and $E_2$, and then terminate. $T_1$ requests $E_1$ and $T_2$ requests $E_2$.
+\end{tablenotes}
+\caption{Expressing scheduling constraints with ephemeral resources}
+\vspace{-1em}
+\label{tab:escher-constraints-policies}
+\end{threeparttable}
+\end{table*}
+
+\subsection{Scheduling primitives in ESCHER}
+\label{sec:sched:primitive}
+We present four scheduling primitives implemented using ephemeral resources which can be used to express both spatial and temporal constraints. We note that this is not an exhaustive set of primitives possible with ephemeral resources. Applications have the flexibility to define their own primitives through ephemeral resource manipulation.
+
+\textbf{[P1] Locality.} 
+Tasks must often be co-scheduled on the same physical node as another task or must be co-located with data. These spatial constraints can be easily expressed in ESCHER. The target task for co-location creates a local ephemeral resource $E_r$ with unbounded capacity when the task starts or the data to be co-located with is created. The constrained task then requests 1 unit of $E_r$ and, thus, automatically gets scheduled on the same node.
+
+\textbf{[P2] Task Signaling.}
+Distributed applications rely on expensive RPCs to coordinate the execution of interdependent tasks. This is prevalent in directed acyclic graph~(DAG) task schedulers, where the ordering of tasks is critical for correctness. These temporal constraints can be expressed with ESCHER by creating ephemeral resources dynamically, effectively using them as signals. E.g., if task T2 has \textit{any} ``happens-before'' dependency on task T1, T1 can create a resource $E_{T2}$ when it completes. T2 \textit{a priori} requests $E_{T2}$ as a part of its resource requirements when launched, and thus is scheduled as soon as $E_{T2}$ is created by T1.  Note that signals in ESCHER are single-shot---all task requests are declaratively placed at the start, and tasks begin execution only when their ephemeral resource demands are met by newly created resources. 
+% It is notable that T1 can create $E_{T2}$ at any point of its execution, making ephemeral resources expressive enough to initiate logically dependent task T2 before T1 completes, but no sooner than is deemed safe by T1.
+More generally, barrier synchronization is naturally supported. Given $\left\{ T^{i-1}_j \right\} \rightarrow T^i$ for $j>1$, $T^i$ could simply request a single unit of resource created by each of $T^{i-1}_j$ upon their respective completion. Thus, semaphores (and therefore, mutual exclusion) can also be implemented. % with ephemeral resources.
+
+\textbf{[P3] Queues.}
+Many policies \cite{wfq, sfs} use one or more task queues as a fundamental construct in their implementation. 
+The core ESCHER scheduler queues tasks until their resource requirements (ephemeral and physical) can be satisfied. ESCHER allows the application to decide when to dequeue tasks by increasing the capacity of an ephemeral resource. 
+% orts task queues by design, since tasks whose resource requirements (ephemeral and physical) are not satisfied are queued in the scheduler till they are feasible. Thus, 
+Creating a queue is simply creating a unique ephemeral resource $E_q$ with initial capacity 0 on any node. A task is enqueued by launching it in a wrapper task requesting 1 unit of $E_q$ resource. The queue drain rate can be set by changing the capacity of $E_q$. On acquiring the $E_q$ resource, the wrapper task submits the contained task to the scheduler with its physical resource requirement (e.g., 2 CPUs) and exits. Note that it's possible to implement batched scheduling %with dynamically adjustable mini-batch size
+ by incrementing the capacity of $E_q$ by the desired batch size.
+
+\textbf{[P4] Resource Locking.}
+ESCHER enables a new scheduling construct where an ephemeral resource can be used to acquire and lock one or more physical resources ("bundle"). This reservation of resources is achieved with \emph{ghost tasks} - long-running tasks which acquire the bundle like a regular task and create a local ephemeral resource to accommodate new tasks. Ghost tasks create a pattern of indirection where tasks request ephemeral resources instead of physical resources to get scheduled. We note that ghost tasks achieve the same outcome as incremental locking presented in Omega~\cite{omega}. This is useful when applications require atomic transactions on a \emph{group} of resources, such as in gang scheduling.
+
+
+% \subsection{Application Policy: Load Balancing}
+% \label{policies:example1}
+% Consider a simple policy such as elastic load balancing. In some applications, such as web servers, it is desirable to evenly spread out tasks to minimize the average load per node and eliminate single points of failure. Moreover, the bursty nature of these workloads, where the exact number of requests to be served is not known, adds dynamicity to the scheduling requirement.
+
+% \begin{sloppypar}
+% To implement this spatial constraint, ephemeral resources can provide load balancing by creating a resource \lstinline{load_balancer} on each node and having each incoming task request 1 unit of this \lstinline{load_balancer} resource. To make this policy scale with incoming tasks, a separate \lstinline{load_monitor} process continually monitors the state of the \lstinline{load_balancer} resource on all nodes and increments it all nodes are equally occupied or decrements it if all nodes have more than one available \lstinline{load_balancer} resource. By performing these two functions, the \lstinline{load_monitor} task ensures that the resource availability remains elastic, and thus every task requesting the \lstinline{load_balancer} resource gets scheduled evenly across all nodes.
+% \end{sloppypar}
+
+\subsection{Scheduling policies with ESCHER}
+\label{policies:gangsched}
+\label{sec:sched:policies}
+To illustrate the use of these scheduling primitive constructs, we now describe the implementation of an example application-level policy and a cluster-level policy with ESCHER. \Cref{tab:escher-constraints-policies} lists more policies and their implementation with \name{}.
+
+\subsubsection{Application Policy: Gang Scheduling}
+Distributed training \cite{gandiva} and reinforcement learning workloads~\cite{gorila} require gang scheduling, where all tasks should start and run concurrently. This implies all-or-none scheduling semantics, where either all resources requested by all tasks are granted simultaneously, or no resources are granted.
+
+In implementing all-or-none constraints, a common requirement is to check whether sufficient resources are available to satisfy the policy and reserving them, if necessary.
+%For instance, gang-scheduling requires a fixed size pool of resources to be available to tasks.
+To achieve this, \name{} uses \textit{ghost tasks} from the resource locking primitive. 
+For instance, gang-scheduling a pool of 8 tasks (each of which requires 1 CPU) can be done by launching a ghost task which requires 8 CPUs and creates 8 units of \lstinline{gang-sched} resource. If all ghost tasks are successful, each task in the pool can then request 1 \lstinline{gang-sched} resource and 0 CPUs to get scheduled. If any ghost task is unsuccessful, a timeout in other ghost tasks executes a rollback and removes the \lstinline{gang-sched} resource. To avoid live-locks, either the applications can execute an exponential back-off \cite{expbackoff} before retrying, or an ESL can serialize all gang scheduling requests through a common shared library. We discuss this design space in \Cref{sec:eval:gangscheduling}.
+
+%Gang scheduling can be implemented with ephemeral resources by creating reservation tasks that are submitted with the same resource requirements as the actual tasks, as demonstrated in Figure \ref{fig:policycode:gangsched}. On instantiation, all reservation tasks create a \lstinline{reservation} resource of capacity 1 on their host node and send a heartbeat to the application. The receipt of heartbeats from all reservation tasks indicates a successful resource acquisition and the application can then launch the gang of tasks by having each task request one unit of the \lstinline{reservation} resource each. If the opportunistic scheduling of reservation task fails (identified by a timeout), the reservation tasks remove the \lstinline{reservation} resource and terminate.
+
+\begin{figure}[t]
+\centering
+%% Fig A
+% \begin{subfigure}[b]{0.33\linewidth}
+%   \centering
+%   \begin{subfigure}{\textwidth}
+% \begin{minted}[fontsize=\scriptsize]{python}
+% esl = HFS(domain=cluster.nodes())
+% res_user_a = esl.create_user("a", 1)
+% res_user_b = esl.create_user("b", 2)
+
+% # User A's code
+% task.launch(resources={res_user_a: 1})
+
+% # User B's code
+% task.launch(resources={res_user_b: 1})
+% \end{minted}
+% \end{subfigure}
+%   \caption{}
+%   \label{listing:eslexample}
+% \end{subfigure}
+%% Fig b
+
+\begin{subfigure}[b]{0.45\linewidth}
+  \centering
+  \begin{subfigure}{\textwidth}
+\begin{minted}[fontsize=\tiny]{python}
+def soft_constraint_scheduler(task, ordinal_resource_preferences):
+  for res_pref in ordinal_resource_preferences:
+    if recv_heartbeat(task.task_id):
+      break
+    task.resources = res_pref
+    task.launch()
+    sleep(timeout)
+
+def main():
+  res_prefs = [{gpu: 1}, {cpu: 1}]
+  soft_constraint_scheduler(task, res_prefs)
+\end{minted}
+\end{subfigure}
+  \caption{}
+  \label{listing:softconstr}
+\end{subfigure}
+%% Fig c
+\begin{subfigure}[b]{0.45\linewidth}
+  \centering
+  \begin{subfigure}{\textwidth}
+\begin{minted}[fontsize=\tiny]{python}
+def task1(id):
+  set_resource(label=id, capacity=1)
+  ...
+def composite_scheduling():
+  # Create load-balancing resources
+  for node in cluster:
+    set_resource("load_balancing", 1, node)
+  for i in range(0, task_count):
+    # Load balance task 1
+    task1.launch(id=i, resources = {'load_balancing': 1})
+    # Co-locate task 1 & 2
+    task2.launch(resources = {i: 1})
+\end{minted}
+\end{subfigure}
+  \caption{}
+  \label{listing:compositionpolicy}
+\end{subfigure}
+
+\caption{\small Scheduling with \name{}. \textbf{(a)} Soft constraints with \name{}. \textbf{(b)} Composition of load-balancing and co-location policies with ephemeral resources in \name{}.}
+\label{fig:schedpseudo2}
+\vspace{-5mm}
+\end{figure}
+
+\subsubsection{Cluster Policy: Hierarchical Fair Sharing}
+\label{policies:hfs}
+From a cluster operator's perspective, using ESCHER allows enforcement of cluster-level scheduling goals, such as multi-tenancy, while still supporting application-level scheduling policies described above. For example, consider large organizations, which typically have a cluster of resources shared among teams. This sharing has three requirements. First, the scheduler must allow assigning resource sharing weights to users. Second, to maximize resource utilization, the scheduler must implement max-min fairness~\cite{ghodsi2011dominant}, i.e., temporarily re-allocate idle resources to oversubscribed users. Finally, teams  need to further partition their share of resources among sub-teams. % The scheduler must support creating hierarchies of max-min fair sharing.
+
+Hierarchical max-min fair sharing (HFS) can be implemented as an ESL using a variant of the Queue primitive. The HFS ESL is instantiated to operate on a specified domain of nodes and provides a single call - \lstinline{create_user(id, weight)} - which returns a resource name unique to the user id. On invoking this routine, the ESL executes a \lstinline{set_resource} call to create a unique resource (e.g., \lstinline{res_user1}) with infinite capacity for the user on each allocated node. When a user submits a task, they must request a capacity of 1 their unique resource label (e.g., \lstinline{res_user1}) which ensures their task is run only on the resources provisioned for them.  Since ephemeral resources can be updated at runtime, the ESL dynamically resizes user allocations by adding and removing their ephemeral resources. Hierarchies in this setup can be created by launching multiple instances of the ESL  and restricting their operating domain to the nodes granted by the parent ESL.
+
+%To achieve max-min fairness, the HFS ESL implements a lending scheme which runs a daemon to monitor the users' resource utilization through the \lstinline{get_cluster_status} call. If any user's available resource capacity is zero (i.e., the user is oversubscribed), the ESL first tries to reclaim any resources this user may have lent to other users. If no borrowers are found, the user borrows resources from other users who have available resource capacity (i.e., are undersubscribed).
+
+\subsubsection{Soft constraints with ESCHER}
+\label{sec:softconstraints}
+The core scheduler enforces task resource requirements as a hard constraint, keeping the core scheduling logic simple. %a strict matching of task resource requirements to cluster resource availability.
+% If any resource in the set of requirements is unavailable, scheduling will fail even if other resources are available.
+However, some applications may demand relaxed scheduling semantics, where some resource requirements can be specified as \textit{soft constraints}.
+% If the soft constraints are not satisfied, they can be discarded and the task is rescheduled with only the remaining resource requirements.
+Ephemeral resources can be used to implement soft constraints even when the scheduler only supports strict matching of resource requirements.
+First, the application specifies the soft constraints as an ordinal set of resource set preferences $R = [r_1, r_2, ..., r_n]$, where $r_i$ is the $i^{th}$ preferred resource requirement set.
+% The ordering of this set indicates the resource preference order.
+For instance, an application which prefers a GPU but will work without one would specify its resource requirements as $R = [\{gpu: 1\}, \{\} ]$.
+
+The soft-constraints ESL then instruments the application's tasks with a lightweight heartbeat sent to the ESL to notify it of successful scheduling when the task launches (Listing \ref{listing:softconstr}).
+The ESL then sequentially attempts to launch a task, starting with resource requirement $r_1$. If the ESL does not receive the callback from the task within a certain timeout $t$, it implies the resource requirement was not matched.
+The ESL then cancels and resubmits the task, now with a resource requirement $r_2$. This best-effort scheduling is attempted for all resource preferences $r \in R$ until the scheduling succeeds or all preferences have been evaluated.
+
+% This mechanism also prevents any duplicate execution of tasks. The response to a task heartbeat is a signal which indicates if the task should continue execution or terminate immediately. When a task successfully launches for the first time, the application sends a continue execution signal, but any subsequent successful task heartbeats are sent the termination signal. This ensures that any duplicate launches, either due to resources becoming available over time or a short wait timeout, are suppressed.
+
+%NOTE(romilb):Ephermerality of resources isn't really used for soft-constraints..
+
+% \begin{listing}
+% \begin{minted}[fontsize=\tiny]{python}
+% def task():
+%   is_valid_run = send_heartbeat()
+%   if is_valid_run:
+%     ...
+
+% def soft_constraint_scheduler(task, ordinal_resource_preferences):
+%   for resource_preference in ordinal_resource_preferences:
+%     if heartbeat_already_received(task.task_id):
+%       break
+%     task.resources = resource_preference
+%     task.launch()
+%     sleep(timeout)
+
+% def main():
+%   ordinal_resource_preferences = [{gpu: 1}, {cpu: 1}]
+%   soft_constraint_scheduler(task, ordinal_resource_preferences)
+% \end{minted}
+% \caption{Soft constraints with \name{}}
+% \label{listing:softconstr}
+% \end{listing}
+
+% \input{policy-pseudocode.tex}
+
+\label{policies:objective}
+\textbf{Objective functions.}
+Soft constraints can be used to approximate policies that optimize a combined objective function.
+% In addition to spatial and temporal scheduling policies, ephemeral resources can also be used to approximate policies which aim to optimize on a combined objective function.
+For instance, consider a policy which aims to balance both CPU and memory utilization in a cluster.
+% load balance tasks on a weighted function of CPU and memory availability.
+Formally, given weights for memory and CPU utilization $\alpha$ and $\beta$, the objective is to maximize the minimum of $\gamma_n=\alpha M_n + \beta C_n$ across all nodes, where $M_n$ and $C_n$ are the memory and CPU utilization on node $n$ (ranging between 0 and 1).
+
+% Mathematically, given the set of all nodes in the cluster $N$ and weights for memory and CPU availability $\alpha$ and $\beta$, the objective is to:
+% {\small
+% %\vspace{-12pt}
+% \begin{equation}
+% \max\min_{\forall n \in N} (\alpha\text{$MEM_n$} + \beta\text{$CPU_n$})
+% \end{equation}
+% }
+% where $MEM_n$ and $CPU_n$ are CPU availability values (ranging between 0 to 1) on node $n$. It is possible to approximate such maxmin optimization policies with ESCHER.
+To express this policy in ESCHER, the scheduler first creates the resource \textit{obj} on each node with a capacity of $\alpha+\beta$.
+A task with memory and CPU requirements $m$ and $n$ then specifies the soft constraint $R = [\{obj: \gamma\}, \{obj: \frac{\gamma}{2}\}, \{obj: \frac{\gamma}{4}\},... \{obj: \frac{\gamma}{2^k}\}]$, where $\gamma = \alpha m + \beta n$.
+The task also includes the hard constraints $\{MEM: m, CPU: n\}$.
+This preference places each task on the least utilized node, correct up to a factor of 2, while guaranteeing that no node is overallocated.
+
+% To run tasks, each task uses soft constraints to specify a resource set preference of $R = [\{obj: \gamma\}, \{obj: \frac{\gamma}{2}\}, \{obj: \frac{\gamma}{4}\},... \{obj: \frac{\gamma}{2^k}\}]$. Such a resource set preference allows each task to be placed on the least utilized node, correct upto a factor of 2. On successful scheduling, the task calls \lstinline{set_resource} on the local \textit{obj} resource to signal its consumption and reduce its quantity.
+
+% Note that this approach may incur significant overheads from repeated retries when the resources are oversubscribed. As an alternative, this policy can also be implemented by observing the cluster state, computing the objective function locally and using targeted placement with \lstinline{set_resource} to directly place the task on the desired node. \romil{TODO: We need to politely admit that this solution is a bit too complex/has overheads.}
+
+
+\subsubsection{Policy Composition}
+%\label{policies:composition}
+%TODO(romilb): Add graphic to explain this better?
+% Some applications may have scheduling requirements that may be expressed as a hierarchical composition of the basic scheduling policies discussed above. For instance, an application might want to enforce co-location among a set of tasks, while evenly spreading out these groups of co-located tasks to load balance across the cluster. Implementing this policy on existing frameworks is challenging due to the highly specific needs of this application. Even if the application developer was to modify the core framework scheduler, the implementation of this policy is still complex, requiring significant developer effort to develop and maintain.
+Applications like hyperparameter search require a hierarchical composition of other policies~(\Cref{sec:motivation:example}).
+% With ephemeral resources a hierarchical policy can be easily expressed as a composition of other policies.
+Scheduling policy compositions can be logically expressed either as an AND conjunction or an OR conjunction. AND constraints are expressed by concatenating the ephemeral resource vectors for two policies. OR constraints are supported using soft constraints. % An OR composition of two policies P1 and P2 can be specified as the ordinal set [\{P1, P2\}, \{P1\}, \{P2\}].}
+For instance, if an application wants to co-locate $task1$ and $task2$ while load balancing their groups across the cluster, it can simply apply co-location on $task1$ and $task2$ and load balancing only on $task1$ as shown in \cref{listing:compositionpolicy}. Similarly, cluster-level policies can be composed with application-level policies (Section \ref{eval:hfs}). 
+
+Conflicting compositions of policies may render a task impossible to schedule. E.g., composing a cluster-level fair sharing policy and an anti-affinity policy may result in a infeasible task if the fair share  of resources is insufficient. In such situations, one can specify conflict resolutions by using soft-constraints to relax scheduling policies. For instance, a soft constraint vector [\{\text{fair\_a: 1}, \text{anti\_aff: 1}\}, \{\text{fair\_a: 1}\}] would try scheduling a task with fairness and anti-affinity, and relax the anti-affinity constraint if a conflict arises. 
+
+% \begin{listing}
+% \begin{minted}[fontsize=\tiny]{python}
+% def task1(id):
+%   set_resource(label=id, capacity=1)
+%   ...
+% def task2():
+%   ...
+% def composite_scheduling():
+%   # Create load-balancing resources
+%   for node in cluster:
+%     set_resource("load_balancing", 1, node)
+%   # Launch tasks
+%   for i in range(0, task_count):
+%     # Load balance task 1
+%     task1.launch(id=i, resources = {'load_balancing': 1})
+%     # Co-locate task 1 & 2
+%     task2.launch(resources = {i: 1})
+% \end{minted}
+% \caption{Composition of load-balancing and co-location policies with ephemeral resources in \name{}.}
+% \label{compositionpolicy}
+% \end{listing}
+
+% \subsection{Custom application policies}
+% \romil{Candidate for cutting}
+% The ephemeral resource abstraction also enables expression of custom application policies.
+% For instance, consider a data-locality sensitive application~\cite{clipper} serving multiple replicas of a periodically retrained machine learning model. Such models can be hundreds of megabytes in size, so instantiating new model actor replicas for inference is best done on the node where a cached copy of the model can be found. However, the application also requires continuous updates to the model, which can result in stale caches of the model across the cluster. \name{} allows easy invalidation of caches when the base model is retrained by simply setting the capacity of the \lstinline{data-locality} (Figure \ref{fig:policycode:datalocality}) resource to zero on nodes where the model is stale, and resetting it to one when the cache is updated.
+
+% Similarly, the use of ephemeral resources enables single-shot task-to-task affinity scheduling. While task-to-node affinity can be achieved in other schedulers as well~\cite{tetrisched,firmament}, task-to-task affinity is more difficult to express in such schedulers because it is relative to other units of compute, not relative to physical nodes. \name{} makes it possible to submit all affine tasks at once, e.g., without waiting for the first task to complete before submitting other tasks. Tasks stay pending internally until \textit{co\_location} ephemeral resource creation succeeds, after which all affine tasks get scheduled. 

@@ -1,0 +1,179 @@
+
+
+\insertTableRelatedWork{}
+
+\section{Background \& Related Work}
+\label{sec:related}
+
+\cameratext{In this section, we compare Cilantro with prior work. Table~\ref{tab:relatedwork} summarizes the key differences of Cilantro against other resource allocation systems and methods.}
+
+\newcommand{\relworkheading}[1]{\textbf{\textit{#1:}}}
+
+% Organizations typically have a finite pool of cluster resources that must be shared
+% among multiple jobs.
+\relworkheading{Performance oblivious methods}
+The simplest, yet popular approach to allocating finite resources
+among competing jobs, is to adopt a \emph{resource fair} policy,
+which simply divides the resource equally
+(or proportional to weights)~\cite{jiang2012improving,isard2009quincy,hadoopfs,mo2000fair}.
+As this does not account for jobs'
+resource requirements, it is inadequate in 
+all but the most trivial settings.  
+
+% there is a scarcity of resources and we cannot satisfy the resource
+% requirements of all users.
+
+% Hence, multi-tenant schedulng policies attempt to balance the performance goals
+% while satisfying some notion of fairness.
+% The simplest, yet popular approach to this is a \emph{resource fair} policy,
+% which simply divides the resource
+% equally (or proportional to some weights) without accounting for the users'
+% performance~\cite{jiang2012improving,isard2009quincy,hadoopfs,mo2000fair}.
+% However, there has been recent interest in performance-aware fairness policies.
+% % There are however several classes of policies 
+% We review two common classes of such policies. 
+
+
+% Another class of work, which relies on users to submit their own resource demand,
+% has been adopted by
+Several scheduling frameworks, such as Kubernetes~\cite{kubernetes},
+Mesos~\cite{hindman2011mesos} and YARN~\cite{yarn},
+relies on users to submit their own resource demand.
+To execute resource allocations from policies,
+Kubernetes and YARN use resource reservations while Mesos negotiates through
+resource offers.
+This requires users to estimate their jobs' resource needs, which can be difficult.
+They focus on one-way resource allocations
+and do not provide any mechanisms for the policy
+to get feedback on application performance.
+% Moreover, static resource allocations restrict the
+% application's ability to respond to changing traffic patterns and service loads.
+However,
+recognizing that end users may have varied scheduling objectives,
+these frameworks support and implement multiple policies.
+% Consequently, policies are forced to make invasive changes to application logic to extract
+% relevant metrics~\cite{xiao2018gandiva}.
+% \rbcomment{Say something about users being bad at estimating resource demands and maybe move this para first.}
+
+
+\relworkheading{Methods based on proxy metrics}
+The most common approach to account for resource requirements relies on proxy metrics (e.g. CPU utilization, work-queue lengths).
+% There is a long line of work for resource management both in the multi-tenant setting and for
+% application-level task scheduling. 
+% \relworkheading{Systems for scheduling microservices:}
+Quasar~\cite{delimitrou2014quasar} 
+offline profiles jobs' proxy metrics,
+and has a fixed operator-centric policy to maximize cluster
+utilization.
+Paragon~\cite{delimitrou2013paragon} accounts for resource heterogeneity and inter-job interference
+ to achieve performance guarantees.
+AGILE\cite{nguyen2013AGILEED} models the resource pressure, and uses demand prediction to minimize SLO violations.
+The above works do not directly account for users' performance \cameratext{goals} and optimize for singular objectives.
+
+%they highlight the need for automatically learning resource requirements instead of relying on users to estimate them.
+
+% The focus on demand-based policies has also influenced the design of scheduling frameworks, such as Kubernetes~\cite{kubernetes}, Mesos~\cite{hindman2011mesos} and
+% YARN~\cite{yarn}. 
+% These frameworks exclusively implement demand-based fairness policies and do not fundamentally support welfare-based policies.
+% To execute resource allocations from policies,
+% Kubernetes and YARN use resource reservations while Mesos negotiates allocations through
+% resource offers. In doing so, these frameworks focus on one-way resource allocations
+% and do not provide any mechanisms for the policy
+% to get feedback on application performance.
+% Consequently, policies are forced to make invasive changes to application logic to extract
+% relevant metrics~\cite{xiao2018gandiva}.
+% 
+
+\relworkheading{Methods which use offline profiling}
+% Since proxy metrics can be unreliable and users are bad at estimating resource demands,
+% Since proxy metrics can be poor at predicting the real world performance of a job,
+Some work has explored directly incorporating job performance
+via profiled historical data.
+% however, they rely on profiled historical data to
+% obtain a job's resource-to-performance mapping.
+Morpheus~\cite{morpheus} aims to mitigate performance unpredictability by
+defining SLOs and satisfying their resource demands by using models based on historical data.
+Ernest~\cite{venkataraman2016ernest} provides methods for estimating performance curves using
+limited amount of data, but does not study using these estimates for
+resource allocation under scarcity.
+Sinan~\cite{zhang2021sinan} partly
+uses profiled information for auto-scaling in a cloud environment.
+\cameratext{Quincy's~\cite{isard2009quincy} min-cost flow formulation aims at providing fairness, but relies on offline estimates of data movement costs.}
+For reasons explained in \S\ref{sec:intro}, offline profiling can be problematic
+and it is desirable to rely on real-time feedback to determine resource allocations.
+
+\relworkheading{Methods which use online feedback}
+\cameratext{Among related work}, some feedback-driven systems account
+ for performance metrics and SLOs in resource allocation.
+Jockey~\cite{jockey} focuses on meeting latency SLOs for a single job by modeling
+internal job dependencies to dynamically re-provision resources.
+Henge~\cite{kalim2018henge} defines new utility functions for stream processing workloads and aims to maximize a singular objective \cameratext{--} the sum of utility of all jobs.
+\cite{patterson1995informed} uses application hints in for prefetching disk blocks in the OS kernel. 
+\cameratext{Gavel \cite{gavel} is a scheduler for ML training workloads in heterogeneous environments with varying objectives. Since Gavel is focused on ML training, it's policies are designed for throughput and a greedy optimizer computes the optimal allocation for each round. On the other hand, Cilantro supports any metric specified by the user and employs online learning to eventually converge on the optimal allocation.} 
+Finally, in a video streaming application, Minerva~\cite{nathan2019end} studies methods for 
+resource allocation so that all end users have the same quality of service.
+The highly customized policies used in the above works, while adequate to the allocation
+objectives set out by the
+authors, are not applicable for diverse cluster objectives which is our goal here.
+
+\relworkheading{Variable resource amounts}
+In other related work,
+PARTIES~\cite{chen2019parties} 
+allocates resources to jobs within the same server while always satisfying SLOs.
+If the SLOs of all jobs cannot be met, it evicts one of them to a different server;
+thus, it does not apply to our setting where there is a fixed amount of
+resources and eviction is not possible.
+Indeed, in~\S\ref{sec:experiments} we show that a straightforward adaptation of PARTIES  does not work as well.
+% 
+%Work such as
+Sinan~\cite{zhang2021sinan}, DS2~\cite{kalavri2018three}, \cameratext{Autopilot~\cite{rzadca2020autopilot}}
+and FIRM~\cite{qiu2020firm}
+% \rbcomment{These also fall under the Methods which use online feedback umbrella. Also neither of these use the cloud/have cost as a constraint...}
+consider performance-aware resource allocation using online feedback when there is elasticity in
+resource availability, %but costs are a constraint, 
+e.g. the cloud. 
+\cameratext{Because these works can scale up to more resources than originally provisioned, they are not directly comparable to Cilantro which operates in a fixed cluster setting.}
+While the cloud is an emerging use case, traditional fixed resource cluster management
+remains pertinent for privacy and cost reasons. % Using on-prem clusters offers data privacy and even when using cloud, long-term rentals are significantly cheaper than on-demand instances.
+Moreover, the above work focus on specific goals and are not designed to handle
+general allocation objectives. \cameratext{As an example, FIRM~\cite{qiu2020firm} focuses on autoscaling resources for single applications deployed as microservices to minimize end-to-end SLO violations, Cilantro operates differently, reallocating a fixed number of resources according to user-specified objectives, which can include fairness considerations. Additionally, FIRM uses Reinforcement Learning with anomaly injection, in contrast to Cilantro, which focuses on resource-allocation under uncertainty  and is agnostic to the learning method used.}
+
+
+
+
+% % At the policy level, there is a long history of work on 
+% Finally, pertinent to our work here,
+% there is a body of work %\rbcomment{Maybe wee need citations here. We say large body but mention only two later in the para.}
+% at the policy level for multi-tenant resource allocation
+% which balance performance and fairness.
+% However, all of these works assume knowledge of the resource-to-performance mapping,
+% which is usually not available in practice.
+% One such class of methods are ``welfare-based'', the most popular among which is Kelly's model~\cite{kelly1998rate}. It
+% which stipulates that we maximize the
+% \emph{social welfare}, i.e sum of user performances (or more accurately utilities derived
+% from performances, see \S\ref{sec:polfc}), when determining allocations.
+% An alternative approach is to maximize the
+% \emph{egalitarian welfare}, i.e minimum user performance (e.g.~\cite{nathan2019end}).
+% Recently, 
+% Minerva~\cite{nathan2019end} studies egalitarian welfare when allocating bandwidth 
+% in a video streaming application.
+
+
+% \emph{Demand-based fairness policies.}
+% Another class of such methods are ``demand-based'', where 
+% % \emph{demand} and the
+% a scheduler allocates resources based on an appropriately chosen demand value for each job.
+% Examples of such policies include weighted fair allocation~\cite{demers1989analysis},
+% DRF~\cite{ghodsi2011dominant}, and their queuing
+% variants~\cite{waldspurger1994lottery,stiliadis1998latency,ghodsi2012multi}.
+% If the resource-to-performance mappings are known,
+% such demand-based policies can be used for performance-aware allocation if the
+% jobs have SLOs (or similar performance goals).
+% This is done by  defining the demand of a user to be the
+% minimum resources needed to meet their SLO;
+% for instance, in  Fig.~\ref{fig:toyexample}, we may set the demand of the first and
+% second users to be 40 and 60 respectively.
+% However, existing implementations of demand-based policies typically rely on
+% proxies such as work-queue lengths
+% to compute the demand~\cite{bennett1996wf,hindman2011mesos,ghodsi2013choosy}.
+% Consequently, the resulting allocations may fall short on fairness and/or performance in real-world deployments.

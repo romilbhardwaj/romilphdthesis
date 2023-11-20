@@ -1,0 +1,295 @@
+
+\subsection{Multi-tenant cluster sharing}
+\label{sec:fixedclus}
+% \vspace{-0.05in}
+
+
+% We evaluate Cilantro in a multi-tenant setting where competing jobs from different users share the same cluster. In this environment, we run Cilantro with various online-learning based policies from \S\ref{sec:policies}.
+We first evaluate Cilantro's multi-tenant policies (\S~\ref{sec:learningpolicies}) on a 1000 CPU
+cluster shared by 20 users.
+
+
+\textbf{Workloads.}
+We use three classes of workloads---database querying, prediction serving and
+machine learning training---which are used to create multiple jobs. The database querying workload runs TPC-DS~\cite{tpc-ds} 
+queries on replicated instances of sqlite3 database and uses the query latency as the performance metric. 
+The prediction serving workload runs queries on a ML model (random forest regressor) trained on the news popularity dataset~\cite{fernandes2015proactive}. 
+The ML training workload trains a neural network on the naval propulsion~\cite{coraddu2016machine} dataset using stochastic gradient descent. The database querying and prediction serving workloads use the query latency as the performance metric while ML training uses batch throughput to measure performance. Resource-performance mappings for informing the oracle baselines in \S\ref{sec:fixedclus} were obtained through offline profiling of all workloads. These profiles are visualized in Figure \ref{fig:profiling}. 
+More details of the workloads, including workload-specific parameters are available in the appendix.
+
+% \newcommand{\wlheader}[1]{\emph{#1}}
+
+% \wlheader{Database querying:}
+% We use the TPC-DS \cite{tpc-ds} benchmark suite as the workload backed by replicated instances of sqlite3 database. 
+% %Each job's database is
+% %populated with the TPC-DS data generator with the scale factor parameter set to 100.
+% % The TPC-DS suite consists of 99 query templates
+% % out of which 27 were not compatible with the sqlite dialect and were discarded.
+% % Of the remaining workloads,
+% From the TPC-DS query set, we created two workloads (setting scale factor to 100): DB-0, which had queries that completed in under 100 ms and DB-1 which had queries that had a completion time between 100 and 300 ms.
+% When a query is requested, we randomly pick a relevant query and dispatch it
+% according to the trace. The performance metric of interest is  query latency.
+
+
+% \wlheader{Prediction serving:}
+% In prediction serving~\cite{crankshaw2017clipper}, a job processes arriving queries
+% to output a prediction, usually obtained via a machine learning model.
+% In our set up, we use a random forest regressor as the model and the the news popularity
+% dataset~\cite{fernandes2015proactive} for training and test queries in a 50:50 split.
+% % Half of the dataset is used to train the model (before the experiment),
+% % while the remaining half (test set) is used to generate queries for the workload.
+% Queries are picked randomly from the test set and issued in batches of 4.
+% The metric of interest is the serving latency.
+% % When a query is 
+
+
+% \wlheader{ML training:}
+% % Many real world machine learning deployments require that we continuously update the model
+% % from an input stream of data
+% % so as to account for changes in the data distribution~\cite{xiao2018gandiva}.
+% % \kkcomment{A good citation here.}
+% We use CPUs to train a neural network with four hidden layers of size 64 each.
+% We train our model on the naval propulsion~\cite{coraddu2016machine} dataset using
+% stochastic gradient descent (SGD).
+% Each task in this workload consists of training a batch of 16 points for 100 iterations. The performance metric of interest here is the batch throughput.
+
+\textbf{Traces.} Queries to the database and prediction serving workloads
+ are dispatched by a trace-driven workload generator.
+We
+use the Twitter API~\cite{twitter2020} to collect a trace of tweet arrival rates at Twitter's Asia datacenters;
+to bring to parity with our cluster, we subsample the arrival rate by a factor
+of 10. % for the database workloads and by a factor of 2 for the prediction serving workload.
+% The workload generator parses this trace and dispatches a query at every arrival.
+For the ML training workload, we draw queries from an essentially infinite pool to create a constant
+stream of work.
+% All these workloads are made to report their performance to the cilantro client
+% every 10 seconds. Tasks which are running when the performance is reported are discarded to avoid
+% affecting results for next reporting round.
+
+
+% We have shown this trace in Fig.~\ref{fig:twitter_trace}, Appendix~\ref{sec:app_evaluation}.
+% For the database workloads, it chooses a random query from the bin while for the query-serving
+% workload, it dispatches a batch of 32 data points from the test dataset.
+
+%  and by running the other workloads
+% in parallel to replicate its behaviour during our experiments.
+% In particular, we found that profiling them by running them independently did not reflect the
+% behavior of the workload under interference.
+% \kkcomment{@Romil: should we mention this or is it dicey?}
+
+
+% \subsubsection{Experimental Set up}
+\textbf{Experimental set up.}
+We use a cluster of  250 AWS m5.xlarge instances (4 vCPUs each).
+The \cilantro{} scheduler runs on its own dedicated m5.xlarge instance.
+We use the above 4 workloads to create 20 jobs as follows:
+10 database jobs with P90, P90, P90, P90, P95, P95, P95, P95, P99, P99 latency SLOs of 2s;
+% 3 DB-0 users with P90, P90, and P95 latency SLOs of 2s;
+% 7 DB-1 users with P90, P90, P95, P95, P95, P99, P99 latency SLOs of 2s;
+3 prediction serving jobs  with P90, P90, and P95 latency SLOs of 2s;
+7 ML training jobs  with throughput SLOs of 400, 400, 450, 450, 500, 500, and
+500 QPS.
+% For each jobs, to discount utility with SLO violations,
+% we choose one of the three options in Fig.~\ref{fig:utilityillus},
+% to reflect settings where small SLO violations may be either critical or inconsequential.
+To reflect settings where small SLO violations may be either critical or inconsequential,
+we discount the utility via one of the three options in Fig.~\ref{fig:utilityillus} for each job.
+Detailed information on the users' jobs is given in the appendix.
+The estimated total amount of resources based on the median demand was 1637 CPUs;
+hence, even at full capacity, not all users can satisfy their SLOs.
+We evaluate all baselines for 6 hours.
+
+
+
+\input{cilantro/baselines}
+
+\subsubsection{Results \& Discussion}
+\label{sec:baselines}
+
+\insertFigMetrics
+
+\insertFigTimeseriesUtilities
+\textbf{Evaluation on performance-aware fairness metrics.}
+We first compare all 15 baselines on the social
+welfare~\eqref{eqn:socwel}, egalitarian welfare~\eqref{eqn:egalwel}, and the NJC fairness
+criteria~\eqref{eqn:njcfair}.
+% 
+Fig.~\ref{fig:metrics} illustrates the results by
+plotting the time-averaged NJC fairness vs the two welfare criteria.
+Table~\ref{tab:metrics} (in the appendix) tabulates these values explicitly with error bars.
+While the oracular methods perform best on their respective metrics, we find that the online
+learning policies in \cilantros come close to matching them.
+\equalshare{} achieves a perfect NJC score by definition, but performs poorly on social and
+egalitarian welfare as it is performance oblivious.
+
+We found that
+\greedyew, \parties, and \AIMD{} were sensitive to the amount
+by which we changed the allocations based on feedback;
+when tuning them, we found that they were
+either too slow or too aggressive when responding to load shifts.
+Next, the learning models used by \quasar{} and \ernest{} were not able to
+accurately estimate the demands in our experiment.
+Finally,  the evolutionary baselines were inefficient,
+taking a long time to discover the optimal solution.
+They, however, were effective within Cilantro's welfare policies
+when you need to optimize a cheap analytically computable function as they can be run for
+several iterations.
+% they took a long time to discover the optimal solution when they 
+
+% the evolutionary baselines \evoalgsws and \evoalgews took a
+% long time to discover the
+% optimal solution and could not account for fluctuations in the load. \rbcomment{Should we plot these on the timeseries too?}
+% They however, were effective when used in our social/egalitarian welfare baselines as they are
+% optimizing a cheap analytically computable function available in memory; hence, they can be run for
+% several iterations to compute the next allocation.
+% executed for several iterations for 
+% 
+% and hence did not do well uniformly on all criteria.
+
+
+\insertFigUserUtilities
+
+% We see that,
+Despite our general approach, \cilantro's policies are able to
+outperform \minerva{} and \greedyew{} which are designed specifically to maximize egalitarian
+welfare. It also outperforms generically designed evolutionary algorithms for the social and
+egalitarian welfare.
+While it may indeed be possible to design more efficient fine-tuned policies for a given objective,
+the flexibility provided by Cilantro's approach is beneficial to end users.
+It should not be surprising that
+\cilantros outperforms other systems such as \ernest, \quasar, \parties, and \AIMD{}
+as our policies are designed to explicitly optimize for these objectives.
+% this should not be surprising as our policies were designed to explicitly optimize for these metrics.
+\emph{But this is precisely the goal of Cilantro}.
+End-users can declare their desired objective, and Cilantro will automatically derive
+policies to achieve them. 
+
+
+To illustrate how Cilantro improves with feedback,
+in
+Fig.~\ref{fig:timeseriesutilities}, we have shown how the three objectives evolve over time for
+Cilantro's policies.
+% Cilantro. For each of the three welfare criteria, the corresponding Cilantro objective maximizes it
+% without requiring an explicit policy.
+\equalshare~trivially achieves $\njcfair=1$ at start since our initial allocation
+is always 50 CPUs to each job (i.e \equalshare). However, it does poorly on welfare due to poor cluster usage.
+The goal behind \cilantronjcs is to achieve $\njcfair=1$ while also achieving good cluster usage.
+This causes the initial drop in performance for \cilantronjc~as it explores better allocations that still maximize $\njcfair$.
+
+%\rbcomment{Should we add something more here?}
+% For \cilantronjcs this equal allocation continues for a few more rounds 
+% In NJC Fairness, <explain why cilantro-NJC drops at start>. We
+% note that the convergence of Cilantro can be sped up by using more aggressive allocation windows at
+% the cost of slightly reduced accuracy.
+
+\cameratext{Table \ref{tab:metrics} presents the detailed results of our multi-tenant cluster resource sharing evaluation. This table adds a  metric which measures the useful resource usage.}
+\begin{align}
+\text{Useful resource usage}
+= \sum\nolimits_{j=1}^m \min(\allocj, d_j)
+\label{eqn:effresusage}
+\end{align}
+\cameratext{Here, the  $d_j$ is user $j$'s resource demand.
+% clipped (see Fig.~\ref{fig:utilityillus}).
+This demand-based metric,
+measures how much \emph{useful} work is being done by the cluster as allocations beyond the
+demand do not increase a user's utility (see Fig.~\ref{fig:utilityillus}). We find that Cilantro's policies achieve the maximum useful resource usage in their respective classes. This is because learning resource demands allows Cilantro to reallocate resources from jobs which have already achieved maximum utility to jobs which can benefit from increased resources. }
+
+\insertTableMetrics
+
+\insertFigSP
+% \insertFigHotelReservation
+\insertFigMSResults
+
+\textbf{Individual user utilities.}
+To delve deeper into the trade-offs of the three paradigms discussed in
+\S\ref{sec:polfc}, we have shown the individual  user utilities achieved by these three policies
+in Fig.~\ref{fig:userutils}.
+We see that both the social and egalitarian welfare policies result in some users being worse off
+than receiving their fair allocation of $1000/20=50$ CPUs.
+This results in an NJC fairness violation.
+In contrast, in \cilantronjc, users are at most marginally worse off than their fair share.
+However, a third of the users achieve a noticeably higher utility than their fair share utility,
+with more than $3\times$ for a few of them.
+% \cilantronjc{} is able to learn the resource demands of all users, and is able to achieve a fair and
+% efficient allocation by transfering resources from users whose fair share is in excess of their
+% demand to the rest.
+We also see that \cilantroews has  maximized egalitarian welfare by taking
+resources away from those who achieve high utility and giving it to those who do not, while
+\cilantrosws has maximized  social welfare by allocating more resources to jobs that
+can quickly achieve high utility.
+
+
+
+
+\textbf{Evaluating Strategy-proofness.}
+We next evaluate Cilantro policies for strategy-proofness.
+% In our setting,
+A policy is said to be strategy-proof if an unscrupulous user cannot increase the
+utility of their job by misreporting their performance metrics to the scheduling
+policy.
+% In some use cases, strategy-proofness can be an important consideration.
+% If all users overstate their resource requirements, then a scheduling policy can nevery accurately
+% know the resource requirement and hence will not be able to achieve the desired goal.
+% % Strategy-proofness
+% Most fair division policies are known to be strategy-proof when the utilities are known and hence it
+% is natural to ask if this is also true when the utilities need to be learned.
+% 
+For this, we repeat the same experiment set up; all jobs behave exactly as before except the \incmtt{db16} job which lies about its performance
+by either under-reporting by a factor $\times 1/2$,
+or over-reporting  by a factor $\times 2$.
+% \begin{enumerate}
+% \item It states its latency SLO to be P99, 2s (instead of P95).
+% \vspace{-0.05in}
+% \item When it sends performance updates to the scheduler
+% it under-reports its performance by a factor $\times 1/2$.
+% \vspace{-0.05in}
+% \item It states its latency SLO to be P75, 2s.
+% \vspace{-0.05in}
+% \item It over-reports its performance  by a factor $\times 2$.
+% % value of its observed performance.
+% \end{enumerate}
+By under-reporting, the user
+gives the impression that more resources are required to reach its SLO;
+% performance goals.
+in contrast, by over-reporting, a user is deceiving the scheduler to
+prioritize their job as
+they can achieve high utility with few resources.
+% in the latter two, the job presents an overly optimistic picture of its resource
+% requirements.
+% 
+In Fig.~\ref{fig:spness},
+we report the utilities achieved by \incmtt{db16} under these untruthful behaviors.
+%  for \cilantrosw, \cilantroew, and \cilantronjc.
+We see that for \cilantronjc, the job's utility does not increase when over-reporting
+and decreases when underreporting, leaving no incentive for the user to be untruthful.
+In contrast,  for \cilantroew, a user stands to gain by under-reporting
+while for \cilantrosw, they gain by over-reporting.
+While a theoretical study of such strategy-proofness properties is beyond the scope of this work,
+it is interesting to empirically observe that the strategy-proofness properties of NJC fairness
+policies are retained in Cilantro.%'s feedback driven setting.
+% This is 
+
+% Finally, 
+% it is worth pointing out that \cilantronjcs achieves an favourable trade-off between all
+% three performance-aware criterion in Fig.~\ref{fig:metrics}.
+% With the additional benefit of strategy-proofness,
+% this makes \cilantronjcs an attractive option in instances when the overall goals
+% of resource allocation cannot be explicitly stated.
+
+%  properties of NJC fair sharing
+% mechanisms are retained even when the performance needs to be learned online.
+% This makes NJC an attractive option, especially in instances when the overall goals
+% of resource allocation cannot be explicitly stated.
+% 
+% It is interesting to note that the strategy-proofness properties of NJC fair sharing
+% mechanisms are preserved even when the resource-performance mappings need to be learned online.
+% The strategy-proofness properties of these three policies are not
+% Indeed, when utilities are known neither social nor egalitarian policies are known to be
+% strategy-proof.
+% Indeed, for both \cilantrosws and \cilantroews are not strategy-proof as the achieved utility can be
+% manipulated by misreporting.
+% This is not surprising since even the oracular versions of these policies are not known to be
+% strategy-proof.
+
+
+

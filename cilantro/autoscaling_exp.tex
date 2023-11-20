@@ -1,0 +1,69 @@
+
+\subsection{Autoscaling experiments}
+\label{sec:autoscaling}
+
+
+\insertFigAutoScaling
+\textbf{Experimental Set up \& Baselines:}
+Here, we focus on autoscaling a single job based on the load (rate of arrivals) and when it is
+required to satisfy a given latency-based SLO (performance goal).
+An ideal policy would use just enough resources to meet the SLO so as to keep the cost at a minimum.
+% For this experiment, we use the YCSB query serving workload with a P95, 3s target SLO.
+Our experiment evaluates all baselines on how well they can autoscale on the DB-1 workload
+under a P95, 2s SLO for 2 hours.
+% We perform two different experiments,
+%  the first using the YCSB query serving workload with an SLO of 3s P95 latency, and the
+%   second using the query serving workload with an SLO of 10s P95 latency.
+% 
+% \subsubsection{Baselines}
+% % \label{sec:baselinesautoscaling}
+% 
+% \textbf{Baselines:}
+(i)\oracleas{} and (ii)\cilantroas: described in Sec.~\ref{sec:polas}.
+Given the load on each round, the oracular policy uses ground truth
+obtained via exhausting profiling to compute the amount of resources necessary to attain the
+given performance goal.
+% and performance goal.
+% Given the load on each round, 
+% , as described in Section~\ref{sec:polas},
+% \cilantroas: described in Sec.~\ref{sec:polas}.
+% Theameters for the 
+  (iii)\kubeas~\citep{k8sas}: This is Kubernetes' default autoscaling policy.
+ (iv)\pdas: Proportional derivative control changes the allocation based on the
+difference between SLO and observed performance and the rate of change of this difference.
+ (v)\dstwo~\citep{kalavri2018three}:
+DS2's policy for autoscaling DAGs, which can be easily adapted to our setting.
+% Unlike the above methods, DS2 scales based on the observed throughput and does not use
+% a target latency SLO to compute the allocation.
+% All methods except \dstwo{} can use the \slo
+% \end{enumerate}
+
+% \begin{enumerate}[label=\arabic*)]
+% \item \oracleas:
+% Given the load on each round, the oracular policy uses ground truth
+% obtained via exhausting profiling to compute the amount of resources necessary to attain the
+% given performance goal.
+% % and performance goal.
+% % Given the load on each round, 
+% % , as described in Section~\ref{sec:polas},
+% \item \cilantroas: Described in Sec.~\ref{sec:polas}.
+% % Theameters for the 
+% \item \kubeas~\citep{k8sas}: This is Kubernetes' default autoscaling policy, which operates on the ratio between desired metric value and current metric value.
+% \item \pdas: Proportional derivative control changes the allocation based on the
+% difference between SLO and observed performance and the rate of change of this difference.
+% \item \dstwo~\citep{kalavri2018three}:
+% DS2's policy for autoscaling DAGs can be easily adapted to our setting.
+% Unlike the above methods, DS2 scales based on the observed throughput and does not use
+% a target latency SLO to compute the allocation.
+% % All methods except \dstwo{} can use the \slo
+% \end{enumerate}
+
+Table 3 reports the fraction of queries completed under the given deadline and the average
+cost (number of replicas) used by each method.
+While DS2 has achieved the $0.95$ performance threshold, it is very costly.
+None of the other policies achieve this threshold, but \cilantroas{} comes closest.
+Fig.~\ref{fig:autoscaling} shows the resources allocated by each method with time.
+% \label{sec:baselines}
+
+
+\insertTableAS

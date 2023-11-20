@@ -1,0 +1,86 @@
+\makesavenoteenv{tabular}
+\makesavenoteenv{table}
+
+
+\lstset{%
+basicstyle=\ttfamily\small,
+breaklines = true,
+tabsize=1
+}
+% \makeatletter
+% \patchcmd{\maketitle}
+% 	{\@maketitle}
+% 	{\vspace{0em}\@maketitle\vspace{0em}}% change the value as needed
+% 	{}
+% 	{}
+% \makeatother
+
+
+% Watermarking
+% \usepackage{draftwatermark}
+% \SetWatermarkText{Draft: do not distribute}
+% \SetWatermarkScale{0.4}
+\setminted[python]{breaklines, fontsize=\footnotesize}
+%\renewcommand{\listingscaption}{Policy}
+
+
+
+\def\name{ESCHER}
+\def\resadjective{Ephemeral}
+\def\ray{Ray}
+\def\createresapi{\textit{create\_resource}}
+
+\newif\ifcomments
+%%%KILL SWITCH for comments
+%\commentstrue
+\commentsfalse
+\ifcomments
+\newcommand{\rliaw}[1]{\textbf{\textcolor{red}{Richard: #1}}}
+\newcommand{\alexey}[1]{\textbf{\textcolor{purple}{AT: #1}}}
+\newcommand{\romil}[1]{\textbf{\textcolor{orange}{Romil: #1}}}
+\newcommand{\romilc}[1]{\textbf{\textcolor{orange}{#1}}}
+\newcommand{\swang}[1]{\textbf{\textcolor{blue}{Stephanie: #1}}}
+\newcommand{\ion}[1]{\textcolor{green}{Ion: #1}}
+\newcommand{\camready}[1]{{\textcolor{blue}{#1}}}
+%\newcommand{\suggest}[1]{\textcolor{violet}{#1}}Question 1 (Security):
+
+\else
+\newcommand{\rliaw}[1]{\textcolor{black}{}}
+\newcommand{\alexey}[1]{\textcolor{black}{}}
+% \newcommand{\romil}[1]{\textcolor{black}{}}
+\newcommand{\swang}[1]{\textcolor{black}{}}
+\newcommand{\ion}[1]{\textcolor{black}{}}
+\newcommand{\suggest}[1]{\textcolor{black}{}}
+\newcommand{\nsdi}[1]{\textcolor{black}{}}
+\newcommand{\camready}[1]{{{#1}}}
+\fi
+
+
+%\title[\name{}: Expressive Scheduling with \resadjective{} Resources]{\huge{\name{}: Expressive Scheduling with \resadjective{} Resources}}
+
+\chapter{{\name{}: Expressive Scheduling with \resadjective{} Resources}}
+\label{ch_escher}
+
+% Disable hyperlinks if you get errors in compilation
+% \hypersetup{draft}
+
+\input{escher/abstract}
+
+% \renewcommand{\shortauthors}{R. Bhardwaj et al.}
+
+\input{escher/intro}
+\input{escher/motivation-alt}
+\input{escher/arch}
+\input{escher/escher}
+%\input{library}
+\input{escher/implementation}
+\input{escher/evaluation}
+\input{escher/limitations}
+\input{escher/related}
+\input{escher/conclusion}
+\input{escher/acknowledgements}
+
+%\bibliography{bibliography}
+%\bibliographystyle{ACM-Reference-Format}
+
+%\end{document}

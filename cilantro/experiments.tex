@@ -1,0 +1,147 @@
+
+
+
+\insertFigProfiling
+\section{Evaluation}
+\label{sec:experiments}
+
+We evaluate Cilantro in two settings described in \S\ref{sec:policies}.
+\vspace{-0.05in}
+\begin{enumerate}
+%     \item In the multi-tenant  setting, the \cilantrosw, \cilantroew, and \cilantronjcs policies,
+    \item In the multi-tenant setting, Cilantro's online learning policies,
+        which do not start with any prior data, are
+    competitive with  oracular policies which have access to jobs' resource to
+    performance mappings
+    obtained after several hours of profiling.
+    Moreover, they outperform 9 other baselines on the metrics outlined in \S\ref{sec:polfc}.
+% \vspace{-0.05in}
+%     \item
+%     We also qualitatively compare the three allocation paradigms discussed in
+% Section~\ref{sec:polfc} via  \cilantro's online learning framework.
+% While \cilantro's goal is to enable a wide variety of policies, we find that NJC fair division
+% mechanisms provide an excellent trade-off between the various fairness criteria.
+% Moreover, it is strategy-proof which disincentivises manipulative users from trying to get more
+% resources for themselves.
+\vspace{-0.05in}
+    \item In the microservices setting, \cilantro{} is able to support the completely different
+objective of minimizing end-to-end latency. It outperforms three other baselines
+and reduces the P99 latency to $\times0.57$ that achieved by the next
+best performance-aware baseline.
+%  a performance oblivious
+% scheduler by $\times\frac{1}{6}$ and the ne
+% baselines by upto $\times$ while
+% offering faster convergence.
+\vspace{-0.05in}
+\item In our microbenchmarks, we show that Cilantro's allocation policies are inexpensive,
+evaluate its fallback options when performance metrics are unavailable,
+and demonstrate its robustness to errors in feedback and choices for
+performance learner and forecaster models.
+% demonstrate why an asynchronous design is necessary to handle variable
+% update frequencies from applications.
+% and demonstrate that our asynchronous design can handle different update frequencies from
+% different applications.
+%  light-weight,
+% and 
+% many of its supported policies are strategy-proof, and \rbcomment{Add more mbs.}
+% Moreover, it is able to learn and perform as well as oracular policies in seve
+\end{enumerate}
+
+
+
+
+% \insertTableMetrics
+\input{cilantro/fixed_cluster_exp}
+\insertFigMicrobenchmarks
+\input{cilantro/microservices_exp}
+%\input{autoscaling_exp}
+
+% \rbcomment{Temporal behavior of learn policies}
+\subsection{Microbenchmarks}
+%\subsection{\cilantro~Overheads}
+\label{sec:microbenchmarks}
+% \vspace{-1mm}
+
+% Following three figures are captured in insertFigMicrobenchmarks
+% \insertTableRunTime
+% \insertFigFallback
+% \insertFigUpdateFreq
+
+\textbf{Cilantro Overhead.}
+Fig.~\ref{fig:microbenchmarks}-Left evaluates the time taken for \cilantros to process the feedback
+and compute the allocations for the three policies described in Sec.~\ref{sec:polfc}.
+% Due to our choice of relatively simply estimators and effi
+This shows that \cilantros is fairly light-weight.
+For comparison, the average time it took to de-allocate a Kubernetes pod and assign it to a
+different job was on the order of 5-15s.
+% \cilantrosw{} and \cilantroew{} are slightly more expensive since finding the optimum
+% social/egalitarian welfare requires running an evolutionary algorithm to optimize the upper
+% confidence bound.
+% The time taken for obtaining an allocation for auto scaling was very small as it simply required
+% querying the learners for an estimate of the resource demand.
+
+% \insertFigMicrobenchmarkSchedLatency
+
+
+\textbf{Unavailable performance metrics.}
+In real-world situations, performance metrics of all users may not be available.
+We evaluate Cilantro's fallback defaults for
+such instances.
+We re-run the same experiment in \S\ref{sec:fixedclus}, but for users
+\incmtt{db01}, \incmtt{mlt1}, \incmtt{mlt2}, \incmtt{db11}, and \incmtt{prs1}, we manually set
+the demand as described in \S\ref{sec:discussion}.
+Since the true demands are not known a priori, users might under- or overstate them.
+To reflect this, we first
+compute the true demand for each user under the median load from our profiled data.
+% To reflect this,
+We evaluate \cilantronjcs when these five users report either half this value as their demand or twice this value, when compared to providing feedback.
+Fig.~\ref{fig:microbenchmarks}-Center presents results %shows the %we evaluate \cilantronjcs 
+on the three criteria given in \S\ref{sec:polfc}.
+% We evaluate how \cilantronjcs performs on the three criteria given in \S\ref{sec:polfc}.
+% The results, given in Fig.~\ref{fig:fallback}.
+% Crucially, the NJC fairness metric is small when under-reporting since users \incmtt{db11} and
+% \incmtt{prs1} will now be allocated only half their true demand.
+While the fallback options are worse than when reporting feedback,
+% as we are using incorrect information on users' performance.
+the failures are graceful.
+Cilantro is still able to learn
+from the remaining 15 users and achieve efficient allocations with only relatively small
+drops in social and egalitarian welfare.
+The NJC fairness criterion is significantly small when under-reporting since these 5
+users will have been allocated at most half of their true demand and $\njcfair$~\eqref{eqn:njcfair} depends on the single worst fairness violation.
+
+\textbf{Robustness to choice of learners and feedback errors.}
+% Moreover,
+While Cilantro's decoupled design aids with generality, it may be susceptible to the idiosyncrasies
+of the specific models used for the performance learners and load forecasters.
+Moreover, in many real environments, the feedback can be very noisy.
+To show that Cilantro is robust to both these effects, we perform the following
+microbenchmark in a synthetic 5 user environment (described in the Appendix) with the
+\cilantronjcs policy.
+As both feedback noise and model idiosyncrasies can be modeled with inaccurate confidence intervals,
+we introduce increasing levels of noise (5\%, 10\%, 20\%, 50\%) to the 
+upper and lower confidence bounds returned by the learners and forecasters.
+The results, given in Fig.~\ref{fig:microbenchmarks}-Right, show that the social and egalitarian
+welfare decrease gracefully with noise.
+Moreover, due to \cilantronjc's conservative approach for demand recommendations, the NJC fairness
+metric remains relatively high despite the noise.
+
+
+
+% \textbf{Irregular performance update frequency from applications.}
+% In practice, different applications may emit their performance metrics at different rates.
+% In Fig~\ref{fig:frequpdate},
+% we have shown the rate of performance updates received from 4 different users
+% in the course of our experiments in \S\ref{sec:fixedclus}.
+% This demonstrates that an asynchronous design, such as the one used in Cilantro, is necessary
+% in an online setting so that the performance estimation of jobs which have frequent updates
+% is not bottlenecked by those whose updates are infrequent.
+
+
+% \textbf{Effects of noise:}
+
+% \textbf{Effects of heterogeneous resources:}
+% 
+% \textbf{Forecaster and learner performance:}
+
+% \kkcomment{Talk about how we beat custom methods}

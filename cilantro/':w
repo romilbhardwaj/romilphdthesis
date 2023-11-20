@@ -1,0 +1,351 @@
+
+\section{Introduction}
+\label{sec:intro}
+
+% \rbcomment{Needs a nicer opening.}
+
+
+
+The fundamental problem for any resource manager is to allocate a finite amount of
+scarce resources to competing jobs.
+% Allocating a finite amount of shared resources to competing jobs 
+% is one of the most important tasks in cluster management.
+% Allocating resources to competing jobs when there is contention for the finite shared resources
+% in a cluster is one of the most important responsibilities of a cluster manager.
+% Resource allocation is one of the most important responsibilities of a cluster manager.
+% When allocating resources in a fixed cluster where there is contention for shared resources,
+% among competing jobs or when autoscaling in
+%  the elastic cloud where we need to keep costs at a minimum,
+When doing so, we should ensure that the allocations fulfill the users' and the
+organization's overall goals.
+
+% Traditionally, scheduling policies have optimized on various objectives,
+Traditionally, resource allocation policies have aimed to
+provide fairness~\citep{ghodsi2011dominant,demers1989analysis},
+maximize resource utilization~\citep{xiao2018gandiva},
+maximize the amount of work done~\citep{ghodsi2011dominant},
+or
+minimize queue lengths~\citep{racksched,sparrow}.
+% 
+However,
+these policies miss, or at best are imperfect proxies for what matters most to the users:
+the performance of their jobs in terms of actionable real-world performance metrics
+(e.g. P95 latency or throughput for a serving job, completion time for an analytics job).
+Barring some recent exceptions,
+resource allocation systems have been largely oblivious to a job's real-world performance
+(henceforth, simply \emph{performance}). 
+% Such systems either require users to determine their resource requirements, or are typically based
+% on heuristics such as resource utilization.
+Moreover, traditional policies, even those accounting for
+performance~\citep{delimitrou2014quasar,chen2019parties,zhang2021sinan,jockey},
+are typically based on heuristics which are post-hoc evaluated on desired allocation
+criteria and then manually tuned to optimize for such criteria.
+This can be burdensome and unreliable, especially in the presence of load shifts and other changes
+in the environment.
+% when there are changes in the environment.
+% For
+% instance, resources allocated to a web service must account
+% not only change with diurnal traffic patterns,
+% but also with unforeseen bursts in traffic due to external events.
+
+% Since application (job) performance is crucial to user satisfaction,
+% there has been extensive work in tracking and recording these metrics,
+% giving rise to popular monitoring tools such as Grafana,
+% Prometheus, and Datadog.
+% However, instead
+% requiring users to observe these metrics and determine their resource requirements and/or
+% tune the afore-mentioned policies.
+
+% allocate for their
+% jobs. This is both laborious for users and results in allocations that are either wasteful or
+% insufficient for the user's goals.
+% @KK: WE discuss this later on and this kills the flow
+
+% \wg{Maybe make the argument a bit clearer. For example, the resource utilization, or
+% queuing delays can also be thought of some types of performances? This might make the readers
+% confused. Could look at the opening of the dominant resource fairness paper, sth like many policies
+% aim to guarantee fairness, or system-level goals, but we also want to guarantee jobs' performance
+% and user satisfaction. }
+
+%@ Romil: para below, I am not sure if AWS/Azure is ht beset example to use up front since it is not
+%a job/application. I think the intro flows better without this para.
+% Not achieving an adequate level of performance, such as a given service level objective (SLO),
+% % even by a small margin,
+% can be very expensive for users and resource managers alike.
+% For instance, both Azure and Amazon's terms of service require them to credit 100\% of
+% user's bill if their
+% EC2 service availability falls below 95\% \cite{amazonsla, azuresla}. In such situations, failing to
+% meet a user's performance
+% goals nullifies the purpose of a cluster.
+% % \kkcomment{Which service specifically, can you add a citation here?}
+
+% The importance of application (job) performance is also well understood by users themselves.
+% \wg{need better phrasing. (e.g. application-level performance is also highly-valued by the users and
+% crucial for user satisfaction.)}
+
+% \wg{Can slightly rephrase this part as: 1) requiring user to observe metrics and determine their
+% needs is laborious 2) it is also often hard for the users to precisely determine their needs w.r.t.
+% quantitative metrics. For example, there might be multiple allocations that can lead to the desired
+% performance, such as more cpu but less gpu, or more gpu but less cpu. Replying on simple user inputs
+% can hardly capture these tradeoffs. But learning a performance curve over different resource types
+% can let us compute better allocations.}
+
+% \kkcomment{
+% Frame the story as, 
+% It is not just about learning, but also what do you do with the learned performance
+% curves?
+% Can we also bring in autoscaling in to the story early on?
+% And state the two-fold challenges:
+% in fixed clusters, you often need to trade-off among the performance achieved by different jobs--how
+% do you do this?
+% in cloud settings, you can scale out to increase performance but need to minimize costs-- how do you
+% do this?
+% }\rbcomment{Hmm, at this point I'm just trying to convince the readers that performance based resource allocation is important. I have introduced autoscaling later in the intro now}
+% 
+% \kkcomment{I think this example  is nice but maybe you should set the stage a bit more.}\rbcomment{Is it better now?}
+
+\insertResUtilIllus
+
+To illustrate the pitfalls of performance-oblivious scheduling,
+consider an example where two users are sharing a cluster of $100$ CPUs.
+They are each serving database queries and care about their throughput:
+the first user's service level objective (SLO) is 120 query-per-second (QPS),
+while the second user's is 62 QPS.
+In this scenario, a performance-oblivious resource-based fair policy
+will equally allocate 50 CPUs to each user.
+However, suppose it was known that the resource-to-throughput curves of the two user's were as shown
+in Figure~\ref{fig:toyexample}.
+Hence, the first user can meet their SLO with 40 CPUs while the second can with 60.
+While a performance oblivious 50-50 fair allocation only satisfies the SLO of the first user,
+had we instead accounted for their performance and SLOs and
+allocated 40 CPUs to user 1 and 60 to user 2, they would both have achieved their SLOs.
+Even though this might seem unfair from a resource point of view, the first user may
+not complain since her SLO is satisfied.
+
+% is resource-efficient, in that both jobs will be doing work,
+% only the first user will achieve her SLO while the second one will not.
+% Instead, if we
+% allocate 40 CPUs to user 1 and 60 to user 2, they both achieve their SLOs.
+% While this might seem unfair from a resource point of view, user 1 may not have complaints since
+% her SLO is satisfied.
+
+
+% policies are particularly pronounced when resources must be shared across applications in a multi-tenant environment.  For instance, consider the example in
+% consider the example in
+% Figure~\ref{fig:toyexample} where two users are sharing a cluster of 100 CPUs.
+% They are running database queries from TPC-DS benchmark\cite{tpc-ds},
+% and care about the throughput, i.e. the
+% rate at which queries are processed. The jobs have different resource-to-throughput curves and service level objectives (SLO). The
+% first user's SLO is 120 query-per-second (QPS) which requires 40 CPUs, and the second user's SLO is
+% 62 QPS which requires 60 CPUs.
+% % 
+% While this is resource-efficient, in that both jobs will be doing work,
+% only the first user will achieve her SLO while the second one will not.
+% Instead, if we
+% allocate 40 CPUs to user 1 and 60 to user 2, they both achieve their SLOs.
+% While this might seem unfair from a resource point of view, user 1 may not have complaints since
+% her SLO is satisfied.
+% %In realistic situations, we often cannot satisfy the SLOs of all the jobs when there is a resources are oversubscribed and the scheduler should
+% % decide how best to divide the resources among these competing jobs.
+% %We assume the users are fully satisfied if they achieve their SLOs.
+% % In this example, user 1 requires 30 CPUs to meet her SLO while user 2 requires 70.
+
+
+% Despite being well studied~\citep{delimitrou2014quasar,delimitrou2013paragon,venkataraman2016ernest, morpheus, jockey, chen2019parties, zhang2021sinan}
+% 
+% Despite being well studied~\citep{delimitrou2014quasar,delimitrou2013paragon,venkataraman2016ernest, morpheus, jockey, chen2019parties, zhang2021sinan}
+
+Despite a plethora of
+theoretical~\citep{demers1989analysis,ghodsi2011dominant,kaneko1979nash,kelly1998rate,gutman2012fair} and
+applied~\citep{delimitrou2014quasar,jockey,chen2019parties} work,
+performance-aware scheduling has remained challenging to deploy in practice.
+%  studied~\citep{delimitrou2014quasar,delimitrou2013paragon,venkataraman2016ernest, morpheus, jockey, chen2019parties, zhang2021sinan}
+% and having desirable outcomes,
+% This is largely because of two reasons.
+% Performance-aware allocation has two key challenges.
+% First, it requires the scheduler to know the
+% resource-to-performance mapping for each application. For instance,
+% in the above example, we must know exactly how many resources
+% are required to achieve the SLO of each user.
+% Second, resources are often oversubscribed and we need to decide how best to share these
+% resources among jobs which may or may not be interdependent.
+% Depending on the use-case, we may wish to optimize for different criterion(s) which necessitates
+% different allocation policies.
+% Let us delve into these challenges in more detail:
+% 
+% \wg{Can be slightly rephrased as: However, performance-aware allocations for multiple resource types is difficult in practice due to the fact that computing such desirable allocations requires good knowledge of the allocation to performance mapping. That is, the scheduler must know exactly how many resources
+% are required to achieve a given performance threshold. Such a mapping is hardly directly available in practical applications. While workloads can be profiled before execution to obtain this mapping, such profiling falls short on three aspects.  }
+% 
+This is largely because such policies require
+knowledge of the resource-to-performance mappings for each application.
+% The resource to performance mappings are usually unknown a priori.
+While workloads can be profiled before execution to obtain
+this mapping, such profiling falls short on three aspects.
+First, offline profiled resource-to-performance mappings
+ may not reliably reflect a job's performance in an actual production
+environment,
+such as interference from other workers~\cite{delimitrou2013paragon}
+and performance variability of servers~\cite{tailatscale}.
+% where interference from other workloads~\cite{delimitrou2014quasar} can be non-trivial.
+% For instance, multiple database servers running on the same node may contend for disk IO, degrading
+% performance in unpredictable ways. 
+Second, jobs' resource requirements change with time due to varying load (e.g. arrival rate
+of external queries) and a profiling typically cannot account for these
+changes. 
+%For instance, time-of-day and other factors influence the amount of queries that a database microservice must serve.
+Finally, profiling the resource to performance mapping is an onerous task
+for end users and additionally expensive for the organizations as 
+it requires a large pool of resources to
+exhaustively profile a wide range of resource allocations.
+This can be especially challenging when there are several dependent jobs,
+such as in a microservices environment\cite{deathstarbench}.
+%\emph{This motivates using an online learning mechanism which can continually learn and improve
+%from real-time data.}
+
+
+
+% Second, the choice of scheduling policy depends on the the chosen criteria.
+Even if the resource-to-performance mappings are known,
+the choice of scheduling policy depends on the the chosen criteria.
+For instance, suppose in Fig.~\ref{fig:toyexample}, we wished to maximize the total throught 
+of the cluster, instead of trying to satisfy each user's SLOs (i.e. users do not have SLOs).
+In this case, we would allocate $\sim$$64$ CPUs to the first user and $\sim$$36$ to the second to achieve
+a total throughput of $\sim$$212$ QPs.
+% we need to decide how best to divide these
+% resources when all jobs cannot be fully satisfied simultaneously.
+% More often than not there is a scarcity of resources and we need to decide how best to share these
+% resources among competing jobs.
+As more realistic examples,
+in multi-tenant clusters, we may wish to adopt strategies which treat each users fairly
+while still ensuring that the cluster is used
+efficiently~\cite{kelly1998rate,demers1989analysis,ghodsi2011dominant}.
+% (e.g. Kelly
+% mechanism~\cite{kelly1998rate}, DRF~\citep{demers1989analysis,ghodsi2011dominant}).
+In contrast,
+when we wish to provision resources among different microservices of the same application, we might
+be more interested in some use-case-specific end-to-end performance criterion,
+such as application latency;
+here, we may wish to allocate more resources to critical microservices which bottleneck the
+performance.
+Optimizing for such different criteria necessarily requires different allocation policies.
+To support a diverse set of such criteria and
+% \kkcomment{@Romil: fill in}
+simplify the interface for the end users (i.e. organization, developers), ideally,
+a scheduler should allow them to declare their desired allocation criteria and should then be able
+to optimize for these criteria by learning the resource-to-performance mappings.
+
+% To fa
+
+% Switching
+% between global policies is challenging in many scheduling frameworks (e.g., doing so in Kubernetes
+% requires installing 3rd party schedulers\cite{something}), and implementing new policies requires
+% modifying the core scheduler itself.
+% \rbcomment{I think I stretched this argument a little too much.} 
+% Policies should optimize for the specific performance criteria
+% \emph{This motivates the design of a modular platform which can operate
+% atop the learned resource-to-performance mappings and facilitates
+% a wide variety of policies which directly optimize for the desired criteria.}
+
+% \emph{(ii)} Second, even when the
+% \kkcomment{I like this paragraphs} \wg{+1! : )}
+
+In this paper, we introduce Cilantro, a framework for allocating a single fungible resource type
+(e.g. CPUs, containers) among competing jobs.
+At the core of Cilantro is an online
+learning mechanism which forms feedback loops with jobs
+to allocate resources.
+A pool of performance learners and load forecasters analyzes live feedback from jobs and
+learns models to estimate
+resource-performance curves and load shifts for each job.
+% To support easy specification of performance-based policies, Cilantro introduces a performance-resource translation layer, which uses the learnt models to convert the user's performance goals to resource requirements for the job and vice-versa. 
+% 
+% Currently,
+Cilantro seamlessly enables the implementation of performance-aware policies in two settings:
+\emph{(i)} multi-tenant resource allocation for independent jobs under different fairness criteria,
+and
+\emph{(ii)} resource allocation for constituent inter-dependent jobs (microservices) within an
+application.
+This is a marked departure from performance-oblivious resource-fair policies
+which equally allocate resources, and those based on
+unreliable proxy metrics such as CPU utilization and queue lengths.
+Moreover,
+unlike heuristic-based policies which need to be post-hoc tuned separately to optimize for the
+% desired performance criteria, Cilantro's modular
+desired allocation criteria, Cilantro's modular design is able to automatically derive custom
+policies which directly optimize for end-users' desired criteria. 
+% design supports a large class of allocation criteria.
+% End-users can declare their desired criteria, and Cilantro automatically derives a custom policy
+% to optimize for said criteria. 
+
+
+% The main strength of Cilantro lies in the online nature of its learning mechanism.
+% First, online learning
+% methods are not bound by the amount of data used for learning - they can continually keep learning
+% and improve over time. Second, since the learners learn from runtime data generated from live
+% workloads, they can reliably account for real-world phenomenon, such as performance variability of servers \cite{tailatscale}.
+% Third, online
+% learning reduces the burden on users since they are no longer required to manually estimate the
+% resource demand and any updates to the workload are automatically accounted for by the learner.
+% \wg{Maybe this para can be merged with the one above to emphasize the importance of online learning together}
+
+
+Our proposed solution solves three key technical challenges.
+% overcome. \wg{Can slightly rephrase: Although the online learning block within Cilantro is effective
+% and important, there are two key challenges that need to be overcome.}
+First, due to the lack of
+sufficient data, online learning models have a high degree of uncertainty in the early stages.
+To operate without accurate estimates of resource-to-performance curves, Cilantro
+informs scheduling policies with confidence intervals of its estimates. This enables policies to
+account for this uncertainty when making resource allocation decisions
+until the estimates become more accurate.
+% conservative but best-effort resource allocation decisions until the estimates become more accurate.
+% conservative but best-effort resource allocation decisions until the estimates become more accurate.
+Second, to support a diversity of resource allocation Cilantro's design is modular where
+estimation of resource-to-performance mappings and forecasting of load shifts is decoupled from the
+allocation policies itself.
+Third, Cilantro's design is asynchronous since its different components may operate at different
+frequencies;
+for instance, different applications may emit their performance metrics at irregular intervals,
+the time for updating a learning model depends on the model itself,
+and the frequency of changing an allocation may depend on the agility of the cluster's resource
+manager.
+
+% Second, extracting and communicating performance metrics are not always feasible for applications,
+% since they can be deeply embedded in the application logic. Cilantro includes a side-car client which
+% embeds with applications and provides a uniform interface to extract performance metrics. In case
+% performance metrics are unavailable, Cilantro also provides non-invasive performance measurements of
+% applications to estimate the resource requirements.
+% \rbcomment{This needs to change to talk about PRT}
+% \kkcomment{we should back this last sentence up. Is it better to talk about this later?.}
+% Third,
+% \kkcomment{last sentence is unclear. are we just saying we can use a proxy metric or that users can
+% specify a default}.
+
+We have implemented Cilantro as an open-source extension to the Kubernetes core scheduler, available at (anonymized). To evaluate Cilantro, first we deploy it on a 1000-CPU multi-tenant cluster which includes a diversity of real-world, latency and throughput-sensitive jobs.
+% , such as database query serving, prediction training, and machine learning (ML)
+% inference.
+On three different allocation criteria, Cilantro's policies are able to outperform 9 other
+baselines, and is able
+to compete with oracular policies
+which know the resource-to-performance mappings a priori on resource
+efficiency, fairness, and strategy-proofness.
+When compared to resource-fair allocation, it is able to 
+increase the
+performance of 75\% of users in the clusters by up to $4\times$.
+Second, we evaluate Cilantro on a 160 CPU cluster where we wish to
+allocate CPUs to different microservices within the same
+application. In this scenario, Cilantro is able to minimize the end-to-end latency of the system by
+$\times\frac{1}{6}$ when compared to a resource-fair scheduler and by
+$\times\frac{1}{2}$ when compared to the next-best performance-aware baseline.
+% without requiring any information about the data flow between microservices.
+% \rbcomment{I think this is a cool point that we need to highlight more}
+% \rbcomment{Microbenchmarks?}
+
+% Moreover, we extend Cilantro to
+% support performance-based autoscaling policies, outperforming baselines to satisfy a given
+% performance target.
+% Finally, we demonstrate some properties of performance-aware scheduling policies
+% enabled by Cilantro, such as strategy-proofness, which incentivizes users to state their performance
+% objectives truthfully.
+
+

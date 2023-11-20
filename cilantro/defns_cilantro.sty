@@ -1,0 +1,216 @@
+\newcommand{\insertprethmspacing}{\vspace{0.2in}}
+\newcommand{\insertprethmspacingsmall}{\vspace{0.1in}}
+\newcommand{\insertpostthmspacing}{\vspace{-0.1in}}
+
+
+% \newcommand{\hmmfltext}{Cilantro} % System name, a placeholder here.
+% \newcommand{\hmmfltext}{LUFaH} % System name, a placeholder here.
+
+\newcommand{\cilantrotext}{Cilantro} % System name, a placeholder here.
+\newcommand{\cilantro}{\cilantrotext}
+\newcommand{\cilantros}{{\cilantro} }
+
+% cilantro
+\newcommand{\cilantrosw}{{\fontfamily{lmss}\selectfont{\cilantrotext-SW}}}
+\newcommand{\cilantrosws}{{\cilantrosw} }
+\newcommand{\cilantroew}{{\fontfamily{lmss}\selectfont{\cilantrotext-EW}}}
+\newcommand{\cilantroews}{{\cilantroew} }
+\newcommand{\cilantronjc}{{\fontfamily{lmss}\selectfont{\cilantrotext-NJC}}}
+\newcommand{\cilantronjcs}{{\cilantronjc} }
+% Oracular policies
+\newcommand{\oracletext}{Oracle} % System name, a placeholder here.
+\newcommand{\oraclesw}{{\fontfamily{lmss}\selectfont{\oracletext-SW}}}
+\newcommand{\oraclesws}{{\oraclesw} }
+\newcommand{\oracleew}{{\fontfamily{lmss}\selectfont{\oracletext-EW}}}
+\newcommand{\oracleews}{{\oracleew} }
+\newcommand{\oraclenjc}{{\fontfamily{lmss}\selectfont{\oracletext-NJC}}}
+\newcommand{\oraclenjcs}{{\oraclenjc} }
+% Other heuristics
+\newcommand{\evoalgtext}{EvoAlg} % System name, a placeholder here.
+\newcommand{\evoalgsw}{{\fontfamily{lmss}\selectfont{\evoalgtext-SW}}}
+\newcommand{\evoalgsws}{{\evoalgsw} }
+\newcommand{\evoalgew}{{\fontfamily{lmss}\selectfont{\evoalgtext-EW}}}
+\newcommand{\evoalgews}{{\evoalgew} }
+\newcommand{\greedyew}{{\fontfamily{lmss}\selectfont{Greedy-EW}}}
+\newcommand{\greedyews}{{\greedyew} }
+\newcommand{\equalshare}{{\fontfamily{lmss}\selectfont{Resource-Fair}}}
+\newcommand{\equalshares}{{\equalshare} }
+% Prior literature
+\newcommand{\minerva}{{\fontfamily{lmss}\selectfont{Minerva}}}
+\newcommand{\minervas}{{\minerva} }
+\newcommand{\ernest}{{\fontfamily{lmss}\selectfont{Ernest}}}
+\newcommand{\ernests}{{\ernest} }
+\newcommand{\quasar}{{\fontfamily{lmss}\selectfont{Quasar}}}
+\newcommand{\quasars}{{\quasar} }
+\newcommand{\parties}{{\fontfamily{lmss}\selectfont{Parties}}}
+\newcommand{\partiess}{{\parties} }
+\newcommand{\AIMD}{{\fontfamily{lmss}\selectfont{MIAD}}}
+\newcommand{\AIMDs}{{\AIMD} }
+
+% Prior literature
+\newcommand{\msile}{{\fontfamily{lmss}\selectfont{$\epsilon$--Greedy}}}
+\newcommand{\msiles}{{\msile} }
+\newcommand{\msevoopt}{{\fontfamily{lmss}\selectfont{EvoOpt}}}
+\newcommand{\msevoopts}{{\msevoopt} }
+\newcommand{\ucbopt}{{\fontfamily{lmss}\selectfont{Cilantro}}}
+\newcommand{\ucbopts}{{\ucbopt} }
+
+% Autoscaling
+\newcommand{\cilantroas}{{\fontfamily{lmss}\selectfont{\cilantrotext-AS}}}
+\newcommand{\cilantroass}{{\cilantroas} }
+\newcommand{\oracleas}{{\fontfamily{lmss}\selectfont{\oracletext--AS}}}
+\newcommand{\oracleass}{{\oracleas} }
+\newcommand{\dstwo}{{\fontfamily{lmss}\selectfont{DS2}}}
+\newcommand{\dstwos}{{\dstwo} }
+\newcommand{\kubeas}{{\fontfamily{lmss}\selectfont{K8S}}}
+\newcommand{\kubeass}{{\kubeas} }
+\newcommand{\pdas}{{\fontfamily{lmss}\selectfont{PD}}}
+\newcommand{\pdass}{{\pdas} }
+\newcommand{\ernestas}{{\fontfamily{lmss}\selectfont{Ernest--AS}}}
+\newcommand{\ernestass}{{\ernestas} }
+\newcommand{\quasaras}{{\fontfamily{lmss}\selectfont{Quasar--AS}}}
+\newcommand{\quasarass}{{\quasaras} }
+
+% Microservices
+\newcommand{\equalsharems}{{\fontfamily{lmss}\selectfont{Resource-Fair}}}
+\newcommand{\equalsharemss}{{Resource-Fair} }
+\newcommand{\epsilongreedyms}{{\fontfamily{lmss}\selectfont{$\epsilon$-greedy}}}
+\newcommand{\epsilongreedymss}{{$\epsilon$-greedy} }
+\newcommand{\evoalgms}{{\fontfamily{lmss}\selectfont{EvoAlg}}}
+\newcommand{\evoalgmss}{{EvoAlg} }
+
+
+\newcommand{\numres}{R}
+
+% Allocations
+\newcommand{\alloc}{a}
+\newcommand{\allocpr}{\alloc'}
+\newcommand{\allocii}[1]{\alloc_{#1}}
+% \newcommand{\allocprii}[1]{\allocpr_{#1}}
+\newcommand{\alloci}{\allocii{i}}
+\newcommand{\allocj}{\allocii{j}}
+\newcommand{\allock}{\allocii{k}}
+\newcommand{\allocp}{\allocii{p}}
+\newcommand{\allocq}{\allocii{q}}
+\newcommand{\allocs}{\allocii{s}}
+\newcommand{\allocr}{\allocii{r}}
+\newcommand{\allockp}{\allocii{k'}}
+
+% Volume of the workload
+\newcommand{\volsymbol}{\ell}
+% \newcommand{\vol}{\ell}
+% \newcommand{\volmax}{\volsymbol_{\textrm{\tiny max}}}
+% \newcommand{\volmin}{\volsymbol_{\textrm{\tiny min}}}
+\newcommand{\volmax}{\overline{\volsymbol}}
+\newcommand{\volmin}{\underline{\volsymbol}}
+\newcommand{\volii}[1]{\volsymbol_{#1}}
+\newcommand{\voli}{\volii{i}}
+\newcommand{\volj}{\volii{j}}
+\newcommand{\volk}{\volii{k}}
+\newcommand{\voliitt}[2]{\volsymbol_{#1#2}}
+\newcommand{\volit}{\voliitt{i}{t}}
+\newcommand{\volis}{\voliitt{i}{s}}
+\newcommand{\voljt}{\voliitt{j}{t}}
+\newcommand{\volitmo}{\voliitt{i,}{t-1}}
+\newcommand{\voljtmo}{\voliitt{j,}{t-1}}
+\newcommand{\volitpo}{\voliitt{i,}{t+1}}
+\newcommand{\voljtpo}{\voliitt{j,}{t+1}}
+% Upper bounds
+\newcommand{\volhatii}[1]{\widehat{\volsymbol}_{#1}}
+\newcommand{\volhati}{\volhatii{i}}
+\newcommand{\volhatj}{\volhatii{j}}
+\newcommand{\volcheckii}[1]{\widecheck{\volsymbol}_{#1}}
+\newcommand{\volchecki}{\volcheckii{i}}
+\newcommand{\volcheckj}{\volcheckii{j}}
+
+% Utilities
+\newcommand{\utilmax}{u_{\rm max}}
+\newcommand{\utilii}[1]{u_{#1}}
+\newcommand{\utili}{\utilii{i}}
+\newcommand{\utilj}{\utilii{j}}
+\newcommand{\utilk}{\utilii{k}}
+\newcommand{\utilmech}{\utilii{0}}
+\newcommand{\utilpii}[1]{u'_{#1}}
+\newcommand{\utilpi}{\utilpii{i}}
+\newcommand{\utilpj}{\utilpii{j}}
+\newcommand{\utilpk}{\utilpii{k}}
+\newcommand{\utilpmech}{\utilpii{0}}
+% 
+\newcommand{\utilhatii}[1]{\widehat{u}_{#1}}
+\newcommand{\utilhati}{\utilhatii{i}}
+\newcommand{\utilhatj}{\utilhatii{j}}
+% 
+\newcommand{\utiliitt}[2]{u_{#1#2}}
+\newcommand{\utilit}{\utiliitt{i}{t}}
+\newcommand{\utiljt}{\utiliitt{j}{t}}
+\newcommand{\utilmecht}{\utiliitt{0}{t}}
+\newcommand{\utiliopt}{\utiliitt{i}{\star}}
+\newcommand{\utiljopt}{\utiliitt{j}{\star}}
+\newcommand{\utilmechopt}{\utiliitt{0}{\star}}
+\newcommand{\utiltildeit}{\widetilde{u}_{it}}
+
+% Payoff
+\newcommand{\payoff}{p}
+\newcommand{\payoffii}[1]{p_{#1}}
+\newcommand{\payoffi}{\payoffii{i}}
+\newcommand{\payoffj}{\payoffii{j}}
+\newcommand{\payoffinvi}{p^{\shortminus 1}_i}
+\newcommand{\payoffinvj}{p^{\shortminus 1}_j}
+
+% Penalty
+\newcommand{\penl}{q}
+\newcommand{\penlii}[1]{q_{#1}}
+\newcommand{\penli}{\penlii{i}}
+\newcommand{\penlj}{\penlii{j}}
+\newcommand{\penlinvi}{q^{\shortminus 1}_i}
+\newcommand{\penlinvj}{q^{\shortminus 1}_j}
+
+% Demand
+\newcommand{\dem}{d}
+\newcommand{\demii}[1]{d_{#1}}
+\newcommand{\demi}{\demii{i}}
+\newcommand{\demj}{\demii{j}}
+% \newcommand{\dembar}{d}
+\newcommand{\dembarii}[1]{\overline{d}_{#1}}
+\newcommand{\dembari}{\dembarii{i}}
+\newcommand{\dembarj}{\dembarii{j}}
+\newcommand{\demhatii}[1]{\widehat{d}_{#1}}
+\newcommand{\demhati}{\demhatii{i}}
+\newcommand{\demhatj}{\demhatii{j}}
+\newcommand{\dembariir}[1]{\overline{d}^{(r)}_{#1}}
+\newcommand{\dembarir}{\dembariir{i}}
+\newcommand{\dembarjr}{\dembariir{j}}
+\newcommand{\demhatiir}[1]{\widehat{d}^{(r)}_{#1}}
+\newcommand{\demhatir}{\demhatiir{i}}
+\newcommand{\demhatjr}{\demhatiir{j}}
+
+% Payoff
+\newcommand{\payoffhat}{\widehat{p}}
+\newcommand{\payoffhatii}[1]{\widehat{p}_{#1}}
+\newcommand{\payoffhati}{\payoffhatii{i}}
+\newcommand{\payoffhatj}{\payoffhatii{j}}
+\newcommand{\payoffcheckii}[1]{\widecheck{p}_{#1}}
+\newcommand{\payoffchecki}{\payoffcheckii{i}}
+\newcommand{\payoffcheckj}{\payoffcheckii{j}}
+
+% Interfaces
+\newcommand{\getaforpl}{\incmtt{get-dem-est}}
+\newcommand{\getallocforpl}{\getaforpl}
+\newcommand{\getpforal}{\incmtt{get-perf-est}}
+\newcommand{\getucbforal}{\getpforal}
+\newcommand{\gettsucb}{\incmtt{get-load-ucb}}
+\newcommand{\submitevent}{\incmtt{submit-event}}
+\newcommand{\getdata}{\incmtt{get-data}}
+\newcommand{\getalloc}{\incmtt{compute-alloc}}
+% fields
+\newcommand{\fldreward}{\incmtt{reward}}
+\newcommand{\fldalloc}{\incmtt{num-resources}}
+\newcommand{\fldload}{\incmtt{load}}
+\newcommand{\fldeventstarttime}{\incmtt{event-start-time}}
+\newcommand{\fldeventendtime}{\incmtt{event-end-time}}
+
+% welfare definitions
+\newcommand{\socwel}{W_{\rm S}}
+\newcommand{\egalwel}{W_{\rm E}}
+\newcommand{\njcfair}{F_{\rm NJC}}
+

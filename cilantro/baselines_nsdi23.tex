@@ -1,0 +1,169 @@
+\subsubsection{Baselines}
+\label{sec:baselinesfixedclus}
+\vspace{-1mm}
+
+\newcommand{\bstitle}[1]{\emph{#1:}}
+\bstitle{Oracular policies}
+We implement the following oracular policies which have access to the performance curves,
+obtained by exhaustively profiling
+each workload for at least 4 hours.
+\vspace{-0.02in}
+\begin{itemize}
+% \item[1,]2, 3) \oraclesw, \oracleew, \oraclenjc:
+\item[1)] \oraclesw, \; 2) \oracleew, \; 3) \oraclenjc:
+The oracular policies for maximizing the social and egalitarian welfares
+and the NJC fairness policy described in Sec.~\ref{sec:oracularpolicies}.
+For \oraclesws and \oracleew, on each round,
+we maximize the welfare computed via the profiled performance curves using an evolutionary
+algorithm.
+Details of this evolutionary algorithm are given in the supplementary material.
+For \oraclenjc, we compute the demands using the profiled performance curves
+% we choose the maximum welfare allocation by executing an evolutionary optimizer on the
+% upper confide
+\end{itemize}
+\vspace{-0.05in}
+
+
+\bstitle{\cilantros policies}
+The following three policies use \cilantro's online learning framework as described in
+Sec.~\ref{sec:learningpolicies}.
+\vspace{-0.02in}
+\begin{itemize}
+\item[4)] \cilantrosw, \; 5) \cilantroew, \; 6) \cilantronjc:
+% The online learning policies using \cilantros as described in Sec.~\ref{sec:learningpolicies}.
+For \cilantrosws and \cilantroew, on each round,
+we maximize an upper confidence bound (UCB) on the welfare computed via the UCBs
+on the performance curves using an evolutionary algorithm.
+% Since the UCBs are available in memory analytically this can be done efficiently.
+% For \cilantronjc, we use the procedure described in~\citet{kandasamy20online}.
+\end{itemize}
+\vspace{-0.05in}
+
+\bstitle{Other heuristics}
+We implement the following methods for fair sharing and for
+maximizing the social/egalitarian welfare.
+While they are not based directly off specific prior work, such methods are common in the
+scheduling literature~\citep{crankshaw2017clipper,grandl2016altruistic}.
+\vspace{-0.02in}
+% \kkcomment{@Romil: some citations}
+\begin{itemize}[label=\arabic*)]
+
+% \setcounter{enumi}{6}
+\item[6)] \equalshare: 
+This method simply allocates an equal amount of resources to each job (user).
+\vspace{-0.05in}
+
+% \setcounter{enumi}{6}
+\item[7)] \evoalgsw, \, 8)  \evoalgew:
+Evolutionary algorithms for social and egalitarian welfare;
+the same procedure used for oracular/learning welfare policies above, but
+now they operate directly on the performance metrics.
+% They 
+% This algorithm maintains the social welfare for all past allocations.
+% On each allocation round, it stochastically samples one of the past allocations so that those with
+% higher welfare are more likley to be sampled.
+% It then perturbs the sampled point slightly to obtain a new allocation.
+% \item: 
+% This is similar to \evoalgsw, but samples based on the egalitarian welfare of past
+% allocations instead of the social welfare.
+\end{itemize}
+\begin{enumerate}[label=\arabic*)]
+\setcounter{enumi}{9}
+\item \greedyew: 
+This method starts by allocating resources equally.
+On each round,
+it evaluates the utilities for each job during the previous allocation round.
+It then takes away one resource each from the top half of the users who had high utility 
+and allocates it to the bottom half.
+% Then it chooses the $k$ jobs with the highest utility, takes away one resource each from these
+% jobs, and then allocates it to the $k$ jobs with the lowest utility.
+% In our evaluation, we used $k=3$; for smaller values of $k$, the changes were small
+% and it resulted in slow convergence while for larger values the changes resulted in large
+% fluctuations.
+\end{enumerate}
+
+
+\bstitle{Baselines from prior work}
+\rbcomment{Move to appendix.}
+To the best of our knowledge, there are no prior methods for the above criteria
+when the performance is unknown.
+Therefore, we adapt the following feedback-driven methods from prior work.
+\begin{enumerate}[label=\arabic*)]
+\setcounter{enumi}{10}
+\item \ernest~\citep{venkataraman2016ernest}:
+% Ernest uses a featurized linear model to estimate the time taken to run a job as a function of the
+% amount of resources allocated for the job and the load.
+% Equipped with this estimate, we approximate the resource demand for a job, i.e. the amount of
+% resources required, to satisfy a given target SLO for a given load.
+% On each round, we use the demand estimated in the above fashion as inputs to the max-min fairness
+% procedure to compute allocations for all jobs.
+% In our implementation, the Cilantro learners maintain this featurized linear model, which is
+% updated using non-negative least squares regression (as suggested by the authors) whenever there is
+% new data.
+Ernest uses a featurized linear model  to estimate the
+time taken to run a job.
+We use this estimate to approximate the resource demand to meet the job's SLO.
+On each round, we use the estimated demand as inputs to NJC to compute the allocations.
+% In our implementation, the Cilantro learners maintain this featurized linear model, which is
+% updated using non-negative least squares regression (as suggested by the authors) whenever there is
+% new data.
+\vspace{-0.05in}
+
+\item \quasar~\citep{delimitrou2014quasar}:
+Quasar uses collaborative filtering to estimate a job's resource demand, which we
+% We use this estimated deand as inputs to NJC to compute the allocations.
+use as inputs to NJC to compute the allocations.
+% The authors also describe procedures for vertical scaling and co-locating workloads based on
+% interference and heterogeneity.
+We do not incorporate mechanisms for vertical scaling and workload co-location described
+in~\citep{delimitrou2014quasar} to be consistent across all methods.
+% and since our experimental platform does not support extracting these metrics.
+\vspace{-0.05in}
+
+\item \minerva~\citep{nathan2019end}: 
+Minerva sets the allocation for
+job $j$ at each step to be proportional to $\allocj/\utilj$ where $\allocj$ and $\utilj$ are the
+allocation and utility at the previous round.
+% The stated goal of Minerva is to maximize the egalitarian welfare.
+% The authors also propose several video-streaming specific optimizations in addition to this core
+% algorithm which are not applicable in our setting.
+% The authors also describe an experiment design procedure for choosing an initial data set for
+% estimating the model; however, following this procedure for all jobs in our set up resulted in
+% infeasible allocations.
+% Hence, in the first 10 rounds of allocations, we chose the allocations randomly to initialise the
+% models for each job.
+
+\item \parties~\citep{chen2019parties}: 
+Parties upsizes the allocation for a job
+if it violates or is close to violating the SLO, downsizes the allocation if the job comfortably
+satisfies the SLO, and otherwise does nothing.
+If the SLOs of all jobs cannot be met, it evicts the job from the server.
+As eviction is not an option in our setting %as we we wish to fairly allocate resources,
+we use the Parties logic to compute the demands which are then fed to NJC to obtain the allocations.
+For upsizing, we increase the demand by 20 CPUs and for downsizing, we decrease it by 5.
+
+\item \AIMD{} (Multiplicative-Increase/Additive-Decrease)~\citep{chiu1989analysis}: 
+This is inspired by TCP congestion control.
+If a user's job violates the SLO, we increase its demand by $5\times$ the current allocation,
+and if it satisfies the SLO, we set the demand to be one minus the current allocation.
+We then invoke NJC to compute the allocation for the next round.
+\end{enumerate}
+
+
+% In addition to the above three, we also considered the following prior work which could not be
+% included in our evaluation.
+% Google Autopilot's~\citep{rzadca2020autopilot} horizontal scaling procedure requires an application
+% developer to specify a target CPU utilization and computes the resource demand based on the given
+% target and the observed utilization.
+% This requires an application developer to profile their workload to compute this target based on
+% their SLO, which can be laborious.
+% Additionally, our experimental platform does not support extracting CPU utilization metrics.
+% Paragon~\citep{delimitrou2013paragon} and Allox~\citep{le2020allox} study the placement of jobs
+% among heterogeneous resources and have no natural adaptation to our setting.
+% Festive~\citep{jiang2012improving} describes a method for fair video streaming based on utilities,
+% but their method cannot be adapted to data center resource allocation.
+
+
+
+
+

@@ -1,0 +1,21 @@
+
+\begin{table}[t]
+\small
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\multirow{2}{*}{\begin{tabular}[c]{@{}c@{}}Video\\ Stream\end{tabular}} & \multirow{2}{*}{Accuracy} & \multicolumn{2}{c|}{GPUs Required} & \multirow{2}{*}{\begin{tabular}[c]{@{}c@{}}Resource\\ Savings\end{tabular}} \\ \cline{3-4}
+                                                                        &                           & Ekya        & Fair Scheduler       &                                                                             \\ \hline
+V0                                                                      & 75.6\%                    & 4           & 15.6                 & $3.9\times$                                                                 \\ \hline
+V1                                                                      & 78.6\%                    & 4           & 10.0                  & $2.5\times$                                                                 \\ \hline
+V2                                                                      & 76.5\%                    & 4           & 19.5                 & $4.9\times$                                                                 \\ \hline
+V3                                                                      & 74.5\%                    & 4           & 17.4                 & $4.4\times$                                                                 \\ \hline
+V4                                                                      & 75.1\%                    & 4           & 20.9                 & $5.2\times$                                                                 \\ \hline
+V5                                                                      & 71.4\%                      & 4           & 25.8                  & $6.5\times$                                                                 \\ \hline
+V6                                                                      & 79.5\%                    & 4           & 8.05                  & $2.0\times$                                                                 \\ \hline
+V7                                                                      & 75.3\%                    & 4           & 21.8                 & $5.5\times$                                                                 \\ \hline
+V8                                                                      & 75.0\%                    & 4           & 84.5                 & $21.1\times$                                                                 \\ \hline
+V9                                                                      & 75.2\%                    & 4           & 177.8                  & $44.5\times$                                                                \\ \hline
+\end{tabular}
+\caption{\bf\small Resource savings for different cities in Cityscapes. \romil{We should write DNF for V7 V8 V9. \romil{This is a bit confusing because every row is not running independently - so this isn't  per resource saving. We should either get overall aggregate number here or run V0 repeatedly to get per video number.}}}
+\label{tab:resource-savings-golden}
+\end{table}

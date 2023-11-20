@@ -1,0 +1,274 @@
+% Latex library functions
+%
+% Ross Girshick
+%
+% Adapted from:
+% Jamie Shotton
+% With contributions from Chris Bishop and Antonio Criminisi
+
+%\usepackage[usenames]{color}
+\usepackage{xspace}
+%\usepackage{subfigure}
+
+\newcommand{\mc}[1]{\mathcal{#1}}
+
+\newcommand{\defn}[1]{\textit{#1}}
+\newcommand{\clslbl}[1]{#1}%\texttt{#1}}
+
+\newcommand{\chapref}[1]{\chaptername~\ref{chap:#1}}
+\newcommand{\Chapref}[1]{\chaptername~\ref{chap:#1}}
+\newcommand{\chapsref}[2]{\chaptername s~\ref{chap:#1}~and~\ref{chap:#2}}
+\newcommand{\Chapsref}[2]{\chaptername s~\ref{chap:#1}~and~\ref{chap:#2}}
+\newcommand{\appref}[1]{\appendixname~\ref{chap:#1}}
+\newcommand{\chaplabel}[1]{\label{chap:#1}}
+
+%\newcommand{\secxref}[1]{Section~\ref{sec:#1}}
+%\newcommand{\Secxref}[1]{Section~\ref{sec:#1}}
+%\newcommand{\eqxref}[1]{(\ref{eq:#1})}
+%\newcommand{\figxref}[1]{Figure~\ref{fig:#1}}
+%\newcommand{\tablexref}[1]{Table~\ref{table:#1}}
+
+% Generic reference commands
+\newcommand{\seclabel}[1]{\label{sec:\reflabel-#1}}
+\newcommand{\secref}[2][\reflabel]{Section~\ref{sec:#1-#2}}
+%\newcommand{\secref}[2][\reflabel]{Section~\ref{sec:#1-#2}}
+\newcommand{\Secref}[2][\reflabel]{Section~\ref{sec:#1-#2}}
+\newcommand{\secrefs}[3][\reflabel]{Sections~\ref{sec:#1-#2} and~\ref{sec:#1-#3}}
+
+\newcommand{\eqlabel}[1]{\label{eq:\reflabel-#1}}
+\renewcommand{\eqref}[2][\reflabel]{Eq.~\ref{eq:#1-#2}}
+\newcommand{\Eqref}[2][\reflabel]{\ref{eq:#1-#2}}
+\newcommand{\eqrefs}[3][\reflabel]{(\ref{eq:#1-#2}) and~(\ref{eq:#1-#3})}
+
+\newcommand{\figlabel}[2][\reflabel]{\label{fig:#1-#2}}
+\newcommand{\figref}[2][\reflabel]{Figure~\ref{fig:#1-#2}}
+\newcommand{\Figref}[2][\reflabel]{Fig.~\ref{fig:#1-#2}}
+\newcommand{\figsref}[3][\reflabel]{Figs.~\ref{fig:#1-#2} and~\ref{fig:#1-#3}}
+\newcommand{\Figsref}[3][\reflabel]{Figs.~\ref{fig:#1-#2} and~\ref{fig:#1-#3}}
+
+\newcommand{\alglabel}[2][\reflabel]{\label{alg:#1-#2}}
+\newcommand{\algref}[2][\reflabel]{Algorithm~\ref{alg:#1-#2}}
+\newcommand{\Algref}[2][\reflabel]{\ref{alg:#1-#2}}
+
+\newcommand{\tablelabel}[2][\reflabel]{\label{table:#1-#2}}
+\newcommand{\tableref}[2][\reflabel]{Table~\ref{table:#1-#2}}
+\newcommand{\Tableref}[2][\reflabel]{Table~\ref{table:#1-#2}}
+
+\newcommand{\jamie}[2][\reflabel]{#1-#2}
+
+\newcommand{\reflabel}{dummy} % Dummy initial reflabel - use renewcommand...
+
+\newcommand{\st}{\xspace\textrm{s.t.}\xspace}
+\newcommand{\half} {\frac{1}{2}}
+\newcommand{\intd} {\mathrm{d}}
+
+% Notes and to do
+%\newcommand{\note}[1]{{\color{blue} {\bf note:} \it #1}}
+\newcommand{\todo}[1]{{\color{red} {\bf todo:} \it #1}}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+%\newcommand{\half}{\frac{1}{2}};
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Chris Bishop
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\bes}{\begin{equation*}}
+\newcommand{\ees}{\end{equation*}}
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\beas}{\begin{eqnarray*}}
+\newcommand{\eeas}{\end{eqnarray*}}
+\newcommand{\ba}{\begin{align}}
+\newcommand{\ea}{\end{align}}
+
+\newcommand{\const}{{\rm const.}}
+\newcommand{\matlab}{${\rm Matlab}^{\Pisymbol{psy}{226}}$}
+
+% A comment
+%\newcommand{\comment}[1]{}
+
+% Distributions
+\newcommand{\normal}[2]{\mathcal{N}(#1 \given #2)}
+
+%
+\newcommand{\indep}{\bot \hspace{-0.6em} \bot}
+\newcommand{\arrow}{\rightarrow}
+\newcommand{\given}{\,|\,}
+\newcommand{\twolines}{\,||\,}
+\newcommand{\narroweq}{\!\!=\!\!}
+
+% Parents and children
+\newcommand{\pa}[1]{{\rm pa_\mathit{#1}}}
+\newcommand{\cp}[2]{{\rm cp_\mathit{#1}^{(\mathit{#2})}}}
+\newcommand{\ch}[1]{{\rm ch_\mathit{#1}}}
+
+% Neighbours
+\newcommand{\neigh}[1]{{\rm ne_\mathit{#1}}}
+
+% KL divergence
+\newcommand{\KL}{{\rm KL}}
+
+% Entropy
+\newcommand{\entropy}{{\mathbb{H}}}
+
+% Numbers
+\newcommand{\reals}{{\mathbb{R}}}
+
+% % arg max
+% \DeclareMathOperator*{\argmax}{argmax}
+% \DeclareMathOperator*{\argmin}{argmin}
+
+% Transpose
+\newcommand{\trn}{\textrm{T}}
+
+\providecommand{\ie}{\textit{i.e.}\xspace}
+\providecommand{\eg}{\textit{e.g.}\xspace}
+\providecommand{\etc}{\textit{etc.}\xspace}
+\providecommand{\etal}{\textit{et al.}\xspace}
+\providecommand{\vs}{\textit{vs.}\xspace}
+\providecommand{\cf}{\textit{cf.}\xspace}
+\providecommand{\apriori}{\textit{a priori}\xspace}
+\providecommand{\versus}{\textit{versus}\xspace}
+
+\newcommand{\cip}{\mbox{$\perp\!\!\!\perp$}}
+\newcommand{\condindep}[3]{#1~\cip~#2~|~#3}
+\newcommand{\nocondindep}[3]{#1~\mbox{$\not\!\perp\!\!\!\perp$}~#2~|~#3}
+\newcommand{\dir}[2]{{\rm Dir}(#1|#2)}
+
+\newcommand{\bdelta}{\mbox{\boldmath $\delta$}}
+\newcommand{\bDelta}{\mbox{\boldmath $\Delta$}}
+\newcommand{\bbeta}{\mbox{\boldmath $\beta$}}
+\newcommand{\bmu}{\mbox{\boldmath $\mu$}}
+\newcommand{\bnu}{\mbox{\boldmath $\nu$}}
+\newcommand{\balpha}{\mbox{\boldmath $\alpha$}}
+\newcommand{\bepsilon}{\mbox{\boldmath $\epsilon$}}
+\newcommand{\bgamma}{\mbox{\boldmath $\gamma$}}
+\newcommand{\bSigma}{\mbox{\boldmath $\Sigma$}}
+\newcommand{\btau}{\mbox{\boldmath $\tau$}}
+\newcommand{\blambda}{\mbox{\boldmath $\lambda$}}
+\newcommand{\bLambda}{\mbox{\boldmath $\Lambda$}}
+\newcommand{\bpi}{\mbox{\boldmath $\pi$}}
+\newcommand{\bpsi}{\mbox{\boldmath $\psi$}}
+\newcommand{\bchi}{\mbox{\boldmath $\chi$}}
+\newcommand{\bxi}{\mbox{\boldmath $\xi$}}
+\newcommand{\bPsi}{\mbox{\boldmath $\Psi$}}
+\newcommand{\bphi}{\mbox{\boldmath $\phi$}}
+\newcommand{\bvarphi}{\mbox{\boldmath $\varphi$}}
+\newcommand{\bPhi}{\mbox{\boldmath $\Phi$}}
+\newcommand{\btheta}{\mbox{\boldmath $\theta$}}
+\newcommand{\bTheta}{\mbox{\boldmath $\Theta$}}
+\newcommand{\bOmega}{\mbox{\boldmath $\Omega$}}
+\newcommand{\bomega}{\mbox{\boldmath $\omega$}}
+\newcommand{\bzeta}{\mbox{\boldmath $\zeta$}}
+
+\newcommand{\Bmath}[1]{\mbox{\boldmath $#1$}}
+
+\newcommand{\fastfig}[4]{
+\begin{center}
+\begin{figure}[htb!]
+\centerline{\epsfig{figure=#1,width=#2}}
+\caption[short]{#3}
+\label{#4}
+\end{figure}
+\end{center}
+}
+
+\newcommand{\unit}{{\bf I}}
+\newcommand{\boldzero}{{\bf 0}}
+
+\newcommand{\bfa}{{\bf a}}
+\newcommand{\bfb}{{\bf b}}
+\newcommand{\bfc}{{\bf c}}
+\newcommand{\bfd}{{\bf d}}
+\newcommand{\bfe}{{\bf e}}
+\newcommand{\bff}{{\bf f}}
+\newcommand{\bfg}{{\bf g}}
+\newcommand{\bfh}{{\bf h}}
+\newcommand{\bfi}{{\bf i}}
+\newcommand{\bfj}{{\bf j}}
+\newcommand{\bfk}{{\bf k}}
+\newcommand{\bfm}{{\bf m}}
+\newcommand{\bfo}{{\bf o}}
+\newcommand{\bfp}{{\bf p}}
+\newcommand{\bfq}{{\bf q}}
+\newcommand{\bfr}{{\bf r}}
+\newcommand{\bfs}{{\bf s}}
+\newcommand{\bft}{{\bf t}}
+\newcommand{\bfu}{{\bf u}}
+\newcommand{\bfv}{{\bf v}}
+\newcommand{\bfw}{{\bf w}}
+\newcommand{\bfx}{{\bf x}}
+\newcommand{\bfy}{{\bf y}}
+\newcommand{\bfz}{{\bf z}}
+
+\newcommand{\bfA}{{\bf A}}
+\newcommand{\bfB}{{\bf B}}
+\newcommand{\bfC}{{\bf C}}
+\newcommand{\bfD}{{\bf D}}
+\newcommand{\bfE}{{\bf E}}
+\newcommand{\bfF}{{\bf F}}
+\newcommand{\bfG}{{\bf G}}
+\newcommand{\bfH}{{\bf H}}
+\newcommand{\bfI}{{\bf I}}
+\newcommand{\bfK}{{\bf K}}
+\newcommand{\bfL}{{\bf L}}
+\newcommand{\bfM}{{\bf M}}
+\newcommand{\bfO}{{\bf O}}
+\newcommand{\bfP}{{\bf P}}
+\newcommand{\bfQ}{{\bf Q}}
+\newcommand{\bfR}{{\bf R}}
+\newcommand{\bfS}{{\bf S}}
+\newcommand{\bfT}{{\bf T}}
+\newcommand{\bfU}{{\bf U}}
+\newcommand{\bfV}{{\bf V}}
+\newcommand{\bfW}{{\bf W}}
+\newcommand{\bfX}{{\bf X}}
+\newcommand{\bfY}{{\bf Y}}
+\newcommand{\bfZ}{{\bf Z}}
+\newcommand{\llangle}{{\langle \hspace{-0.7mm} \langle}}
+\newcommand{\rrangle}{{\rangle \hspace{-0.7mm} \rangle}}
+\newcommand{\define}{\stackrel{\mathrm{def}}{=}}
+
+\newcommand{\indict}{{\mbox{\bf{1}}}}
+
+\newcommand{\la}{\langle}
+\newcommand{\ra}{\rangle}
+\newcommand{\La}{\left\langle}
+\newcommand{\Ra}{\right\rangle}
+\newcommand{\EXP}[1]{\left\langle #1 \right\rangle}
+\newcommand{\vectwo}[2]{\left[\begin{array}{c} #1 \\ #2 \end{array}\right]}
+\newcommand{\arrtwo}[2]{\begin{array}{c} #1 \\ #2 \end{array}}
+\newcommand{\arrthree}[3]{\begin{array}{c} #1 \\ #2 \\ #3\end{array}}
+\newcommand{\vecn}[1]{\left[\begin{array}{c} #1 \end{array}\right]}
+%\newcommand{\half}{{\scriptstyle \frac{1}{2}}}
+\newcommand{\col}{\mathrm{vec}}
+
+
+\newcommand{\T}{{\rm T}}
+\newcommand{\diag}{{\rm diag}}
+\newcommand{\Tr}{\mbox{Tr}}
+\newcommand{\diff}[1]{{\,d#1}}
+\newcommand{\vgraph}[1]{
+  \newpage
+  \begin{center}
+  {\large \bf #1}
+  \end{center}
+  \vspace{2mm}
+}
+\newcommand{\high}[1]{\textcolor{blue}{\emph{#1}}}
+\newcommand{\cut}[1]{}
+\newcommand{\citeasnoun}[1]{\citeN{#1}}
+\newcommand{\citemulti}[2]{(#1, \citeyearNP{#2})}
+\newcommand{\citemultiN}[2]{#1 (\citeyearNP{#2})}
+\newcommand{\Sum}{{\displaystyle \sum}}
+
+\newcommand{\phz}{\phantom{0}}
+
+\newcommand{\linebreakcell}[2][c]{%
+  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

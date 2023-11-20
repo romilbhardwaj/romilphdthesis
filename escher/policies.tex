@@ -1,0 +1,625 @@
+\section{Scheduling with Ephemeral Resources}
+\label{policies}
+% \begin{table*}[t]
+%   \centering
+%   \begin{tabular}{|p{0.17\linewidth}|p{0.27\linewidth}|p{0.3\linewidth}|p{0.17\linewidth}|}
+%   \hline
+%     \textbf{Scheduling Policy} & \textbf{Goal} & \textbf{Ephemeral Resource Solution} & \textbf{Supported by}\\
+%   \hline
+  
+%   % Begin info
+  
+%   Task co-location & 
+%   Place $n$ tasks on the same physical machine. &
+%   Create an ephemeral resource with capacity $n$ at a node where the union of all resources in the co-location group is available. Launch each task requesting 1 unit of the epehemeral resource. &
+%   Kubernetes, ClassAds, YARN, Mesos
+%   \\
+%   \hline
+  
+%   Data locality & 
+%   Place tasks on the machine where their operands are located. &
+%   Request the address of the data from the framework and create \textit{data} resource on the node. Launch the task requesting 1 unit of  \textit{data} resource. &
+%   Kubernetes (Limited), YARN, Mesos
+%   \\
+%   \hline
+  
+%   Static Load Balancing & 
+%   Given $n$ tasks, evenly spread them out across $m$ workers. &
+%   Create a \textit{load\_balancer} resource on every node with capacity $\lceil n/m \rceil$. Launch each task requesting 1 unit of the \textit{load\_balancer} resource.&
+%   Kubernetes, ClassAds
+%   \\
+%   \hline
+  
+%   Dynamic Load Balancing & 
+%   Given an unknown number of incoming tasks, evenly spread them out across $m$ workers. &
+%   Use the \textit{load\_monitor} pattern to implement a dynamic resource adjuster. Launch tasks requesting 1 unit of the \textit{load\_balancer} resource. &
+%   Kubernetes, ClassAds
+%   \\
+%   \hline
+  
+%   Bin-packing & 
+%   Given an unknown number of incoming tasks, minimize the number of workers used to complete the tasks. &
+%   Use the \textit{load\_monitor} pattern on a subset of active nodes. Expand the subset when necessary by composing with soft-constraints. &
+%   Kubernetes
+%   \\
+%   \hline
+  
+%   Anti-affinity & 
+%   Given two of tasks, place them on distinct nodes. &
+%   Create \textit{anti\_affinity} resource with capacity 1 on all nodes. Launch each task in the anti-affinity group requesting 1 unit of the \textit{anti\_affinity} resource. &
+%   Kubernetes
+%   \\
+%   \hline
+  
+%   Gang scheduling & 
+%   Given a set of tasks, enforce all-or-none run semantics. &
+%   Use the \textit{reservation task} pattern to block resources for all tasks in the gang. Once the reservation tasks succeed, launch all gang tasks. &
+%   None
+%   \\
+%   \hline
+  
+%   Weighted Fair Queuing\cite{wfq} & 
+%   Given a set of tasks, enforce priority ordering across tasks. &
+%   Use the \textit{reservation task} pattern to block resources for all tasks in the gang. Once the reservation tasks succeed, launch all gang tasks. &
+%   None
+%   \\
+%   \hline
+  
+%   Soft-constraints & 
+%   For a given task, relax resource constraints if they cannot be satisfied. &
+%   TODO. &
+%   Kubernetes (Limited)
+%   \\
+%   \hline
+  
+%   \end{tabular}
+%   \caption{Common scheduling policies, their implementation with Ephemeral Resources and out-of-the-box from different schedulers (TODO: change to checkboxes). In addition to these popular policies, ephemeral resources allow applications to specify custom policies as well and compose them with these common policies.}
+%   \label{tab:1}
+% \end{table*}
+
+\begin{table*}[t]
+  \centering
+  \begin{xtabular}{|p{0.12\linewidth}|p{0.24\linewidth}|p{0.45\linewidth}|p{0.12\linewidth}|}
+  \hline
+    \textbf{Scheduling Policy} & \textbf{Goal} & \textbf{Ephemeral Resource Solution} & \textbf{Supported by}\\
+  \hline
+  
+  % Begin info
+  
+  Task co-location & 
+  Place $n$ tasks on the same physical machine. &
+  Create an ephemeral resource with capacity $n$ at a node where the sum of all resources in the co-location group is available.
+    % \begin{minted}[autogobble]{python}
+    % coloc_tasks = [...]
+    % res_constraint = sum([t.resources for t in coloc_tasks])
+    % set_resource("coloc-group", len(coloc_tasks), res_constraint)
+    % for task in coloc_tasks:
+    %     task.launch(resources={"coloc-group": 1})
+    % \end{minted}
+    &
+  Kubernetes, ClassAds, YARN, Mesos
+  \\
+  \hline
+  
+  Data locality & 
+  Place tasks on the machine where their operands are located. &
+  Request the address of the data from the framework and create \textit{data} resource on the node. 
+    % \begin{minted}[autogobble]{python}
+    % data_addr = nodeid  # Node id where the data is
+    % set_resource("data-loc", 1, data_addr)
+    % task.launch(resources={"data-loc": 1})
+    % \end{minted}
+    &
+  Kubernetes (Limited), YARN, Mesos
+  \\
+  \hline
+  
+  Static Load Balancing & 
+  Given $n$ tasks, evenly spread them out across $m$ workers. &
+  Create a \textit{load\_balancer} resource on every node with capacity $\lceil n/m \rceil$.
+%     \begin{minted}[autogobble]{python}
+%   resource_capacity = ceiling(num_tasks/num_nodes)
+%   for node in nodes:
+%     set_resource("load_bal", resource_capacity, node)
+%   for task in tasks:
+%     task.launch(resources = {"load_bal": 1})
+%     \end{minted}
+    &
+  Kubernetes, ClassAds
+  \\
+  \hline
+  
+  Dynamic Load Balancing & 
+  Given an unknown number of incoming tasks, evenly spread them out across $m$ workers. &
+  Use the \textit{load\_monitor} pattern to implement a dynamic resource adjuster for \textit{load\_balancer}. 
+%   \begin{minted}[autogobble]{python}
+%     def load_monitor():
+%       while True:
+%         avail_res = get_cluster_status()
+%         if avail_res["load_bal"] == 0 on all nodes:
+%             set_resource("load_bal", increment 1, all_nodes)
+%         if avail_res["load_bal"] >= 1 on all nodes:
+%             set_resource("load_bal", decrement 1, all_nodes)
+
+%     def dynamic_load_balancing():
+%       load_monitor.launch()
+%       for task in tasks:
+%         task.resources = {"load_bal": 1}
+%         task.launch()
+%     \end{minted}
+  &
+  Kubernetes, ClassAds
+  \\
+  \hline
+  
+  Bin-packing & 
+  Given an unknown number of incoming tasks, minimize the number of workers used to complete the tasks. &
+  Use the \textit{load\_monitor} pattern on a subset of active nodes. Expand the subset when necessary by composing with soft-constraints. &
+  Kubernetes
+  \\
+  \hline
+  
+  Anti-affinity & 
+  Given two tasks, place them on distinct nodes. &
+  Create \textit{anti\_affinity} resource with capacity 1 on all nodes. Launch each task in the anti-affinity group requesting 1 unit of the \textit{anti\_affinity} resource.
+%   \begin{minted}{python}
+%   for node in nodes:
+%     create_resource(label="anti_affinity", node=node, capacity = 1)
+%   for task in anti_affinity_tasks:
+%   task.resources = {"anti_affinity": 1}
+%   task.launch()
+% \end{minted}
+  &
+  Kubernetes
+  \\
+  \hline
+  
+  Gang scheduling & 
+  Given a set of tasks, enforce all-or-none run semantics. &
+  Use the \textit{reservation task} pattern to block resources for all tasks in the gang. Once the reservation tasks succeed, launch all gang tasks. &
+  None
+  \\
+  \hline
+  
+  Weighted Fair Queuing\cite{wfq} & 
+  Given a set of tasks, enforce priority ordering across tasks. &
+  Use ephemeral resources to build task queues and create resources to drain these queues in priority order. &
+  None
+  \\
+  \hline
+  
+  Soft-constraints & 
+  For a given task, relax resource constraints if they cannot be satisfied. &
+  Sequentially attempt scheduling and check successful placement with heartbeats.   &
+  Kubernetes (Limited)
+  \\
+  \hline
+  
+  \end{xtabular}
+  \caption{Common scheduling policies, their implementation with Ephemeral Resources and out-of-the-box support from popular cluster schedulers \romil{(TODO: change to checkboxes)}. In addition to these policies, ephemeral resources allow applications to specify custom policies and compose them with these common policies.}
+  \label{tab:sched-pols}
+\end{table*}
+
+
+% Code figure
+\begin{figure*}[ht]
+~
+% Task co-location
+~
+\begin{subfigure}{.24\textwidth}
+  \centering
+  \begin{minted}[fontsize=\tiny,breaksymbolleft=\tiny\ensuremath{},breakautoindent=true]{python}
+coloc_tasks = [...]
+constraint = sum([t.resources for t in coloc_tasks])
+set_resource("co-group", len(coloc_tasks), res_constraint)
+for task in coloc_tasks:
+  task.launch(res+={"co-group": 1})
+  \end{minted}
+  \caption{Task Co-location}
+  \label{fig:policycode:taskcoloc}
+\end{subfigure}
+~
+% Data locality TODO: Consider showing task based data locality too.
+~
+\begin{subfigure}{.24\textwidth}
+  \centering
+  \begin{minted}[fontsize=\tiny,breaksymbolleft=\tiny\ensuremath{}]{python}
+data_addr = get_location(data)  # Node id
+set_resource("data-loc", 1, data_addr)
+task.launch(res+={"data-loc": 1})
+  \end{minted}
+  \caption{Data locality}
+  \label{fig:policycode:datalocality}
+\end{subfigure}
+~
+% Policy: Anti Affinity
+~
+\begin{subfigure}{.24\textwidth}
+  \centering
+  \begin{minted}[fontsize=\tiny,breaksymbolleft=\tiny\ensuremath{}]{python}
+for node in nodes:
+  set_resource("anti_aff", 1, node)
+for task in anti_affinity_tasks:
+  task.launch(res+={"anti_aff": 1})
+  \end{minted}
+  \caption{Anti-affinity}
+  \label{fig:policycode:antiaff}
+\end{subfigure}
+~
+% Static Load Balancing
+~
+\begin{subfigure}{.24\textwidth}
+  \centering
+  \begin{minted}[fontsize=\tiny,breaksymbolleft=\tiny\ensuremath{}]{python}
+cap = ceiling(num_tasks/num_nodes)
+for node in nodes:
+ set_resource("load_bal", cap, node)
+for task in tasks:
+ task.launch(res+={"load_bal": 1})
+  \end{minted}
+  \caption{Static Load Balancing}
+  \label{fig:policycode:staticloadbal}
+\end{subfigure}
+
+\newline
+\vspace{2.0mm}
+
+~
+% Dynamic Load Balancing
+~
+\begin{subfigure}{.24\textwidth}
+  \centering
+  \begin{minted}[fontsize=\tiny,breaksymbolleft=\tiny\ensuremath{}]{python}
+def load_monitor():
+ while True:
+  res = get_cluster_status()
+  if res["load_bal"] == 0 on all nodes:
+   set_resource("load_bal", increment 1, all_nodes)
+  if res["load_bal"] >= 1 on all nodes:
+   set_resource("load_bal", decrement 1, all_nodes)
+
+task.launch(res+={"load_bal": 1})
+  \end{minted}
+% for task in tasks:
+%   task.resources = {"load_bal": 1}
+%   task.launch()
+  \caption{Dynamic Load Balancing}
+  \label{fig:policycode:dynloadbal}
+\end{subfigure}
+~
+% Policy: Binpacking
+~
+\begin{subfigure}{.24\textwidth}
+  \centering
+  \begin{minted}[fontsize=\tiny,breaksymbolleft=\tiny\ensuremath{},escapeinside=||,mathescape=true]{python}
+
+def expand_binpack_nodes(res):
+ find node where node.resources > res:
+  set_resource("binpack", |$\infty$|, node)
+
+cluster_res = get_cluster_status()
+if task_res is not subset(binpack_nodes):
+  expand_binpack_nodes(task_res)
+task.launch(res = {"binpack": 1})
+  \end{minted}
+  \caption{Bin-packing}
+  \label{fig:policycode:binpacking}
+\end{subfigure}
+~
+% Policy: Reservation task
+~
+\begin{subfigure}{.24\textwidth}
+  \centering
+  \begin{minted}[fontsize=\tiny,breaksymbolleft=\tiny\ensuremath{}]{python}
+def reservation_task():
+  set_resource("reserved", 1)
+  send_heartbeat()
+  sleep(timeout)
+  result = get_scheduling_status()
+  if result == "failed":
+    set_resource("reserved", 0)
+  \end{minted}
+  \caption{Reservation task pattern}
+  \label{fig:policycode:reservationtask}
+\end{subfigure}
+~
+% Policy: Gang sched
+~
+\begin{subfigure}{.24\textwidth}
+  \centering
+  \begin{minted}[fontsize=\tiny,breaksymbolleft=\tiny\ensuremath{}]{python}
+def gang_scheduling():
+ for task in tasks:
+   reservation_task.launch(res = task.resources)
+ sleep(timeout) # Wait for reservation
+ if all_heartbeats_received():
+   scheduling_status = "success"
+   tasks.launch(res={"reserved": 1})
+ else:
+   scheduling_status = "failed"
+  \end{minted}
+  \caption{Gang Scheduling}
+  \label{fig:policycode:gangsched}
+\end{subfigure}
+% \begin{subfigure}{.24\textwidth}
+%   \centering
+%   \begin{minted}[fontsize=\tiny,breaksymbolleft=\tiny\ensuremath{}]{python}
+% def colocation_scheduling()
+%     coloc_tasks = [...]
+%     res_constraint = sum([t.resources for t in coloc_tasks])
+%     set_resource("coloc-group", len(coloc_tasks), res_constraint)
+%     for task in coloc_tasks:
+%         task.launch(resources={"coloc-group": 1})
+%   \end{minted}
+%   \caption{Weighted Fair Queuing}
+%   \label{fig:policycode:wfq}
+% \end{subfigure}
+
+
+\caption{Implementation of popular scheduling policies with ephemeral resources. \name{} can allow locality based policies by creating ephemeral resources on nodes which can satisfy the said locality. \name{} can also be used to implement dynamic policies such as load-balancing and bin-packing by implementing lightweight processes which can adjust ephemeral resource capacities on the fly.}
+\label{fig:fig}
+\end{figure*}
+
+
+In this section, we demonstrate the generality of ephemeral resources in their ability to express popular scheduling policies. Tabel \ref{tab:sched-pols} consider common scheduling objectives of modern distributed applications and illustrate how they can be expressed with \name{}. 
+
+\subsection{Task Co-location/Affinity}
+\label{policies:colocation}
+A common scheduling requirement is to place tasks on the same physical machine. This can be a strict requirement for co-dependent tasks. For instance, Reinforcement Learning applications \cite{dqn,gorila} are composed of iterative loops between tasks that run on CPUs to emulate an environment and tasks that run on GPUs to learn a policy. Such tasks need to be co-located on the same physical node to avoid network overheads. 
+
+As shown in Figure \ref{fig:policycode:taskcoloc}, co-location can be achieved with Ephemeral resources by creating a \lstinline{co_location} resource with capacity equal to the number of tasks we want to co-locate on a node where all combined resource constraints of tasks can be satisfied . Then for every task to be co-located, the application requests one unit of the \lstinline{co_location} resource for that task.
+
+If the tasks to be co-located are not known beforehand, an alternative is to perform optimistic scheduling with soft constraints (Section \ref{softconstr}). The application can have the initial task create a \lstinline{co_location} on the node where it is placed and subsequent tasks request request one unit of the \lstinline{co_location} resource as a soft-constraint to get scheduled on the same node, if possible.
+
+% \begin{listing}
+% \begin{minted}{python}
+% def colocation_scheduling()
+%     coloc_tasks = [...]
+%     res_constraint = sum([t.resources for t in coloc_tasks])
+%     set_resource("coloc-group", len(coloc_tasks), res_constraint)
+%     for task in coloc_tasks:
+%         task.launch(resources={"coloc-group": 1})
+% \end{minted}
+% \caption{Achieving task-to-task affinity with \name{}}
+% \end{listing}
+
+Note that task to node affinity can be achieved in other schedulers as well~\cite{tetrisched,firmament}. Task-to-task affinity, however, is more difficult to express in such schedulers, because it's relative to other units of compute, not relative to physical nodes. \name{} makes it possible to submit all affine tasks at once, e.g., without waiting for the first task to complete before submitting other tasks. Tasks stay pending internally until \textit{co\_location} ephemeral resource creation succeeds. Thus, ephemeral resources enable single-shot task-to-task affinity scheduling.
+
+\subsection{Load Balancing}
+\label{policies:loadbalancing}
+In non-isolated multi-tenant environments, multiple tasks may contend for shared resources, such as memory or network. In such environments, load balancing distributes tasks evenly across nodes to minimize the average load per node, reduce network congestion, and eliminate single points of failure. 
+Depending on the application, the number of tasks to be scheduled may or may not be known at the startup time. Both of these cases can be handled with ephemeral resources and are implemented in Figure \ref{fig:policycode:staticloadbal} and Figure \ref{fig:policycode:dynloadbal}.
+
+\textbf{Static load balancing.} When the number of tasks ($n$) to be scheduled and the number of nodes ($m$) is fixed, we simply create a \textit{load\_balancer} resource on every node with capacity $\lceil n/m \rceil$. Subsequently, each task requests one unit of the \textit{load\_balancer} resource. This will result in up to $\lceil n/m \rceil$ tasks being scheduled on each node. %todo(romilb): Explain more, possibly graphically.
+
+% \begin{listing}
+% \begin{minted}{python}
+% def static_load_balancing(num_tasks, num_nodes):
+%   resource_capacity = ceiling(num_tasks/num_nodes)
+%   for node in nodes:
+%     set_resource(label="load_balancer", capacity=resource_capacity, constraint=node)
+%   for task in tasks:
+%     task.resources = {"load_balancer": 1}
+%     task.launch()
+% \end{minted}
+% \caption{Static load-balancing  with \name{}}
+% \end{listing}
+
+\textbf{Dynamic load balancing.} Some applications, for instance web servers, have bursty workloads where the exact number of tasks or requests to be served is not known. For such applications, ephemeral resources can provide load balancing by adopting dynamically scaling the capacity of \textit{load\_balancer} resources as tasks arrive and complete. To start, the application creates 1 unit of the \textit{load\_balancer} resource on every node in the cluster. Each task must request 1 unit of the \textit{load\_balancer} resource. Additionally, a separate \textit{load\_monitor} task continually monitors the state of the \textit{load\_balancer} resource on all nodes and increments it all nodes are equally occupied or decrements it if all nodes have more than one available \textit{load\_balancer} resource. By performing these two functions, the \textit{load\_monitor} task ensures that the resource availability remains elastic, and thus every task requesting the \textit{load\_balancer} resource gets scheduled.
+
+% This task has two key responsibilities:
+% \begin{itemize}
+%     \item When the available capacity of the \textit{load\_balancer} resource across the cluster drops under a predefined threshold (e.g., becomes 0), increment the capacity by 1 on all nodes.
+%     \item When the available capacity of the \textit{load\_balancer} resource on all machines exceeds a predefined threshold (e.g., 1), decrement the capacity by 1 on all nodes.
+% \end{itemize}    
+% By performing these two functions, the \textit{load\_monitor} task ensures that the resource availability remain elastic, and thus every task requesting the \textit{load\_balancer} resource gets scheduled.
+
+% Upper bounds on task count dont work - should we explain why?
+
+
+% \begin{listing}
+% \begin{minted}{python}
+% def load_monitor():
+%   while True:
+%     avail_res = get_cluster_status()
+%     current_load_vector = [avail_res[node]['load_balancer'] for node in nodes]
+%     if all(load == 0 for load in current_load_vector):
+%       for node in nodes:
+%         current_cap = node.resources['load_balancer']
+%         update_resource(label='load_balancer', capacity=current_cap + 1, constraint=node)
+%     if all(load >= 1 for load in current_load_vector):
+%       for node in nodes:
+%         current_cap = node.resources['load_balancer']
+%         update_resource(label='load_balancer', capacity=current_cap - 1, constraint=node)
+
+% def dynamic_load_balancing():
+%   load_monitor.launch()
+%   for task in tasks:
+%     task.resources = {"load_balancer": 1}
+%     task.launch()
+% \end{minted}
+% \caption{Dynamic load balancing  with \name{}}
+% \end{listing}
+
+\subsection{Bin-packing}
+%todo(romilb): Should bin-packing be merged with load balancing
+Contrary to load-balancing, some applications may want to pack tasks on as few nodes as possible to avoid resource fragmentation. Moreover, packing can be used to elastically provision the fewest number of nodes for an application, which can result in significant savings (e.g., especially when the deployment is on a public cloud).
+
+Packing can be implemented by enforcing load-balancing on only a subset of all nodes, and dyanmically expanding this subset to ensure resource constraints of tasks can always be satisfied. Figure \ref{fig:policycode:binpacking} shows the pseudocode for achieving bin-packing. All nodes in the bin-packing set are labelled with a \lstinline{binpack} resource with infinite capacity. Before launching the task, the application checks if the task's resource requirement will be satisfied on any node in the bin-packing set. If not, it tries to expand the binpacking set of nodes to include a feasible node and launches the task by appending the \lstinline{binpack} resource to it's resource requirement vector. 
+
+% \begin{listing}
+% \begin{minted}{python}
+% #Assuming load_balancing scheduling is already running
+% def deprovision_node(node):
+%   update_resource(label="load_balancing", node=node, capacity=0)
+% \end{minted}
+% \caption{Deprovisioning nodes to enforce bin-packing}
+% \end{listing}
+
+
+\subsection{Data locality}
+Distributed operators often have data dependencies which may not be satisfied by the node they are placed on. This incurs the overhead of fetching the inputs from a remote node before the operator is executed. Data-locality aware scheduling aims to minimize this overhead by scheduling tasks at nodes where the data already exists. 
+% Examples of such applications include dataframe processing and loading csv files in Modin~\cite{DevinMasters}---a data processing library implemented on top of Ray. As large CSV files are loaded, it may be preferable to partition the file and associate processing tasks per partition, while distributing the partitions across nodes. These tasks are then best co-located with the data they consume.
+
+
+% Very classic big data requirement to have data locality - baked into scheduler for spark,mapreduce etc.
+% Context for policy - eg data -> Partitions
+% Figures for making it easier to understand
+
+Ephemeral resources can allow applications to implement data locality-aware scheduling. If the node where the data is located is known, the application can create an ephemeral resource with the label \lstinline{data} and capacity 1 at the node. It can then launch the task and request 1 unit of \lstinline{data} resource to co-locate the task with the data, as shown in Figure \ref{fig:policycode:datalocality}. 
+
+\name{} also allows embedding of application semantics, such as cache invalidation, as resource specifications. For instance, consider an application \cite{clipper} serving multiple replicas of a periodically retrained machine learning model. Such models can be hundreds of megabytes in size, so instantiating new model actor replicas for inference is best done on the node where a cached copy of the model can be found. However, the application also requires continuous updates to the model, which can result in stale caches of the model across the cluster. \name{} allows easy invalidation of stale caches when the base model is retrained by simply setting the capacity of \lstinline{data} to zero on all nodes, and resetting it to one when the cache is updated.
+
+%Serving multiple replicas of a periodically retrained machine learning model is another example. Such models can be hundreds of Megabytes in size, so instantiating new model actor replicas for inference is best done on the node where a cached copy of the model can be found. Inference queries submitted can specify their model locality preference as a soft constraint~(Sec.~\ref{softconstr}). \name{} easily allows to invalidate locally cached ML models when the base model is retrained by simply setting to zero the capacity of \lstinline{data}.
+% Depending on whether the generator task can be modified, data-locality can be achieved in two ways:
+
+
+% \begin{listing}
+% \begin{minted}{python}
+% def data_local_scheduling(data):
+%   node = get_location(data)
+%   set_resource(label="data", capacity=1, constraint=node)
+%   task.resources = {"data": 1}
+%   task.launch()
+% \end{minted}
+% \caption{Implementing data locality with ephemeral resources in \name{}}
+% \end{listing}
+
+\subsection{Anti-affinity}
+Some applications, such as databases, require tasks to be placed on physically distinct nodes for resilience against failures or to avoid resource contention. Figure \ref{fig:policycode:antiaff} demonstrates a simple implementation of Anti-affinity in ESCHER.  %todo(romilb): Find real-world application that needs Anti-affinity
+
+Ephemeral resources can enable anti-affinity by creating a \lstinline{anti_affinity} resource with capacity 1 on all nodes in the cluster. All tasks which must be placed separately should request 1 unit of \lstinline{anti_affinity} resource. When a task launches, it will consume the \lstinline{anti_affinity} resource and, thus, no other task will be scheduled on the same node until the resource is relinquished. % Note that this is similar to the implementation of the load-balancing policy described in Section~\ref{policies:loadbalancing}, where \lstinline{load_balancer} equals 1.
+
+% \begin{listing}
+% \begin{minted}{python}
+% def anti_affinity_scheduling():
+%   for node in nodes:
+%     set_resource(label="anti_affinity", capacity=1, constraint=node)
+%   for task in anti_affinity_tasks:
+%   task.resources = {"anti_affinity": 1}
+%   task.launch()
+% \end{minted}
+% \caption{Anti-Affinity with \name{}}
+% \end{listing}
+
+% \subsection{Atomicity}    % Omitting since distributed atomicity covers this
+
+
+\subsection{Gang Scheduling}
+Some applications, such as data-parallel training algorithms, require that all tasks should start and run concurrently. This implies all-or-none scheduling semantics, where either all resources requested by all tasks are granted simultaneously, or no resources are granted, and the resource request remains unsatisfied. This is known as gang scheduling.%, where groups of tasks must be launched together. %todo(romilb): Give example
+
+Gang scheduling can be implemented with ephemeral resources by creating reservation tasks that are submitted with the same resource requirements as the actual tasks, as demonstrated in Figure \ref{fig:policycode:gangsched}. On instantiation, all reservation tasks create a \lstinline{reservation} resource of capacity 1 on their host node and send a heartbeat to the application. The receipt of heartbeats from all reservation tasks indicates a successful resource acquisition and the application can then launch the gang of tasks by having each task request one unit of the \lstinline{reservation} resource each. If the opportunistic scheduling of reservation task fails (identified by a timeout), the reservation tasks remove the \lstinline{reservation} resource and terminate.
+
+% \begin{listing}
+% \begin{minted}{python}
+% def reservation_task():
+%   set_resource(label="reserved_node", capacity=1)
+%   send_heartbeat()
+%   sleep(timeout)
+%   result = get_scheduling_status()
+%   if result == "failed":
+%     set_resource(label="reserved_node", capacity=0)
+
+% def gang_scheduling():
+%   for task in tasks:
+%     reservation_task.resources = task.resources
+%     reservation_task.launch()
+  
+%   # Wait for reservation tasks to launch
+%   sleep(timeout)
+%   if all_heartbeats_received():
+%     scheduling_status = "success"
+%     for task in tasks:
+%       task.resources = {"reserved_node": 1}
+%       task.launch()
+%   else:
+%     scheduling_status = "failed"
+% \end{minted}
+% \caption{Implementing the all-or-nothing gang scheduling semantics with ephemeral resources in \name{}}
+% \end{listing}
+%TODO(romilb): Should we be careful here to launch tasks only where their reservation actor succeeded? This is relevant when tasks have varying resource requirements, but it would complicate the pseudocode.
+Gang scheduling is particularly hard to achieve without explicit support either hard-coded in the scheduler as a feature or as a space-time rectangle, where the simultaneous start-time is enforced by the resource request primitive itself (e.g., the ``n Choose k'' primitive in TetriSched~\cite{tetrisched}). As a result, some frameworks~\cite{mesos, firmament} require multiple rounds to emulate the all-or-nothing semantics. This is insignificant for high-churn, fine-grain task execution environments (e.g., targeted by Mesos~\cite{mesos}), but may cause liveness violations when tasks are longer running or a larger number of tasks is gang scheduled.
+
+\subsection{Weighted Fair Queuing}
+
+Ephemeral resources can also be used to enforce priority orderings of tasks, such as in Weighted Fair Queuing \cite{wfq}. To implement two queues, an application can create two resources, \lstinline{queue_1} and \lstinline{queue_2}, on each node with capacity zero. Each task can then be assigned to either of the queues by having it request 1 unit of \lstinline{queue_1} or \lstinline{queue_2} resource. On submitting these tasks, they will be put in the wait queue since none of the nodes have the capcaity for \lstinline{queue} resource. The application can then update the \lstinline{queue} resource to a capacity proportional to the weight it wants to assign to the queue. For instance, creating two units of \lstinline{queue_1} resource would grant two slots for tasks from queue 1. Remaining tasks must wait until these slots are released on task completion.
+
+%todo(romilb): Mathematically formulate this for arbitrary priority levels and reservation counts
+%todo(romilb): Talk about preemption support.
+
+\subsection{Soft constraints}
+\label{softconstr}
+As the default policy, the core scheduler enforces a strict matching of task resource requirements to cluster resource availability. If any resource in the set of requirements is unavailable, scheduling will fail even if other resources are available. However, this hard matching requirement is not always desirable. Some applications may demand relaxed scheduling semantics, where some resource requirements can be specified as soft constraints. If the soft constraints are not satisfied, they can be discarded and the task is rescheduled with only the remaining resource requirements.
+
+Ephemeral resources can be leveraged to implement soft constraints even when the scheduler only supports strict matching of resource requirements. First, the application specifies the soft constraints as an ordinal set of resource set preferences $R = [r_1, r_2, ..., r_n]$, where $r_i$ is the $i^{th}$ preferred resource requirement set. The ordering of this set indicates the resource preference order. For instance, an application which has a soft requirement of a GPU, but will work even without a GPU would specify its resource requirements as $R = [\{gpu: 1\}, \{\} ]$.
+
+The application then instruments its tasks with a lightweight heartbeat sent to the application to notify it of successful scheduling when the task launches (Listing \ref{listing:softconstr}). The application now sequentially attempts launching tasks with starting with resource requirement $r_1$. If the application does not receive the callback from the task within a certain wait timeout $t$, it implies the resource requirement was not matched and thus it retries scheduling, but now with a resource requirement $r_2$. This best-effort scheduling is attempted for all resource preferences $r \in R$ till the scheduling succeeds or all preferences have been evaluated.
+
+This mechanism also prevents any duplicate execution of tasks. The response to a task heartbeat is a signal which indicates if the task should continue execution or terminate immediately. When a task successfully launches for the first time, the application sends a continue execution signal, but any subsequent successful task heartbeats are sent the termination signal. This ensures that any duplicate launches, either due to resources becoming available over time or a short wait timeout, are suppressed.
+
+%NOTE(romilb):Ephermerality of resources isn't really used for soft-constraints..
+
+\begin{listing}
+\begin{minted}[fontsize=\tiny]{python}
+def task():
+  is_valid_run = send_heartbeat()
+  if is_valid_run:
+    ...
+
+def soft_constraint_scheduler(task, ordinal_resource_preferences):
+  for resource_preference in ordinal_resource_preferences:
+    if heartbeat_already_received(task.task_id):
+      break
+    task.resources = resource_preference
+    task.launch()
+    sleep(timeout)
+
+def receive_heartbeat(heartbeat):
+  if already_received(heartbeat.task_id):
+    is_valid_run = False
+  else:
+    mark_received(heartbeat.task_id)
+  is_valid_run = True
+
+def main():
+  ordinal_resource_preferences = [{gpu: 1}, {cpu: 1}]
+  soft_constraint_scheduler(task, ordinal_resource_preferences)
+\end{minted}
+\caption{Soft constraints with \name{}}
+\label{listing:softconstr}
+\end{listing}
+
+\subsection{Hierarchical Policy Composition}
+\label{policies:composition}
+
+%TODO(romilb): Add graphic to explain this better?
+
+Some applications may have scheduling requirements that may be expressed as a hierarchical composition of the basic scheduling policies discussed above. For instance, an application might want to enforce co-location among a set of tasks, while evenly spreading out these groups of co-located tasks to load balance across the cluster. Implementing this policy on existing frameworks is challenging due to the highly specific needs of this application. Even if the application developer was to modify the core framework scheduler, the implementation of this policy is still complex, requiring significant developer effort to develop and maintain.
+
+With ephemeral resources a hierarchical policy can be easily expressed as a composition of other policies. Since ephemeral resources use resource management to apply scheduling constraints, adding a policy on top of another is as simple as adding another set of ephemeral resource constraints on an existing policy. Complex compositions and their resolutions can be implemented by specifying a priority ordering of compositions as soft constraints. For instance, if the above described application wants to co-locate $task1$ and $task2$ while load balancing their groups across the cluster, it can simply apply co-location on $task1$ and $task2$ and load balancing only on $task1$ as shown in Listing \ref{compositionpolicy}.
+
+\begin{listing}
+\begin{minted}[fontsize=\tiny]{python}
+def task1(id):
+  set_resource(label=id, capacity=1)
+  ...
+def task2():
+  ...
+def composite_scheduling():
+  # Create load-balancing resources
+  for node in cluster:
+    set_resource("load_balancing", 1, node)
+  # Launch tasks
+  for i in range(0, task_count):
+    # Load balance task 1
+    task1.launch(id=i, resources = {'load_balancing': 1})
+    # Co-locate task 1 & 2
+    task2.launch(resources = {i: 1})
+\end{minted}
+\caption{Composition of load-balancing and co-location policies with ephemeral resources in \name{}.}
+\label{compositionpolicy}
+\end{listing}
+
+% \begin{itemize}
+%     \item TODO(romilb): Delay scheduling as a sub-case of soft constraints (Data locality)
+% \end{itemize}

@@ -1,0 +1,117 @@
+% \begin{algorithm}
+%  \KwData{Configuration profiles $\Gamma_v$ and $\Lambda_v$ and resource allocations $g^{c}_R$ and $g^{c}_I$ for video $v$}
+%  \KwResult{The optimal configurations $\gamma^{opt}_{v}$ and  $\lambda^{opt}_{v}$}
+%  
+%  best\_accuracy = 0\;
+%  \For{$\lambda_v$ in $\Lambda_v$}{
+%     \For{$\gamma_v$ in $\Gamma_v$}{
+%          accuracy = simulator([$\lambda_v$, $\gamma_v$], [$g^{c}_R$, $g^{c}_I$])\;
+%         \If{accuracy > best\_accuracy}{
+%             $\lambda^{opt}_{v}$, $\gamma^{opt}_{v}$ = $\lambda_v$, $\gamma_v$\;
+%             best\_accuracy = accuracy\;
+%         }
+%     }
+%  }
+% 
+% return $\lambda^{opt}_{v}$, $\gamma^{opt}_{v}$\;
+% \caption{ConfigurationPickingRoutine}
+% \label{algo:config_pick}
+%\end{algorithm}
+
+\begin{algorithm}[t]
+\small
+ \KwData{Training ($\Gamma$) and inference ($\Lambda$) configurations}
+ \KwResult{GPU allocations $\mathcal{R}$ and $\mathcal{I}$, chosen configurations ($\gamma \in \Gamma$, $\lambda \in \Lambda$) $\forall v \in V$}% for the period T.}
+ 
+ % Run in a loop to do iterations of configuration selection and resource allocation
+all\_jobs[] = Union of inference and training jobs of videos $V$\;
+\tcc{Initialize with fair allocation}
+ best\_alloc[] = fair\_allocation(all\_jobs)\; 
+% \For{iteration in iteration\_count}{
+     % Perform SCO - Single camera optimization which picks the best hyperparameters.
+%     \For{v in V}{
+%        v.training\_config = {\sf\footnotesize PickConfigurations}(v, curr\_alloc[v]) \;
+%     }
+ best\_accuracy\_avg =  {\sf\footnotesize PickConfigurations}(best\_alloc, {\bf out} best\_configs[]) \;
+     % Perform thief resource stealing
+     \tcc{Thief resource stealing}
+%     best\_accuracy\_avg = 0\;
+     \For{\text{\em thief\_job} in \text{\em all\_jobs[]}}{
+        \For{\text{\em victim\_job} in \text{\em all\_jobs[]}}{
+            \If{\text{\em thief\_job} == \text{\em victim\_job}} {\bf continue\;}
+            temp\_alloc[] $\leftarrow$ best\_alloc[]\;
+            \While{true}{
+                \tcc{$\Delta$ is the increment of stealing}
+                temp\_alloc[victim\_job] $-$= $\Delta$\;
+                temp\_alloc[thief\_job] $+$= $\Delta$\;
+                \If{{\em temp\_alloc[victim\_job]} < {\em 0}}{
+                    \bf break\;
+                }
+                \tcc{Calculate accuracy over retraining window and pick configurations.}accuracy\_avg = {\sf\footnotesize PickConfigurations}(temp\_alloc, {\bf out} temp\_configs[])\;
+                %\tcc{Calculate accuracy over retraining window and pick configurations.}%accuracy\_$\alpha$ = {\sf\footnotesize Estim}(temp\_configs[], temp\_alloc[])\;
+                \If{{\em accuracy\_avg} > {\em best\_accuracy\_avg}}{
+                    best\_alloc[] = temp\_alloc[]\;
+                    best\_accuracy\_avg = accuracy\_avg\;
+                    best\_configs[] = temp\_configs[];
+                }
+                \Else{\bf break\;}
+            }
+        }
+     }
+% }
+ {\bf return} {best\_alloc[], best\_configs[]}\;
+ 
+ \caption{Thief Scheduler.
+ %\junchen{it's going through all the users, rather than iterative algorithm.. may need a better structure}
+ %\romil{Explain estim in function call.}
+ }
+ \label{algo:thief_sched}
+\end{algorithm}
+
+% PickConfigurations
+% For the given allocation, finds the best configuration and returns the accuracy gotten by the best configuration and given resource allocation.
+
+\begin{algorithm}[t]
+\small
+ \KwData{Initial resource allocations $\mathcal{R}^\prime$ and $\mathcal{I}^\prime$ and configurations ($\Lambda$)}
+ \KwResult{GPU allocations $\mathcal{R}$ and $\mathcal{I}$, chosen configurations ($\gamma \in \Gamma$, $\lambda \in \Lambda$) $\forall v \in V$}% for the period T.}
+ 
+ % Run in a loop to do iterations of configuration selection and resource allocation
+all\_jobs[] = Union of inference and training jobs of videos $V$\;
+\tcc{Initialize with fair allocation}
+ best\_alloc[] = fair\_allocation(all\_jobs)\; 
+% \For{iteration in iteration\_count}{
+     % Perform SCO - Single camera optimization which picks the best hyperparameters.
+%     \For{v in V}{
+%        v.training\_config = {\sf\footnotesize PickConfigurations}(v, curr\_alloc[v]) \;
+%     }
+ best\_accuracy\_avg =  {\sf\footnotesize PickConfigurations}(best\_alloc, {\bf out} best\_configs[]) \;
+     % Perform thief resource stealing
+     \tcc{Thief resource stealing}
+%     best\_accuracy\_avg = 0\;
+     \For{\text{\em thief\_job} in \text{\em all\_jobs[]}}{
+        \For{\text{\em victim\_job} in \text{\em all\_jobs[]}}{
+            \If{\text{\em thief\_job} == \text{\em victim\_job}} {\bf continue\;}
+            temp\_alloc[] $\leftarrow$ best\_alloc[]\;
+            \While{true}{
+                \tcc{$\Delta$ is the increment of stealing}
+                temp\_alloc[victim\_job] $-$= $\Delta$\;
+                temp\_alloc[thief\_job] $+$= $\Delta$\;
+                \tcc{Calculate accuracy over retraining window and pick configurations.}accuracy\_avg = {\sf\footnotesize PickConfigurations}(temp\_alloc, {\bf out} temp\_configs[])\;
+                %\tcc{Calculate accuracy over retraining window and pick configurations.}%accuracy\_$\alpha$ = {\sf\footnotesize Estim}(temp\_configs[], temp\_alloc[])\;
+                \If{{\em accuracy\_avg} > {\em best\_accuracy\_avg}}{
+                    best\_alloc[] = temp\_alloc[]\;
+                    best\_accuracy\_avg = accuracy\_avg\;
+                    best\_configs[] = temp\_configs[];
+                }
+                \Else{\bf break\;}
+            }
+        }
+     }
+% }
+ {\bf return} {best\_alloc[], best\_configs[]}\;
+ 
+ \caption{PickConfigurations \romil{FORMAT LATER}
+ }
+ \label{algo:pickconfigs}
+\end{algorithm}

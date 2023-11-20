@@ -1,0 +1,280 @@
+
+\section{Cilantro Architecture}
+\label{sec:method}
+
+Cilantro is a performance-aware scheduling framework that can optimize for various
+scheduling objectives without requiring any a priori knowledge of the resource-performance mapping of the workloads. The design of Cilantro is informed by the following two key insights.
+
+% R1 - Need online learning. Learners achieve R1
+ \noindent\textbf{[I1] Offline profiling of resource-performance is insufficient.} Performance-aware
+policies rely on accurate estimates of resource-to-performance mappings and load shifts.
+Offline profiling of these resource-performance mappings can be inaccurate due to unpredictability in server and application performance~\cite{tailatscale} and
+changing traffic patterns~\cite{googletrace}. 
+Adapting to these changes necessitates continuously learning
+% resource-performance mappings for each running service
+and predicting these unknowns in an online manner.
+
+% R2 - Need modularity. PRT and learners achieves R2 - Decouple policies 
+% Generality and efficiency require decoupling
+\noindent\textbf{[I2] Decoupling learning mechanisms and policies enables diverse scheduling objectives.}
+% \rbcomment{There are solutions using end-to-end learning (RL), but to support different objective you'll need to run learn every time. Thus, by decoupling, you can make this more efficient since you can learn the model once. 2. Specifying defaults is easy in case metrics are not available. 3. More transparent design - debuggable and explainable.}
+As different
+scheduling policies optimize different criteria, it may be challenging for a scheduling
+framework to generally support different policy types. Prior work on feedback-driven resource
+allocation~\cite{zhang2021sinan, kalavri2018three, qiu2020firm} \cameratext{uses} an end-to-end model for
+allocating resources for a fixed objective, such as total utility or cost.
+% However, if the
+% scheduling objective changes, these frameworks require expensive retraining of their models, if not
+% a complete redesign of the system.
+% However, if the
+Optimizing for a different objective in \cameratext{these systems} may require a complete redesign of the system and policy, or at the very least
+an expensive retraining of their models.
+% if not a complete redesign of the system.
+Decoupling learning mechanisms from policies allows the
+model to be learned once and applied to multiple allocation objectives. This decoupling also increases 
+transparency in the allocation decisions made by the scheduler and facilitates debugging.
+
+% For instance, 
+% %allocating resources for a performance-based policy, such as aggregate throughput maximization, requires the individual throughput of each application. On the other hand, a resource-based policy, such as dominant resource fairness \cite{ghodsi2011dominant}, requires the total resource capacity. Whikle
+% systems such as Sinan \cite{zhang2021sinan} can implement end-to-end performance-maximizing policies
+% while YARN~\cite{yarn} and~Mesos~\cite{hindman2011mesos} can support demand-based fairness
+% policies. But there are no systems which
+% can support both types of policies.
+% To support a diversity of performance-aware allocation criteria, learning mechanisms must
+% operate independent of the policies themselves, but must inform the policies of their estimates
+% to support making allocation decisions.
+
+% Supporting such a diversity of policies necessitates
+% Supporting both these policy types
+% requires policies to be able to 1) operate on under uncertain estimates of performance-resource
+% mappings and 2) model load shifts in learners. \rbcomment{I'm not very happy with 2)..} 
+% 
+% Can use previous learned curves for any policy
+
+% R3 - 
+% \noindent\textbf{[I3] Diversity of applications, learning models, and cluster managers
+% necessitates asynchronicity.} \rbcomment{This is more of an engineering argument... Remove.} The frequency of
+% performance feedback depends on the application and the environment (see
+% \S\ref{sec:microbenchmarks}).
+% For instance, database query
+% serving jobs may report feedback multiple times in a minutes, while deep learning training jobs may
+% do so only every few minutes. \rbcomment{Give concrete examples, e.g. TPC-H, ResNet-101 training}
+% Similarly, the time to update a learning model with new data depends on the model itself,
+% and the frequency at which we can change allocations in a cluster depends on the agility of
+% the cluster manager.
+% Avoiding unnecessary bottlenecks in the system
+% necessitates an asynchronous design where each
+% component operates in a push or pull based framework. This
+% allows high frequency components to operate at their maximum rate while allowing slower components,
+% such as learners for low-frequency jobs or cluster managers, to be polled when required.
+
+% \subsection{Design goals}
+% The design of Cilantro aims to support three key goals.
+% \begin{enumerate}
+%     \item \textbf{[G1] Learn resource-performance mappings online.} Performance-based policies, such as welfare maximization, rely on accurate resource requirement estimates for a specific performance target. Obtaining these resource-performance mappings through offline profiling is insufficient due to unpredictability in server and application performance \cite{tailatscale} and changing traffic patterns \cite{googletrace}. Adapting to these changes necessitates learning resource-performance mappings for each running service in an online manner.
+%     % Learners achieve G@
+%     \item \textbf{[G2] Delineate learning mechanisms from the scheduling polcies.} Scheduling policies, either resource-based or performance-based, rely on input parameters to produce resource allocations that satisfy the policy's constraints. For instance, a welfare maximization policy requires the individual performance of each application to allocate resources. 
+%     % PRT and learners achieves G2 - Decouple policies 
+%     % Decouple
+%     \item \textbf{Produce best-effort estimates when feedback is unavailable.}
+%     \item \textbf{Minimize resource thrashing and queuing .}
+% \end{enumerate}
+
+
+We leverage these learnings to build Cilantro (Figure ~\ref{fig:scheme}). Cilantro is composed of two key components: the centralized Cilantro scheduler, which is responsible for generating resource allocations, and the Cilantro clients---lightweight sidecars co-located with each job---which fetch a job's performance metrics and send them to the Cilantro scheduler. Informed by \textbf{[I1]}, the Cilantro scheduler employs online learning to create increasingly accurate models of job performance and load. Guided by \textbf{[I2]}, the policy optimizes a user-defined objective by polling these models for a resource-performance estimates to produce a resource allocation.
+
+
+%Cilantro is composed of two key components: the centralized Cilantro scheduler, which is responsible for generating resource allocations, and the Cilantro clients---lightweight sidecars co-located with each job---which fetch a job's performance metrics and send them to the Cilantro scheduler.
+
+
+% Using these insights, we build Cilantro, which can support performance-aware and demand-based
+% resource allocation in a general manner. Cilantro incorporates performance-aware policies through
+% online learning of the resource-performance mappings of jobs, while achieving generality by
+% decoupling the scheduling policies from the resource allocation and online learning mechanisms of
+% the framework. Figure~\ref{fig:scheme} presents the architecture of Cilantro.
+
+
+\insertFigScheme
+\textbf{Assumptions \& terminology.}
+% \kkcomment{fixed cluster}
+In this work, %both in the multi-tenant and microservices settings,
+ we will focus on jobs which can scale elastically with the
+number of resources with corresponding gains in performance.
+% Precisely this means that in the multi-tenant setting, a job's performance is
+% (atleast approximately) non-decreasing in the amount of resources allocated to it.
+% In the microservices setting, this means that fixing the resource allocations for all other
+% microservices, the application's end-to-end performance is 
+% (atleast approximately) non-decreasing in the amount of resources allocated to any given
+% microservice.
+Examples of such workloads include stateless or stateful distributed services
+(e.g., prediction serving~\cite{crankshaw2017clipper},
+memcached~\cite{fitzpatrick2004distributed},
+Cassandra~\cite{lakshman2010cassandra}),
+distributed computation (ML training, MPI jobs)
+and distributed frameworks
+(e.g. Hadoop~\cite{shvachko2010hadoop}, Spark~\cite{zaharia2010spark}).
+% \kkcomment{@Romil: can you add workloads from the Hotel reservations application here?}\rbcomment{I believe it's already captured in the distributed services above}
+Some of these can be viewed as a collection of several tasks whose job size may vary with
+time,
+such as in serving jobs. Each task may refer to a query whose arrival rate may change with
+time.
+\cameratext{For jobs with such varying query rates,}
+we will refer to the instantaneous rate of external query arrival as the \emph{load}
+(measured in queries per second (QPS)).
+% In order to make learning feasible, jobs should run for a long enough duration (at least a few hours) and should frequently emit metrics which are indicative of its performance.
+%Finally, a single unit of resource may refer to a container or a virtual machine.
+Finally, we assume there is a \emph{fixed amount} of a \emph{single}, \emph{fungible}
+% We also assume that there is a single fungible
+resource type that must be allocated.
+
+
+\newcommand{\moduleheader}[1]{\textbf{#1.}}
+% \newcommand{\moduleheader}[1]{\emph{\underline{#1.}}}
+% \newcommand{\moduleheader}[1]{\emph{#1.}}
+% \newcommand{\moduleheader}[1]{\emph{\textbf{#1.}}}
+
+
+% \kkcomment{Mention that the utilities are updated frequently so the learners can leran frequently.
+% The allocation is at a slower rate.}
+
+% \insertFigUtilityIllus
+
+% \subsection{Cilantro Scheduler}
+\label{sec:design:cilantroscheduler}
+
+\textbf{\underline{Cilantro scheduler:}}
+The Cilantro scheduler is designed as a centralized asynchronous event driven system.
+% Events trigger various modules in the system.
+Event sources include timers, performance updates received from the Cilantro clients, and
+cluster state updates from the underlying resource manager.
+Below, we describe the scheduler's modules.
+% We now describe different modules in the Cilantro scheduler.
+Specific implementation details are
+available in \S\ref{sec:implementation}. 
+% \kkcomment{Below, you haven't described which events trigger which modules.}\rbcomment{Added where they were missing.}
+
+\moduleheader{1. Data loggers}
+Application metrics pushed from Cilantro clients are stored in memory-backed tables.
+They relay these metrics to the performance learners and load forecasters.
+% when queried via its \incmtt{get-latest-data} interface.
+% Performance updates from Cilantro clients are stored in data loggers -- memory-backed tables which
+% are polled by the performance learners and load forecasters.
+% The data loggers store application performance reports
+% from cilantro clients and relay it to the learners when queried.
+% The Cilantro scheduler maintains a data logger per running application.
+% The data logger
+% offers a \submitevent{} interface, which applications can use to push data,
+% and a \getdata{} interface, which the time series and performance learners can use to pull data.
+% Each event contains at least the following fields:
+% \fldalloc: the allocation (amount of resources) the job received during this event,
+% \fldreward: the instantaneous stochastic performance value,
+% \fldload: the average load observed during the event,
+% \fldeventstarttime, \fldeventendtime: the start and end times during which the above metrics were computed.
+% When the size exceeds a specified threshold, the table is spilled to disk to reduce memory footprint.
+
+\moduleheader{2. Performance learner}
+The performance learner learns a job's performance as a function of the
+% This module learns an application's performance as a function of the
+resource allocation and the load using an associated model.
+It periodically polls the data logger for new data and updates the model.
+The learner's update frequency is constrained only by the velocity at which the model
+can be updated.
+One instance of a performance learner is maintained per application.
+% 
+A performance learner provides 
+\incmtt{get-perf-ucb} and \incmtt{get-perf-lcb} interfaces for a policy, which return upper and lower confidence bounds for the performance as a function of the resources and load.
+% upper and lower confidence bounds respectively for the performance as a function of the amount of resources and load, which are used by the policy.
+
+\insertFigUtilityIllus
+
+\moduleheader{3. Load forecasters}
+In many real-world deployments, the job size could vary with time depending on the real-time traffic,
+which should be accounted for when allocating resources.
+The goal of the load forecaster is to estimate this load for the duration of a future allocation
+based on past observed loads via an associated time series model.
+% based on past dat
+% queries 
+% The goal of the time series learner is to estimate the time-varying load which
+It offers \gettsucb{} interface for a policy which returns an upper confidence
+bound for the future load.
+%The time series learner operates similarly to the performance learner, maintaining two models which
+Load forecasters are periodically updated by polling from the data loggers.
+
+\moduleheader{4. Uncertainty-aware Policy}
+Policies compute allocations in order to optimize for a user-specified scheduling objective.
+In an online setting, using direct estimates of the performance may fail as
+it does not reflect the uncertainty in the model.
+Therefore, Cilantro's policies leverage confidence intervals of these estimates to
+account for this uncertainty in a principled manner when making allocation decisions (\S\ref{sec:policies}).
+% The policy module  queries the performance learners and load forecasters to obtain these confidence
+% bounds.
+% It offers a \getalloc{} interface which can be queried by the Resource Allocator
+% to compute resource allocations.
+
+
+% In an online-learning setting, directly using estimates of resource demands for a specific
+% performance goal can be inaccurate because point estimates do not reflect the uncertainty in the
+% model. Instead Cilantro uses the optimism in the face of uncertainity (OFU)
+% principle\cite{abbasi2011ofu} to inform its policies with the confidence bounds for the
+% resource-performance estimates using the \getpforal{} interface. This value is scaled by the current
+% load estimate received from \gettsucb{} to get the resource demand required for satisfying the job's
+% performance goal. The use of confidence bounds to compute allocations is described in
+% \S\ref{sec:learningpolicies}.
+% While many performance-aware policies can directly utilize current application performance and load information to compute resource allocations, supporting performance-oblivious scheduling policies (such as max-min fairness) requires stating the resource demand of the job. To maintain the generality of Cilantro, we introduce a performance-resource translator (PRT), a thin layer which converts performance, load estimates and the job's performance goals into the resource demands for jobs.
+
+% Our implementation of PRT operates on the assumption that each task in the job requires the same amount of resources to complete. PRT exposes the \getaforpl{} interface, which, for a given performance
+% goal and load, returns an estimate and confidence intervals for the resource demand (i.e. amount of resources
+% required to meet the performance goal). PRT produces these estimates by querying the \getpforal{} interface for the resource requirement to achieve the target performance. This value is scaled by the current load estimate received from \gettsucb{} to get the resource demand required for satisfying the job's performance goal. We discuss the importance of returning confidence intervals in Section \ref{sec:learningpolicies}.
+
+% By polling the \getaforpl{} interface, the policy computes an allocation according to a pre-specified goal (see Section~\ref{sec:policies} for some goals and specific policies).
+% It provides a \getalloc{} interface which, upon invocation,
+% queries the performance-resource translation layer for estimates of resource demands and computes an allocation.
+
+
+\moduleheader{5. Resource allocator}
+The resource allocator is responsible for executing the resource allocations by interfacing with the
+underlying cluster manager.
+This module is driven via an
+allocation expiry event, upon which it invokes the policy's \getalloc{} method and allocates the
+resources. Allocation expiry events are raised based on a timeout,
+resulting in a new round of allocations.
+In practice, the duration of an allocation round
+is limited by the agility of the environment. Since scaling jobs requires time, changing
+resource allocations too frequently can result in job thrashing (having to scale down before it has
+a chance to utilize new resources).
+% Consequently, Cilantro enforces a minimum time period between changing resource allocations.
+% \kkcomment{Can we shrink this?}
+
+% \subsection{Cilantro client}
+\label{sec:design:cilantroclient}
+
+\textbf{\underline{Cilantro client:}}
+The Cilantro client is a lightweight side-car container \cameratext{whose purpose is to} to poll the job to get its current performance,
+process it, and 
+publish it to the scheduler's data loggers.
+% In doing so, the client can also
+% process the performance metrics to make them more representative of the
+% real-world value of the said performance (Section \ref{sec:utilities}). 
+% 
+The primary task for the client is to extract metrics from their assigned job. Many
+systems expose REST endpoints to query system performance~\cite{kuberneteshealth,
+raydashboard}, but often the applications also use monitoring tools such as
+Prometheus or Grafana.
+%In such situations, the Cilantro client can
+%directly query these services.
+Depending on the job, the performance metric extraction logic is specified by the users.
+In \S\ref{sec:discussion}, we describe built-in fallback options if job metrics are not
+available.
+% If the Cilantro client has no visibility into the application metrics, we provide built-in fallback
+
+% that can use surrogate metrics from the Kubernetes API, such as resource utilization, to report job
+% performance. The user can also directly submit a resource demand via the client which will then be fed to the policy when determining allocations.
+% \kkcomment{Is it better to discuss the last part of this paragraph in the discussion section?}
+% \kkcomment{I don't think its necessary to reiterate the sub-optimality of surrogates. what do you
+% think of the last sentence?}
+
+% While this is not desirable, any sub-optimal allocations made due to the use of
+% surrogate metrics only hurts the application not implementing the Cilantro client (Section
+% \ref{sec:microbenchmarks}), thus incentivizing accurate reporting. 
+% \rbcomment{Kirthi can you read this once?}
+

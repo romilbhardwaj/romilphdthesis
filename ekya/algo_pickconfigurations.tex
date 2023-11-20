@@ -1,0 +1,34 @@
+% PickConfigurations
+% For the given allocation, finds the best configuration and returns the accuracy gotten by the best configuration and given resource allocation.
+
+\begin{algorithm}[t]
+\small
+ \KwData{Resource allocations in {temp\_alloc[]}, configurations ($\Gamma$ and $\Lambda$), retraining window $T$, videos $V$}
+ \KwResult{Chosen configs $\forall v \in V$, %for the given $\mathcal{R}^\prime$ and $\mathcal{I}^\prime$, 
+ average accuracy over $T$}
+ 
+     chosen\_accuracies[] $\leftarrow$\{\}; chosen\_configs[] $\leftarrow$\{\}\;
+     \For{\text{\em v} in $V$\text{\em []}}{
+        %\tcc{Pick highest accuracy inference cfg}
+        infer\_config\_pool[] = $\Lambda$.{\bf where}(\text{resource\_cost} < temp\_alloc[v.inference\_job] \&\& accuracy $\geq a_\text{MIN}$ )\;
+        % Add alpha min filter in cfg_pool
+        infer\_config = {\bf max}(infer\_config\_pool, {\bf key}=accuracy)\;
+        %\tcc{Pick training configuration}
+        best\_accuracy = 0\;
+        % best\_training\_cfg = None\;
+        \For{\text{\em train\_config} in \text{\em $\Gamma$}}{
+            \tcc{Estimate accuracy of inference/training config pair over retraining window} % Done using profiles.
+            accuracy = {\sf\footnotesize EstimateAccuracy}(train\_config, infer\_config, temp\_alloc[v.training\_job], $T$)\;
+            \If{\text{\em accuracy} > \text{\em best\_accuracy}} {
+                best\_accuracy = accuracy\;
+                best\_train\_config = train\_config\;
+            }
+        }
+        chosen\_accuracies[v] = best\_accuracy\;
+        chosen\_configs[v] = \{infer\_config, best\_train\_config\}\;
+     }
+    {\bf return} chosen\_configs[], {\bf mean}(chosen\_accuracies[])\;
+ 
+ \caption{\bf\small PickConfigs}
+ \label{algo:pickconfigs}
+\end{algorithm}

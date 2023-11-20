@@ -1,0 +1,123 @@
+\section{Ekya Implementation}
+\label{sec:system}
+
+% impl overview
+
+% logical integration
+
+% key design choices
+% - fine-grained gpu isolation
+% - control interface with inference/retraining process
+% - efficient support for microprofiling
+
+%\junchen{this is copied from eval}
+% We implement a prototype of \name using Python and the Ray framework~ \cite{ray}.
+
+%Next, we describe how \name is integrated with existing libraries of DNN inference/training and the key design choices that optimize \name's efficiency in practice. 
+
+% \subsection{API and integration}
+% \label{sec:integration}
+
+%\mypara{Interfaces}
+%\junchen{1. what are the input API exposed by \name (sequence of images/frames); 2. what API does \name assume from the GPU library; and from the DNN runtime. 3. and importantly, these APIs are already provided by existing libraries and DNN inference/retraining can be done as is.}
+%\name decodes video frames (images) from encoded video streams and feeds the frames to the inference tasks while also accumulating them to be used as input for the model's retraining at the beginning of each retraining window. 
+% which are split into retraining tasks.
+% Each task is a logical collection of data (images) accumulated in a retraining period. 
+\name uses PyTorch \cite{pytorch} for running and training ML models. 
+%Note that the training/inference jobs are logically the same as standalone training and inference tasks, so the underlying DNN engine can be seamlessly replaced and improved by better implementation.
+%To allocate fractional GPU resources to each job, we need driver-level support from the GPU.
+%\name uses Nvidia Multi-Process Service\cite{nvidia-mps} (MPS), which acts as a broker of GPU compute resources by intercepting CUDA calls and re-scheduling them according {\name}'s thief scheduler. 
+
+\mypara{Modularization}
+%\junchen{1. Instead of using a single top-down process, \name includes a collection of independent actors, each running the \name's control logic (microprofiling or thief scheduler or a training/inference job. 2. why? scalability? fault tolerance? slightly higher communication cost is tolerable since we operate on timescale of seconds.}
+%While \name could be a single process, 
+Our implementation uses a collection of logically distributed modules for ease of scale-out to many video streams and resources. 
+Each module acts as either the \name scheduler, micro-profiler, or a training/inference job, and is implemented by a long-running ``actor'' in Ray \cite{ray}. 
+A benefit of using the actor abstraction is its highly optimized initialization cost and failure recovery. %of training/inference models, thus allowing for % when they must be \gaa{invoked repetitively}, 
+%Since an actor can keep a model loaded into GPU memory even when it fails, this allows for 
+%quick recovery from failures. 
+%\name also uses Ray to handle failures\junchen{Romil, add some details here}. 
+% Moreover, this modularization allows Ekya to scale easily to multiple video streams and resources. Finally, actors are able to communicate in a peer-to-peer fashion, which allows training jobs to directly update the inference model when retraining completes.
+
+
+\mypara{Dynamic reallocation of resources}% GPU isolation
+\name reallocates GPU resources between training and inference jobs at timescales that are far more dynamic than required by prior frameworks (where the GPU allocations for jobs are fixed upfront ~\cite{kubernetes, yarn}).  
+%There are two approaches to fine-grained GPU isolation for \name: (1) a middle layer, such as the Nvidia MPS~\cite{nvidiamps}, at the GPU driver level can reschedule GPU calls, or (2) dynamically throttling the per-process input load (such as reducing the video sampling rate) to ensure resources are freed up for use by others. 
+While a middle layer like Nvidia MPS~\cite{nvidia-mps} provides resource isolation in the GPU by intercepting CUDA calls and re-scheduling them, it also 
+%A middle layer like Nvidia MPS 
+requires terminating and restarting a process to change its resource allocation. %, whereas throttling the load per-process may have the same effect without restarting the jobs, but Nvidia MPS enforces max-min fairness which does not allow arbitrary GPU partitioning. 
+Despite this drawback, \name uses Nvidia MPS due to its practicality, while the restarting costs are largely avoided by the actor-based implementation that keeps DNN model in GPU memory. %\footnote{Currently, \name is limited to managing the GPU compute cycles. Extending {\name} to multiple resources like GPU memory is part of future work.%, and it assumes GPU memory is generally available. Processes today simply fail if they try to allocate more GPU memory than is available. However, 
+%It is to be noted that recent work has shown that GPU memory can be virtualized with physical CPU memory \cite{salus, checkmate},and thus out-of-memory situations do not cause catastrophic failure. %In such a situation, GPU memory can be simply handled as an additional resource by \name.
+%}
+% For simplicity and fast model reloading, we use Nvidia MPS, but future work can consider regulating load as a mechanism to implement resource sharing.  
+%\romil{This is not what we really do.. just mentioning it here based on discussion with Junchen.} \romil{Mention the default CUDA max-min fairness work?}
+
+
+% \mypara{Placement onto GPUs} % GPU isolation
+% The resource allocations produced by the thief scheduler are ``continuous'', i.e., it assumes that the fractional resources can be spanned across two discrete GPUs. To avoid the consequent expensive inter-GPU communication, \name first quantizes the allocations to inverse powers of two (\eg 1/2, 1/4, 1/8). This makes the jobs amenable to packing. \name then allocates jobs to GPUs in descending order of demands to reduce fragmentation \cite{tetris}. %, which ensures all jobs fit on the GPUs.
+
+
+% \mypara{Model checkpointing and reloading}
+% \name can improve inference accuracy by checkpointing the model {\em during} retraining and dynamically loading it as the inference model~\cite{tf-checkpoint, torch-checkpoint}.
+
+
+% Checkpointing can, however, disrupt both the retraining and the inference jobs,
+% so {\name} weighs the cost of the disruption (\ie additional delay on retraining and inference) due to checkpointing against its benefits (\ie the more accurate model is available sooner).
+% Implementing checkpointing in \name is also made easy by the actor-based programming model that allows for queuing of requests when the actor (model) is unavailable when its new weights are being loaded. 
+
+
+\mypara{Adapting estimates during retraining}
+%{\name} relies on estimates on the expected accuracy from the retraining (to be explained in \S\ref{sec:profiling}), that it uses in Algorithm \ref{algo:thief_sched}. However, when the actual accuracy during the retraining varies from its expected value, {\name} reactively adjusts its allocations. 
+When the accuracy during the retraining varies from the expected value from micro-profiling, {\name} reactively adjusts its allocations. 
+%The {\em reactive} controller in {\name} (Figure \ref{fig:sys-arch}) monitors the growth in accuracy of the retraining jobs. 
+Every few epochs, \name uses the current accuracy of the model being retrained to estimate its eventual accuracy when all the epochs are complete. It updates the expected accuracy in the profile of the retraining ($\Gamma$) with the new value, and then reruns Algorithm \ref{algo:thief_sched} for new resource allocations (but leaves the configuration that is used currently, $\gamma$, to be unchanged). 
+%Since the increase in accuracy during the retraining is not always linear with the epochs, {\name} learns the {\em rate} of growth from prior retraining runs. %Further, to improve its estimation, {\name} also uses statistical techniques similar to those in prior work \cite{hyperdrive}.
+
+%Ekya relies on offline profiles for estimating the expected final accuracy and completion time for each job. However, based on the input data, the performance of a model may vary from the expected profile. Ekya must adapt to any such variations.
+
+
+%Ekya includes a reactive controller which continuously monitors the performance of training jobs and computes their deviation from the expected offline profiles. If the deviation crosses a fixed threshold, the job is immediately checkpointed and terminated and the profile is flagged as unreliable. \romil{Why not continue the job? Perhaps because its a bad use of resources?} If the profile is flagged as unreliable for 2 consecutive retraining windows, then it is allowed to run instead of being terminated, and the profile is updated with the newly observed curve. Thus, erring profiles are continuously updated while minimizing the cost from re-profiling correct profiles.
+
+
+%\mypara{Batched micro-profiling}
+% Microprofiling parallelization
+% \junchen{1. why microprofiling needs speedup: while microprofiling reduces the total workload, it is still slow as it needs to test the configs one by one. 2. two optimizations: (a) sampled training data can be fit into memory once and reused; and (b) retraining can be parallelized}
+%Micro-profiling, as explained in \S\ref{subsec:profiling}, can still be slow since it requires running multiple independent training jobs to get estimates for each configuration. 
+%Since micro-profiling operates on the {\em same} (sub-sampled) data, \name loads the data to GPU memory once and reuses it for micro-profiling the different training configurations. In addition, these micro-profiling jobs can be parallelized and this parallelization also benefits from packing jobs together to maximize utilization~\cite{gandiva}.
+
+
+
+
+
+
+
+
+
+
+
+% \subsection{Runtime enhancements in retraining window}
+% \label{subsec:misc}
+
+% \junchen{todo: 1. add thief scheduler acceleration, 2. maybe move checkpointing to a new implementation section}
+
+% We next present two key enhancements to {\name} to improve its performance {\em during} the retraining of the jobs.
+
+% \subsubsection{Checkpointing models.} 
+% \label{subsubsec:checkpoint}
+
+
+
+
+
+%\subsubsection{Decay factor} The inference accuracy of even the retrained model may {\em decay during the} retraining window because of shifting data distributions. While {\name} supports small retraining windows, we can also incorporate a decay factor (learned from history) in the {\sf\small Estim} module of \S\ref{subsec:thief}. 
+%The inference accuracy of a retrained job is expected to decrease as the data distribution shifts over time. This is modeled in the profiles and incorporated in the simulator $S$ of the thief scheduler, which allows the thief scheduler to account for the eventual degradation of a retrainined model when deciding which cameras to prioritize. \romil{Not implemented}
+
+%\noindent{\bf Retraining frequency.} The need for retraining depends on the changes in the data distribution. Some video stream may not require periodic retraining because their distributions may be stationary, while some video streams may change more rapidly, calling for a higher retraining frequency. This information is expected to be captured in the configuration profiles, where subsequent retrainings would demonstrate a lower accuracy gain. This information is directly consumed by thief scheduler which implicitly decides if a camera must be retrained or not by allocating resources. If a camera requires no retraining, the thief allocator will set it's resource allocation to 0. \romil{Add plots on the effects of retraining frequency} \ga{Add this to Section 2.1}
+
+% \subsection{System Implementation}
+% \romil{WIP}
+
+
+
+
+

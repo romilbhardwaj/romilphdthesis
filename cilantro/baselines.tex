@@ -1,0 +1,74 @@
+\subsubsection{Baselines}
+\label{sec:baselinesfixedclus}
+\vspace{-1mm}
+
+\newcommand{\bstitle}[1]{\textbf{#1.}}
+\bstitle{Oracular policies}
+We implement the three policies
+in~\S\ref{sec:oracularpolicies} with oracular
+access to the true performance mappings (obtained by exhaustively profiling workloads for at least 4 hours).
+They are \oraclesw, \oracleew,  for maximizing social/egalitarian welfare
+and the \oraclenjcs fairness policy.
+% For \oraclesws and \oracleew, on each round,
+% we maximize the welfare computed via the profiled performance curves using an evolutionary
+% algorithm.
+% Details of this evolutionary algorithm are given in the supplementary material.
+% For \oraclenjc, we compute the demands using the profiled performance curves.
+
+\bstitle{\cilantros policies}
+We evaluate \cilantrosw, \cilantroew, and \cilantronjc, as described in
+Sec.~\ref{sec:learningpolicies}.
+% using \cilantro's online
+% learning framework as described in Sec.~\ref{sec:learningpolicies}. 
+% For \cilantrosws and \cilantroew, on each round,
+% we maximize an upper confidence bound (UCB) on the welfare computed via the UCBs
+% on the performance curves using an evolutionary algorithm.
+% Since the UCBs are available in memory analytically this can be done efficiently.
+% For \cilantronjc, we use the procedure described in~\citet{kandasamy20online}.
+
+\bstitle{Other heuristics}
+We implement four methods for fairness and
+maximizing  welfare.
+While not based directly off specific prior work, such methods are common in the
+scheduling literature~\cite{crankshaw2017clipper,grandl2016altruistic}. \equalshare~simply
+allocates an equal amount of resources to each job. \evoalgsw~and \evoalgew~are evolutionary
+algorithms for social and egalitarian welfare; the same procedure used for Cilantro's welfare
+policies, but now operating directly on the performance metrics.
+\greedyew~starts by
+allocating resources equally;
+on each round, it evaluates job utilities in the previous round and
+takes away one CPU each from the top half of the users who had high utility 
+and allocates it to the bottom half.
+% Then it chooses the $k$ jobs with the highest utility, takes away one resource each from these
+% jobs, and then allocates it to the $k$ jobs with the lowest utility.
+% In our evaluation, we used $k=3$; for smaller values of $k$, the changes were small
+% and it resulted in slow convergence while for larger values the changes resulted in large
+% fluctuations.
+
+\bstitle{Baselines from prior work}
+% To the best of our knowledge, there are no prior methods for the above criteria
+% when the performance is unknown.
+We adapt five feedback-driven methods from prior work - \ernest~\cite{venkataraman2016ernest},
+\quasar~\cite{delimitrou2014quasar},  \minerva~\cite{nathan2019end},
+\parties~\cite{chen2019parties}~and \AIMD{}
+(Multiplicative-Increase/Additive-Decrease)~\cite{chiu1989analysis}. \cameratext{In particular, we note that applying the \parties~notion of migration in our setting would imply moving the job to a different cluster or increasing the size of the cluster, both of which are beyond scope for this fixed cluster setting.} Details on the specific
+adaptations are available in the appendix.
+
+
+% In addition to the above three, we also considered the following prior work which could not be
+% included in our evaluation.
+% Google Autopilot's~\cite{rzadca2020autopilot} horizontal scaling procedure requires an application
+% developer to specify a target CPU utilization and computes the resource demand based on the given
+% target and the observed utilization.
+% This requires an application developer to profile their workload to compute this target based on
+% their SLO, which can be laborious.
+% Additionally, our experimental platform does not support extracting CPU utilization metrics.
+% Paragon~\cite{delimitrou2013paragon} and Allox~\cite{le2020allox} study the placement of jobs
+% among heterogeneous resources and have no natural adaptation to our setting.
+% Festive~\cite{jiang2012improving} describes a method for fair video streaming based on utilities,
+% but their method cannot be adapted to data center resource allocation.
+
+
+
+
+

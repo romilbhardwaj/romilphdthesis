@@ -1,0 +1,193 @@
+\documentclass[letterpaper,twocolumn,10pt]{article}
+\usepackage{usenix2019_v3}
+\usepackage{authblk}
+
+\pagestyle{plain} % removes running headers
+\makeatletter
+% Affiliations on same line
+\renewcommand\AB@affilsepx{, \protect\Affilfont}
+\makeatother
+
+
+%\usepackage{pifont}
+\usepackage{booktabs} % For formal tables
+\usepackage{subcaption}
+
+%\usepackage{usenix, graphicx, multirow, times}
+\usepackage{graphicx, multirow, times}
+
+%\usepackage{mathptmx}
+\usepackage{xurl}
+\usepackage{tikz}
+\usepackage{amsfonts, verbatim, mathtools, color, xspace, caption, amsmath}
+\setlength{\abovecaptionskip}{3pt plus 3pt minus 2pt}
+%\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{colortbl}
+%\usepackage{balance}
+\usepackage{alltt}
+%\usepackage[mathcal]{euscript}
+%\usepackage{cite}
+\usepackage[small,compact]{titlesec}
+%\usepackage[font={small}]{caption}
+\usepackage[labelfont=bf]{caption}
+\renewcommand{\ttdefault}{cmtt}
+\usepackage{mdwlist}
+
+\pagenumbering{gobble}
+
+\newcommand{\eg}{{\it e.g.,}\xspace}
+\newcommand{\ie}{{\it i.e.,}\xspace}
+\newcommand{\commentt}[1]{{\small\texttt{#1}}}
+\usepackage{natbib}
+%\bibliographystyle{named}
+
+
+\newcommand{\myparashort}[1]{\vspace{0.07cm}\noindent{\bf {#1}}~}
+\newcommand{\mypara}[1]{\vspace{0.07cm}\noindent{\bf {#1}:}~}
+\newcommand{\myparaq}[1]{\vspace{0.07cm}\noindent{\bf {#1}?}~}
+
+%\setlength{\intextsep}{9pt}  
+%\setlength{\floatsep}{0.7em plus 0.3em minus 0.3em} % space left b/w floats 
+\setlength{\textfloatsep}{0.7em plus 0.3em minus 0.3em} % space left on top and bottom of an in-text float. 
+
+\usepackage{listings}
+%\usepackage{color}
+%\usepackage{xcolor}
+%\usepackage{booktabs} % For formal tables
+%\usepackage{diagbox}
+\usepackage{subcaption}
+\usepackage{upgreek}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+%\usepackage{hyperref}
+
+\usepackage[normalem]{ulem}
+
+
+\SetKw{KwBy}{by}
+\SetKwInOut{Input}{Input}  
+
+\newcommand\mycommfont[1]{\footnotesize\ttfamily\textcolor{blue}{#1}}
+\SetCommentSty{mycommfont}
+
+\newlength\mylen
+\newcommand\myinput[1]{%
+	\settowidth\mylen{\KwIn{}}%
+	\setlength\hangindent{\mylen}%
+	\hspace*{\mylen}#1\\}
+
+%\usepackage[sort]{cite}
+ 
+% ----------------- Macros: ---------------------
+\newcommand{\tbd}[1]{{\bf [[TBD: {#1}]]}}
+\newcommand{\eat}[1]{}
+\newcommand{\name}{{\tt Ekya}\xspace}
+\newcommand{\xref}[1]{\S\ref{#1}}
+\newcommand{\fair}{uniform\xspace}
+\newcommand{\Fair}{Uniform\xspace}
+
+% ---------------- Notes: -----------------------
+\newcommand{\num}[1]{{\color{red}\bf {#1}}}
+%\newcommand{\num}[1]{#1}
+
+\newcommand{\red}[1]{{\color{red}{#1}}}
+
+
+
+\newcommand{\junchen}[1]{{\color{red} [Junchen: {#1}]}}
+\newcommand{\junchenedit}[1]{{\color{red} {#1}}}
+\newcommand{\ga}[1]{{\color{orange} Ganesh: {#1}}}
+\newcommand{\gaa}[1]{{\color{orange} {#1}}}
+\newcommand{\ys}[1]{{\color{cyan}\bf Yuanchao: {#1}}}
+\newcommand{\ysedit}[1]{\color{cyan}\bf {#1}}
+\newcommand{\zhengxu}[1]{{\color{purple} Zhengxu: {#1}}}
+\newcommand{\romil}[1]{{\color{green} Romil: {#1}}}
+\newcommand{\romilc}[1]{{\color{green}\bf {#1}}}
+\newcommand{\revtext}[1]{{{#1}}}
+\newcommand{\cameratext}[1]{{{#1}}}
+%\newcommand{\cameratext}[1]{{\color{blue}{#1}}}
+%\newcommand{\revtext}[1]{{\color{blue}{#1}}}
+\newcommand{\ion}[1]{{\color{red} Ion: {#1}}}
+\newcommand{\kh}[1]{{\color{magenta} {#1}}}
+
+
+\newcommand{\fillme}{{\bf XXX}\xspace}
+
+\baselineskip=12pt
+\sloppy
+
+\newcounter{packednmbr}
+\newenvironment{packedenumerate}{\begin{list}{\thepackednmbr.}{\usecounter{packednmbr}\setlength{\itemsep}{0.5pt}\addtolength{\labelwidth}{-4pt}\setlength{\leftmargin}{2ex}\setlength{\listparindent}{\parindent}\setlength{\parsep}{1pt}\setlength{\topsep}{0pt}}}{\end{list}}
+\newenvironment{packeditemize}{\begin{list}{$\bullet$}{\setlength{\itemsep}{0.5pt}\addtolength{\labelwidth}{-4pt}\setlength{\leftmargin}{2ex}\setlength{\listparindent}{\parindent}\setlength{\parsep}{1pt}\setlength{\topsep}{0pt}}}{\end{list}}
+\newenvironment{packedpackeditemize}{\begin{list}{$\bullet$}{\setlength{\itemsep}{0.5pt}\addtolength{\labelwidth}{-4pt}\setlength{\leftmargin}{\labelwidth}\setlength{\listparindent}{\parindent}\setlength{\parsep}{1pt}\setlength{\topsep}{0pt}}}{\end{list}}
+\newenvironment{packedtrivlist}{\begin{list}{\setlength{\itemsep}{0.2pt}\addtolength{\labelwidth}{-4pt}\setlength{\leftmargin}{\labelwidth}\setlength{\listparindent}{\parindent}\setlength{\parsep}{1pt}\setlength{\topsep}{0pt}}}{\end{list}}
+
+
+
+\begin{document}
+
+\author[1,2]{Romil Bhardwaj}
+\author[3]{Zhengxu Xia}
+\author[1]{Ganesh Ananthanarayanan}
+\author[3]{Junchen Jiang}
+\author[1]{Yuanchao Shu}
+\author[1]{Nikolaos Karianakis}
+\author[1]{Kevin Hsieh}
+\author[1]{Paramvir Bahl}
+\author[2]{Ion Stoica}
+\affil[1]{Microsoft}
+\affil[2]{UC Berkeley}
+\affil[3]{University of Chicago}
+
+% \author{
+% {\rm Romil Bhardwaj}\\
+% UC Berkeley
+% \and
+% {\rm Zhengxu Xia}\\
+% Second Institution
+% % copy the following lines to add more authors
+% % \and
+% % {\rm Name}\\
+% %Name Institution
+% } % end author
+
+
+\date{}
+\title{\Large \bf Ekya: Continuous Learning of Video Analytics Models on Edge Compute Servers}
+
+\maketitle
+
+\begin{abstract}
+Video analytics applications use edge compute servers for processing videos.  
+Compressed models that are deployed on the edge servers for inference suffer from {\em data drift} where the live video data diverges from the training data. Continuous learning handles data drift by periodically retraining the models on new data. Our work addresses the challenge of jointly supporting inference and retraining tasks on edge servers, which requires navigating the fundamental tradeoff between the retrained model's accuracy and the inference accuracy. 
+%because during retraining, resources are diverted away from inference tasks. %thereby lowering their accuracy. %We design a scheduling solution {\name} that balances this tradeoff, across multiple video streams simultaneously, and optimizes for the inference accuracy over the retraining window's duration. 
+Our solution \name balances this tradeoff across multiple models and uses a micro-profiler to identify the models most in need of retraining. {\name}'s accuracy gain compared to a baseline scheduler is $29\%$ higher, and the baseline requires $4\times$ more GPU resources to achieve the same accuracy as \name.
+\end{abstract}
+
+\input{introduction}
+\input{background}
+\input{motivation}
+\input{solution}
+% \input{system}
+%\input{microprofiling}
+% \input{evaluation}
+% \input{eval-new}
+\input{eval-newflow}
+\input{discussion}
+\input{related_work}
+\input{conclusion}
+
+
+\bibliographystyle{abbrv}
+\bibliography{sigproc}
+
+\input{appendix}
+
+
+%\bibliographystyle{ACM-Reference-Format}
+%\bibliography{sigproc} 
+
+\end{document}

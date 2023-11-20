@@ -1,0 +1,103 @@
+
+\section{Implementation}
+\label{sec:implementation}
+
+%\vspace{-0.05in}
+
+
+% Async - Event queue system
+% How we scale - add more resources to k8s and those are visible to applications. 
+% L2 Scheduling - we assign that to applications.
+% gRPC periodic updates and heartbeats to identify dead workloads
+% We do horizontal autoscaling
+% Client side shared volumes, co-scheduling and parsing
+
+The Cilantro scheduler %(available at \href{http://www.github.com}{\color{blue}<anonymized>})
+is implemented in 7600 lines of Python code,
+% available as an open-source project at \href{http://www.github.com}{\color{blue}<anonymized>}.
+as a standalone scheduler for Kubernetes. 
+% Any Kubernetes pods created with
+% the \incmtt{scheduler=cilantro} label are forwarded by the kubernetes control plane to the Cilantro
+% scheduler which assigns a node to the pending pod.
+Resource reallocation events are triggered by a timer-based event, which is raised every 2 minutes
+in our experiments.
+This window was chosen based on the fact that Kubernetes pods could be created and destroyed in
+5-15 seconds.
+A 2 minute allocation round is long enough for the pod to reach its steady state that performance
+metrics from the job would be reliable, while at the same time frequent enough to adapt to changes in
+the load and learned performances. %\cameratext{For workloads with slow reporting of performance metrics, longer allocation rounds may be required.}
+
+To execute updated resource allocations received from policies, we horizontally
+scale the workloads by adding more replicas to their Kubernetes deployment. Newly created pods
+rely on the Kubernetes service discovery mechanism to connect to the workload's other servers. The
+workload is responsible for load balancing queries onto the new servers. 
+Workloads write logs to a volume shared with the sidecar cilantro client. 
+The client parses performance metrics and then publishes them to the scheduler over gRPC.
+These messages also act as heartbeats to inform liveness to the scheduler.
+
+The frequency of
+performance feedback depends on the application and the environment. For instance, database serving jobs may report feedback multiple times in a minute, while ML training jobs may
+do so once every few minutes.
+To avoid bottlenecks,
+we use an asynchronous design for Cilantro where each
+component operates in a push or pull based framework. This
+allows high frequency components to operate at their maximum rate while allowing slower components,
+such as learners for low-frequency jobs or cluster managers, to be polled when required. 
+% As we show in \S\ref{sec:microbenchmarks}, Cilantro is robust to irregular performance updates.\rbcomment{Ensure this reference is correct.}
+% The client accumulates these logs over a duration of time and computes performance metrics for this duration. 
+% The length of this duration depends on how frequently the workloads write to STDOUT and
+% should be long enough to compute performance metrics reliably, which depends on the specific
+% application.
+ 
+% \kkcomment{We can highlight the irregular update frequency here. The previous version did not do it.
+% I have attempted but this may not be accurate.}
+
+\cameratext{\textbf{Specifying utilities and objectives.} Utilities of jobs are calculated based on the performance metrics collected by the Cilantro clients in the last resource allocation round. To compute the utilities, application developers specify utility as a python method which operates on a list of floating point numbers representing the performance metrics observed in the previous resource allocation round. Similarly, the scheduling objective (e.g., social welfare from \S\ref{sec:oracularpolicies}) is also defined by the cluster operator as a python method operating on the list of utilities from all jobs.}
+%\kkcomment{Perhaps a comment about how we can realize our UCB-based methods via this python function?
+%Also, some comment on demand-based methods?}
+
+\textbf{Learning models and load forecasters.}
+For the multi-tenant setting, we used a tree-based binning
+estimator~\cite{kandasamy20online,bubeck2010x,grill2015black} with Lipschitz
+constant 10 for each job's resource-to-performance estimation.
+This is a simple and computationally efficient estimator, but does not work well in high dimensions.
+Therefore, for the microservices setting where
+we have a high dimensional estimation challenge,
+% we need to estimate the application's performance
+% as a function of the vector of resource allocations,
+we use
+kernel ridge regression~\cite{zhang2013divide,welling2013kernel} with a Matern kernel with
+smoothness parameter set to 2.5.
+In both settings, for the load forecasters,
+ we use an autoregressive moving average (ARMA) model~\cite{makridakis1997arma}
+with autoregressive order $1$ and moving average order $1$.
+Finally, all confidence bounds were computed at the $90\%$ level, meaning that the
+probability that the true parameter lies between the upper and lower confidence bounds is $90\%$.
+We used the above learning models since they are simple and
+have few tunable hyperparameters.
+With Cilantro's modular design, these can be easily swapped with any other 
+model as long as they provide reliable uncertainty estimates.
+% \rbcomment{Should we say something about explainability here? One of the advantages of mmflearn was that it's explainable..}
+
+% \kkcomment{Mention $B$ and $\beta$ here. EvoAlg, throwing away data}
+
+\textbf{Other policy parameters:}
+For all our policies, we set the parameter $B$ which controls the deviation from the previous
+allocation to 10.
+For demand-based policies, we set the parameter $\beta$ which trades off between conservative and
+aggressive exploration to $3/4$.
+For the welfare-based policies in~\S\ref{sec:polfc} and the microservices use case
+in~\S\ref{sec:msal}, we use evolutionary algorithms to optimize the UCBs.
+The exact implementation is described in the appendix.
+
+% \kkcomment{This para is from the intro.}
+% Third,
+% to avoid unnecessary bottlenecks, Cilantro adopts an event-triggered asynchronous design.
+% This is crucial since
+% Cilantro's different components may operate at different frequencies:
+% different applications may emit their performance metrics at irregular intervals,
+% the time for updating a learning model depends on the model itself,
+% and the frequency of changing an allocation may depend on the agility of the cluster's resource
+% manager.
+
+% \subsection{Workloads}

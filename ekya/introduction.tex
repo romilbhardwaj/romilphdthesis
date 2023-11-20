@@ -1,0 +1,118 @@
+%!TEX root = main.tex
+
+\section{Introduction}
+\label{sec:intro}
+
+%\romil{Call it redistillation instead of continous learning. ML folks have a different conception of continous learning.}
+%DNNs enable ML applications; we focus on vision applications; edge deployments of DNNs (reasons of bandwidth & privacy)
+%Deep neural network (DNN) models are central to modern machine learning applications. We focus on on 
+Video analytics applications, such as for urban mobility \revtext{\cite{rocket-blog, learn2compress}}  % https://techcommunity.microsoft.com/t5/internet-of-things/live-video-analytics-with-microsoft-rocket-for-reducing-edge/ba-p/1522305 uses tinyolo
+and smart cars \cite{bellevue-report}, are being powered by deep neural network (DNN) models %. Vision DNNs 
+for object detection and classification, e.g., Yolo \cite{yolo9000-1}, ResNet \cite{deepresidual-2} and EfficientNet \cite{efficientnet-3}. %, are crucial to detect traffic and road signs on live videos. 
+Video analytics deployments stream the videos to {\em edge servers} \cite{azure-ase, aws-outposts} placed on-premise \cite{ieee-computer, edgevideo-1, edgevideo-2, getmobile}. Edge computation is preferred for video analytics as it does not require expensive network links to stream videos to the cloud \cite{getmobile}, while also ensuring privacy of the videos (e.g., many European cities mandate against streaming their videos to the cloud \cite{sweden-data, azure-data}).
+
+%Data drift; provide example
+%\romil{More techinical term needed here - distriution/covariate shift?}
+%\gaa{Techniques like model compression \cite{compression-4, compression-5, compression-6} have improved DNN efficiency and enabled their deployment on the resource-constrained edge servers (e.g., with weak GPUs).} 
+Edge compute is provisioned with limited resources (e.g., with weak GPUs \cite{aws-outposts, azure-ase}). This limitation is worsened by the mismatch between the growth rate of the compute demands of models and the compute cycles of processors \cite{ion-blog, openai-blog}. As a result, edge deployments rely on {\em model compression} \cite{compression-4, compression-5, compression-6}. % to obtain efficient DNNs.  
+The compressed DNNs are initially trained on representative data from each video stream, but while in the field, they are affected by {\em data drift}, i.e., the live video data diverges significantly from the data that was used for training \cite{datadrift-7, datadrift-8, datadrift-a, datadrift-b}. Cameras in streets and smart cars encounter  %vastly 
+varying scenes over time, e.g., lighting, crowd densities, %lighting conditions, object angles, and crowd densities over time, in addition to 
+and changing object mixes. %encountering new object classes (like segway scooters). 
+It is difficult to exhaustively cover all these variations in the training, especially since even subtle variations affect the accuracy. As a result, there is a sizable drop in the accuracy of edge DNNs due to data drift (by 22\%; \S\ref{subsec:continuous-measurement}). %On the Cityscapes \cite{cityscapes} and Waymo \cite{waymo} datasets, we see that the ResNet18 classifier's accuracy drops by $28\%$ due to data drift (\S\ref{subsec:continuous-measurement}). 
+In fact, %Even if one could exhaustively cover all the variations in the training data upfront, 
+the fewer weights and shallower architectures of compressed DNNs often make them unsuited to provide high accuracy when trained with large variations in the data.%, and usually perform better when trained with a limited amount of variations.
+%While compressed models are efficient for edge servers, their accuracies are more susceptible to data drift.
+
+%Continuous learning; overview; motivational numbers
+%{\em Continuous learning} techniques address the problem of data drift \cite{compressiondrift-11, continuous-12}. 
+\noindent{\bf Continuous model retraining.} A promising approach to address data drift is continuous learning. The edge DNNs are incrementally {\em retrained} on new video samples even as some earlier knowledge is retained \cite{compressiondrift-11, continuous-12}. Continuous learning techniques retrain the DNNs periodically %\gaa{every tens of seconds to few minutes} 
+%to avoid data drift 
+\cite{distribution-20, mullapudi2019}; we refer to the period between two retrainings as the ``retraining window'' and use a sample of the data that is accumulated during each window for retraining. 
+Such ongoing learning \cite{incremental-13, icarl-14, incremental-15} %have been shown to %developed for both {\em sample incremental} (i.e., learning on new samples of known classes) and {\em class incremental} (i.e., learning on samples of new classes) training. These techniques 
+helps the compressed models maintain high accuracy.% even with changing data characteristics.
+%effectively copes with changing data characteristics and maintains high accuracy of the models. 
+
+%Resource challenge of doing it on edge; both inference and training can take up entire edge; going to the cloud is undesirable (bandwidth, privacy)
+%\noindent{\bf Objective and Challenge.}
+%\romil{Isn't our objective to maximize inference accuracy under the presence of datadrift?}. Our objective is to enable continuous training of DNNs on edge servers. 
+%Our objective is to maximize accuracy of DNNs on edge servers in the face of data drift. 
+Edge servers use their GPUs \cite{azure-ase} for DNN inference on many live video streams (e.g., traffic cameras in a city).  %(typically, each edge server handles inference for tens of video streams).
+Adding continuous training to edge servers presents a tradeoff between the live inference accuracy and drop in accuracy due to data drift. Allocating more resources to the retraining job allows it to finish faster and provide a more accurate model sooner. At the same time, during the retraining, taking away resources from the inference job lowers its accuracy (because it may have to sample the frames of the video to be analyzed).%allocating fewer resources to the inference leads to lower accuracy of its outputs (because it may sample the frames of the video that are analyzed). 
+
+%The main challenge in deploying techniques for continuous learning on the edge is the {\em compute constraint of the edge servers}. Edge servers typically contain a small number of GPUs to handle the inference for live video analytics (typically, each edge server handles tens of video streams). Since retraining is periodic \ion{Cite something to support the statement that retraining is periodic}, its compute demands are bursty. Further, the compute demands of training are considerably higher than the demands of inference, thus static provisioning of compute resources on the edge for retraining leads to wasted utilization and increased costs (by \gaa{XXX}). The same reasons that drove the need for inference on the edge servers -- bandwidth and privacy -- also makes transferring the data to the cloud for retraining to be less suited. 
+
+Central to the resource demand and accuracy of the jobs %of {\em both} retraining and inference 
+are their {\em configurations}. For retraining jobs, configurations refer to the hyperparameters, e.g., number of training epochs, that substantially impact the resource demand and accuracies (\S\ref{subsec:profiles}). The improvement in accuracy due to retraining also depends on {\em how much} the characteristics of the live videos have changed. For inference jobs, configurations like frame sampling and resolution impact the accuracy and resources needed to keep up with analyzing the live video \cite{chameleon, noscope}. 
+%\ys{Do we implicitly assume all data from a retaining windows is used for retraining? The amount of data used for retraining/retraining frequency is also a key factor on resource-accuracy tradoff, and I feel we could be more clear on this setting. }
+
+%Central to the resource demand and accuracy of the outputs of {\em both} inference and retraining are their {\em configurations}. For retraining, the choice of hyperparameter configurations, e.g., number of epochs or the number of layers that are retrained, can lead to an order of magnitude variation in their resource demands (\S\ref{subsec:profiles}). Further, the {\em change} in accuracy of the retrained model depends on the change in data characteristics of the live videos. Likewise, for inference, the frame sampling rate or resolution influences the accuracy and resources needed to keep up with analytics on the live video \cite{chameleon, noscope}. 
+
+%Resource-accuracy profiles of training and inference; configurations allow us the decision space
+%\noindent{\bf Resource-accuracy relationship.} 
+%\romil{Explicitly state that this is the tradeoff space}
+%While both DNN inference and retraining on their own can consume the compute resource on the edge server, a key characteristic is the tradeoff presented by the choice of their {\em configuration}, that influences their resource demand as well as accuracy of the outputs. For the retraining, the choice of hyperparameter configurations, e.g., number of epochs or the number of layers whose weights are retrained, can lead to an order of magnitude variation in their resource demands. Further, the {\em change} in accuracy of the retrained model depends on the change in data characteristics of the live videos. Likewise, for inference, the frame sampling rate or frame resolution downsizing dramatically influences the accuracy and resources needed to keep up with the analytics on the live video stream \cite{videostorm, chameleon}. 
+
+%Problem statement: Objective & decisions. TODOs. Optimize for inference accuracy (explain it), allocate resources smartly, and obtain training profiles (difficult since we operate with constraints unlike prior work; contrast)
+\noindent{\bf Problem statement.} %We enable continuous learning of DNN models on edge servers. 
+We make the following decisions for retraining. %We focus on the following problem: 
+($1$) in each retraining window, decide which of the edge models to retrain;  
+($2$) allocate the edge server's GPU resources among the retraining and inference jobs, and 
+($3$) select the configurations of the retraining and inference jobs. %,
+We also constraint our decisions such that the inference accuracy {\em at any point in time} does not drop below a minimum value (so that the outputs continue to remain useful to the application). 
+Our objective in making the above three decisions is to maximize the inference accuracy {\em averaged over the retraining window} (aggregating the accuracies during and after the retrainings). %across all the videos analyzed on the edge server. %This requires considering the inference accuracy prior to the retraining (with the old model), during the retraining (likely at a lower inference configuration), and after the retraining (with the improved model). 
+%\ion{Why is the average interference the right metric? Why not the min interference for instance?}
+Maximizing inference accuracy over the retraining window creates new challenges as it is different from $(i)$ video inference systems that optimize only the instantaneous accuracy \cite{videostorm, noscope, chameleon}, $(ii)$  model training systems that optimize only the eventual accuracy \cite{hyperparameter-16, DBLP:journals/jmlr/BergstraB12, DBLP:conf/nips/SnoekLA12, Swersky_scalablebayesian, DBLP:conf/osdi/XiaoBRSKHPPZZYZ18, DBLP:conf/eurosys/PengBCWG18}.% or training time \cite{DBLP:conf/osdi/XiaoBRSKHPPZZYZ18, DBLP:conf/eurosys/PengBCWG18}.
+
+%Optimize for inference accuracy (max accuracy hyperparameter won’t cut it). Balance between how soon it finishes, how much resources it needs, and how much improvement it provides.
+%Our problem poses a 
+Addressing the fundamental tradeoff between the retrained model's accuracy and the inference accuracy is computationally complex. %, \kh{and we need to consider inference and retraining {\em jointly}. 
+%However, it is computationally complex to make such tradeoffs. 
+First, the decision space is multi-dimensional consisting of a diverse set of retraining and inference configurations, and choices of resource allocations over time. %for retraining and inference among the models of {\em all} video streams. 
+Second, it is difficult to know the performance of different configurations (in resource usage and accuracy) as it requires actually retraining using different configurations. Data drift exacerbates these challenges because a decision that works well in a retraining window may not do so in the future.
+%On the one hand, to maximize the model's accuracy we want to retrain the model frequently and allocate it more resources. On the other hand, every time we retrain the model we divert resources away from the inference job which lowers its accuracy. 
+%Our target metric of maximizing the {\em accuracy over the retraining window} is different from, $(i)$ video analytics systems that optimize only the instantaneous accuracy \cite{videostorm, noscope, chameleon}, $(ii)$  model training systems that optimize only the eventual accuracy \cite{hyperparameter-16, DBLP:journals/jmlr/BergstraB12, DBLP:conf/nips/SnoekLA12, Swersky_scalablebayesian} or training time \cite{DBLP:conf/osdi/XiaoBRSKHPPZZYZ18, DBLP:conf/eurosys/PengBCWG18}. Instead, we consider inference and retraining {\em jointly}, and balance between ($a$) the time taken for retraining and the resources required, and ($b$) the drop in inference accuracy during the retraining and its expected improvement after retraining. 
+%The balancing is needed because, during the retraining, resources will be diverted away from inference and it will thus be running at a lower accuracy configuration. We have to carefully evaluate whether the accuracy improvement on the retrained model sufficiently offsets the drop in inference accuracy during the retraining.
+%As a result, focusing only on retraining job time, like cluster schedulers do \cite{DBLP:conf/osdi/XiaoBRSKHPPZZYZ18, DBLP:conf/eurosys/PengBCWG18}, also does not optimize for our goal.
+
+%Maximizing the inference accuracy over the retraining window is {\em unlike}  objectives pursued by prior work. Video analytics systems optimize only for instantaneous inference accuracy \cite{videostorm, noscope, chameleon} while model training systems optimize only for the accuracy of the trained model \cite{many, prior, works}. Our work views inference and retraining {\em jointly}, and consequently we need to balance between ($a$) the time taken for retraining and the resources required, and ($b$) the improvement in inference accuracy after the retraining. The balancing is needed because, during the retraining, resources will be diverted away from inference and it will thus be running at a lower accuracy configuration. We have to carefully evaluate whether the accuracy improvement on the retrained model sufficiently offsets the drop in inference accuracy during the retraining.
+
+%Allocate resources smartly (fair scheduling won’t cut it); search space pruning with the thief scheduler. And other features of Section 4.
+%Intrinsic to the objective of maximizing the inference accuracy over the retraining window is resource allocation between the retraining and inference of the video streams being analyzed on the edge server. 
+\noindent{\bf Solution components.} Our solution {\name} has two main components: a resource scheduler and a performance estimator. 
+
+%Retraining decisions are made periodically, %(computer vision literature targets retraining every tens of seconds to few minutes \cite{yin2019, mullapudi2019}), 
+%and at the beginning of each retraining window, 
+In each retraining window, the {\bf resource scheduler} makes the three decisions listed above in our problem statement. %\ion{The natural question here is why periodically. At least, why not skip pretraining if no significant features changed in the data input.} 
+In its decisions, {\name}'s scheduler prioritizes retraining the models of those video streams whose characteristics have changed the most because these models have been most affected by data drift. %because these retraining jobs will benefit the most and improve our target metric. 
+The scheduler decides against retraining the models which do not improve our target metric.  %of inference accuracy over the retraining window. 
+%In doing so it is also opts for configurations with cheaper resource demands. 
+%These retraining jobs will likely have the highest improvement in accuracy after the retraining, and hence in our target metric of inference accuracy over the retraining window. %\ion{How do you predict the improvement in the accuracy?}
+%Further, the scheduler prefers configurations with {\em lower resource demands} and may even pick configurations that do {\em not} lead to the highest accuracy improvement because of their lower demand. 
+To prune the large decision space, the scheduler uses the following techniques. First, it simplifies the spatial complexity by considering GPU allocations only in coarse fractions (e.g., 10\%) that are  accurate enough for the scheduling decisions,  while also being mindful of the granularity achievable in modern GPUs \cite{nvidia-mps}. %that are no finer than what GPU isolation mechanisms \cite{nvidia-mps} support in practice. 
+Second, it does not change allocations to jobs {\em during the retraining}, thus largely sidestepping the temporal complexity. Finally, our micro-profiler (described below) prunes the list of configurations to only the promising options.
+
+
+%Profiling. 
+To make efficient choices of configurations, the resource scheduler relies on estimates of accuracy after the retraining and the resource demands. We have designed a {\bf micro-profiler} that observes the accuracy of the retraining configurations on a {\em small subset} of the training data in the retraining window with {\em just a few epochs}. It uses these observations to extrapolate the accuracies when retrained on a larger dataset for many more epochs. Further, we restrict the micro-profiling to only a small set of {\em promising} retraining configurations. These techniques result in {\name}'s micro-profiler being $100\times$ more efficient than exhaustive profiling while still estimating accuracies with an error of $5.8\%$. To estimate the resource demands, the micro-profiler measures the retraining duration {\em per epoch} when $100\%$ of the GPU is allocated, and scales %out the training time 
+for different allocations, epochs, and training data sizes. 
+%Crucial to our scheduler is an estimator of accuracy (after the retraining) in each retraining window along with resource usages of the configurations. The estimate of the accuracy allows the scheduler to decide whether to retrain a model, and if so, how much resources to allocate. Our estimator uses a simple approach based on history and uses the accuracy of the retrained model from those past retraining windows whose distribution of classes are {\em similar} (in Euclidean distance) to the current window's class distribution. However, during the retraining, our scheduler deals with errors in the accuracy estimation by continuously monitoring the progress in accuracy of the retraining and adjusting its resource allocations. 
+
+%System
+\noindent{\bf Implementation and Evaluation.} We have evaluated {\name} using a system implementation and trace-driven simulation. We used video workloads from dashboard cameras of smart cars (Waymo \cite{waymo} and Cityscapes \cite{cityscapes}) as well as from traffic and building cameras over 24 hours. 
+%We have built {\name} to allocate resources between continuous training and inference. %{\name} also enables run-time enhancements by {\em checkpointing} the models during the retraining (and providing more accurate models for inference sooner). 
+%We have evaluated {\name} on %workloads constructed from 
+%the video dataset of smart cars (Waymo \cite{waymo} and Cityscapes \cite{cityscapes}). Our evaluation shows that 
+{\name}'s accuracy compared to competing baselines is $29\%$ higher. As a measure of {\name}'s efficiency, attaining the same accuracy as {\name} will require $4\times$ more GPU resources on the edge for the baseline. 
+
+%Contributions 
+\noindent{\bf Contributions:} Our work makes the following contributions. 
+
+%\noindent{1)} We show the potential for continuous learning in video analytics, towards {\em joint retraining and inference} on edge servers.
+
+\noindent{1)} We introduce the metric of {\em inference accuracy averaged over the retraining window} for continuous training systems.
+
+\noindent{2)} We design an {\em efficient micro-profiler to estimate} the benefits and costs of retraining edge DNN models. 
+
+\noindent{3)} We design a scalable resource scheduler for {\em joint retraining and inference} on edge servers. %{\em allocating resources between retraining and inference} on the edge server.
+ 
+% \noindent{\bf This work does not raise any ethical issues.}

@@ -1,0 +1,111 @@
+\begin{table}[t!]
+\small
+\begin{tabular}{cl}
+{\bf Notation} & {\bf Description}\\\hline
+$\mathcal{V}$ & Set of video streams\\
+$v$ & A video stream ($v \in \mathcal{V}$)\\\hline
+$\mathcal{G}$ & Total GPUs\\
+$g$ & A GPU ($g \in \mathcal{G}$)\\
+$C_g$ & The compute resource of GPU $g$\\\hline
+$\Gamma$ & Set of all training configurations, \\
+ & including DNN architectures/hyperparameters\\
+$\gamma$ & A retraining configuration ($\gamma \in \Gamma$)\\
+$\Lambda$ & Set of all inference configurations\\
+$\lambda$ & An inference configuration ($\lambda \in \Lambda$)\\\hline
+$\mathcal{T}$ & Set of all retraining windows\\
+$t$ & A retraining window ($t \in \mathcal{T}$)\\\hline
+%$M_{v}^t$ & Set of all DNN instances for video $v$ at window $t$\\
+%$m_{v\gamma}^t$ & A DNN instance based on $\gamma$ for video $v$ at $t$\\
+%$\hat{m}_{v\gamma}^t$ & A \emph{retrained} DNN instance based on $\gamma$ for $v$ at $t$\\\hline
+$\delta$ & A binary variable indicates whether \\
+         & a DNN is retrained of not ($\delta\in\{0,1\}$)\\\hline
+%$C^R(v, t, \gamma)$ & Retraining cost using $v$ and $\gamma$ at window $t$ \\
+%$C^I(v, t, \gamma, \lambda)$ & Inference cost using $v$, $\gamma$, $\lambda$ at window $t$ \\
+$C(v, t, \gamma, \delta, \lambda)$ & Compute cost for video $v$ at $t$, \\
+                                   & given training configuration $\gamma$, retraining  \\
+                                   & decision $\delta$, and inference configuration $\lambda$ \\
+$A(v, t, \gamma, \delta, \lambda)$ & Inference accuracy for video $v$ at $t$, \\
+                                   & given training configuration $\gamma$, retraining  \\
+                                   & decision $\delta$, and inference configuration $\lambda$ \\\hline
+%$r_{vt\gamma g}$ & A binary variable indicates the system retrains \\
+%& a DNN based on $\gamma$ for video $v$ at $t$ on GPU $g$\\\hline
+$\phi_{vt\delta\gamma\lambda g}$ & A set of binary variables ($\phi_{vt\delta\gamma\lambda g}\in\{0,1\}$). \\
+& $\phi_{vt\delta\gamma\lambda g} = 1$ iff the system uses a retraining \\
+& decision $\delta$ and $\gamma$-based DNN to run inference\\
+& for video $v$ at retraining window $t$ \\
+& with inference configuration $\lambda$ on GPU $g$\\\hline
+\end{tabular}
+\caption{\label{tab:notations}\small\bf Notations used in {\name}'s description.}
+\end{table}
+
+\subsection{\hspace{-0.2cm}Formulation of joint inference and retraining}
+\label{subsec:formulation}
+
+The problem of joint inference and retraining aims to maximize overall inference accuracy for all videos streams $\mathcal{V}$. % across all retraining windows $\mathcal{T}$. 
+All inference and retraining must be done in a set of GPUs $\mathcal{G}$, where each GPU $g \in \mathcal{G}$ has compute resource $C_g$.
+Table \ref{tab:notations} lists all relevant notations. 
+The system is given a set of training configurations $\Gamma$, which include all DNN architectures and hyperparameters. 
+The system is also given a set of \emph{inference} configurations $\Lambda$ such as frame rates and image resolutions.
+
+\noindent\textbf{System decisions.} For each video $v\in\mathcal{V}$ at window $t\in\mathcal{T}$, the system needs to make a series of decisions. The system needs to decide (1) which DNN to use (training configuration $\gamma\in\Gamma$); (2) if the selected DNN needs to be retrained using the most recent data (retraining decision $\delta\in\{0,1\}$); (3) which inference configuration $\lambda\in\Lambda$ to use; and (4) which GPU $g\in\mathcal{G}$ to use. 
+We use binary variables $\phi_{vt\delta\gamma\lambda g}\in\{0,1\}$ to denote this series of decisions (see Table \ref{tab:notations} for the definition). 
+These decisions incur compute cost $C(v, t, \gamma, \delta, \lambda)$ and yield inference accuracy $A(v, t, \gamma, \delta, \lambda)$.
+%At each retraining window $t \in \mathcal{T}$, the system maintains a set of DNN instances $M_{v}^t$ for video $v$, where each $m_{v\gamma}^t \in M_{v}^t$ denotes a DNN instance that is trained based on configuration $\gamma$. Each DNN $m_{v\gamma}^0 \in M_{v}^0$ is pretrained with offline video data. 
+%The system can optionally retrain $m_{v\gamma}^t$ into $\hat{m}_{v\gamma}^t$ with training configuration $\gamma$ and the video data of $v$ at $t$, and the retraining cost is $C^R(v, t, \gamma)$.
+
+%The system must pick a DNN $m_{v\gamma}^t$ or $\hat{m}_{v\gamma}^t$ and an inference configuration $\lambda \in \Lambda$ to run inference for video $v$ at $t$.
+%The inference cost of such a decision is $C^I(v, t, \gamma, \lambda$), and the inference accuracy is $A(v, t, m, \lambda)$ where $m$ is the chosen DNN. 
+%We use binary variables $r_{vt\gamma g}$ and $i_{vt\gamma \lambda g}$ to indicate the decisions made by the system (see Table \ref{tab:notations} for their definitions).
+
+\noindent\textbf{Optimization Problem.} The optimization problem is to maximize overall inference accuracy within the limit of compute resource. Specifically:
+
+\begin{equation}
+    \begin{aligned}
+       & \underset{\phi_{vt\delta\gamma\lambda g}}{\arg\max}
+         \sum_{\substack{\forall v\in\mathcal{V}, 
+                        \forall t\in\mathcal{T},
+                        \forall \delta\in\{0,1\}\\
+                        \forall \gamma\in\Gamma,
+                        \forall \lambda\in\Lambda,
+                        \forall g\in\mathcal{G}}} 
+          \phi_{vt\delta\gamma\lambda g} \cdot
+          A(v, t, \gamma, \delta, \lambda)\\
+       & \text{subject to}\\
+       & 1. \sum_{\substack{\forall v\in\mathcal{V}, 
+                        \forall t\in\mathcal{T},
+                        \forall \delta\in\{0,1\}\\
+                        \forall \gamma\in\Gamma,
+                        \forall \lambda\in\Lambda}}
+                        \phi_{vt\delta\gamma\lambda g} \cdot
+                        C(v, t, \gamma, \delta, \lambda)
+                        \leq C_g, \forall g \in \mathcal{G} \\
+      & 2. \sum_{\substack{\forall \delta\in\{0,1\},
+                           \forall \gamma\in\Gamma, 
+                           \forall \lambda\in\Lambda, 
+                           \forall g\in\mathcal{G}}}
+           \phi_{vt\delta\gamma\lambda g} = 1, 
+           \forall v\in\mathcal{V}, 
+           \forall t\in\mathcal{T}
+    \end{aligned}
+    \label{eqn:optimization}
+\end{equation}
+
+The first constraint means that the total compute cost based on all system decisions cannot exceed the compute cost $C_g$ for each GPU $g \in \mathcal{G}$. The second constraint means that the system can only make one decision for each video $v$ at window $t$.
+
+\noindent\textbf{Complexity Analysis.} The above optimization problem can be reduced to a 0-1 multiple knapsack problem \emph{if} we know all the $A(v, t, \gamma, \delta, \lambda)\ \forall v \in \mathcal{V}, \forall t \in \mathcal{T}, \forall \gamma \in \Gamma, \forall \delta \in \{0,1\}, \forall \lambda \in \Lambda$. 
+Specifically, the optimization problem is to maximize accuracy (i.e., value of an item) by making a 0-1 decision in the system decision space (i.e., whether putting an item in a knapsack or not). 
+Hence, the greatly \emph{simplified} version of the problem is a 0-1 multiple knapsack problem, which is known to be NP-hard in the strong sense \cite{toth1990knapsack}. 
+In practice, however, getting all the $A(v, t, \gamma, \delta, \lambda)$ is \emph{intractable} because this requires we actually train all the DNN $\forall \gamma\in\Gamma, \forall v \in \mathcal{V}, \forall t \in \mathcal{T}$ and run inference with all the retrained DNNs and non-retrained DNNs $\forall v \in \mathcal{V}, \forall t \in \mathcal{T}, \forall \lambda \in \Lambda$. 
+Doing so completely defeats the purpose of the optimization problem.
+
+The uncertainty of $A(v, t, \gamma, \delta, \lambda)$ makes the problem bear some resemblance to the multi-armed bandits (MAB) problem \cite{robbins1952some}, where a gambler choosing among a set of slot machines at each round of play, and upon that selection observing a reward realization. 
+Because of data shift, the past experience on rewards ($A(v, t, \gamma, \delta, \lambda)$) can change significantly among different window $t$, which means the underlying rewards are non-stationary and the optimal strategy is intractable without limiting the variation of rewards \cite{DBLP:conf/nips/GurZB14}. 
+In contrast, our optimization problem is even more challenging than the non-stationary MAB problem for two reasons.
+First, the cost of each choice ($C(v, t, \gamma, \delta, \lambda)$) varies significantly, and the optimal solution may leverage cheaper yet less rewarding option to maximize the overall accuracy.
+As discussed above, it is a NP-hard multiple knapsack problem even if all the rewards are known. 
+This is fundamentally different from the MAB problem, whose goal is to find and leverage the maximum rewarding option as often as possible because the cost of pulling each arm is fixed.
+Second, we cannot actually get the $A(v, t, \gamma, \delta, \lambda)$ after each choice because this requires "ground truth" labels $\forall v \in \mathcal{V}, \forall t \in \mathcal{T}$. 
+We can only get "ground truth" labels by running a large and general DNN (golden model) on video data. As \S\ref{subsec:continuous} discusses, running a general DNN on all videos is not feasible on resource-constrained edge.
+
+In summary, our optimization problem is more difficult than two fundamentally challenging problems (multiple knapsack problem and non-stationary multi-armed bandits problem).  
+The optimal solution requires unrealistic resources to derive, which means that we need to design an efficient approximate solution to address this problem.

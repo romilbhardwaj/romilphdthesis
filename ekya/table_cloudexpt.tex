@@ -1,0 +1,57 @@
+% \begin{table}[]
+% \footnotesize
+% \begin{tabular}{cccc}
+% \toprule
+% \textbf{Network} & \textbf{\begin{tabular}[c]{@{}c@{}}Uplink\\ (Mbps)\end{tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Downlink\\ (Mbps)\end{tabular}} & \textbf{Accuracy} \\ \midrule
+% Cellular 4G      & 5.1             & 17.5              & 68.5\%            \\ \midrule
+% Satellite        & 8.5             & 15                & 69.2\%            \\ \midrule
+% Cellular 4G x2   & 10.2              & 35                & 71.2\%            \\ \midrule
+% % Cable            & 19.5            & 99                & 75.8\%            \\ \midrule 
+% % Fiber            & 50.5            & 67                & 77.7\%            \\ \midrule
+% \textbf{{\name}}             & -               & -                 & \textbf{77.8\%}          \\
+% \bottomrule
+% \end{tabular}
+% \caption{\label{tab:cloudexpt}\small\bf Training in the cloud with varying network capacities~\cite{edgelandscape} versus using {\name} at the edge.  {\name} delivers retrained models faster than the upload-download delay of modern edge network links, achieving a higher accuracy.}
+% \end{table}
+
+
+% \begin{table}[]
+% \footnotesize
+% \begin{tabular}{ccccc}
+% \toprule
+% \textbf{Network} & \textbf{\begin{tabular}[c]{@{}c@{}}Uplink/Downlink\\ (Mbps)\end{tabular}} & \textbf{Accuracy} & \textbf{\begin{tabular}[c]{@{}c@{}}Additional Bandwidth \\ (Uplink/Downlink)\end{tabular}} \\ \midrule
+% Cellular 4G      & 5.1/17.5               & 68.5\%     &     3.8x/10.2x       \\ \midrule
+% Satellite        & 8.5/15               & 69.2\%       &     3.8x/10.2x       \\ \midrule
+% % Cellular 4G x2   & 10.235              & 35                & 71.2\%            \\ \midrule
+% % Cable            & 19.5            & 99                & 75.8\%            \\ \midrule 
+% % Fiber            & 50.5            & 67                & 77.7\%            \\ \midrule
+% \textbf{{\name}}             & -/-                     & \textbf{77.8\%}     &     -/-     \\
+% \bottomrule
+% \end{tabular}
+% \caption{\label{tab:cloudexpt}\small\bf Training in the cloud with varying network capacities~\cite{edgelandscape} versus using {\name} at the edge.  {\name} delivers retrained models faster than the upload-download delay of modern edge network links, achieving a higher accuracy.}
+% \end{table}
+
+\begin{table}[t]
+\footnotesize
+% \begin{tabular}{ccccc}
+% \hline
+% \multirow{2}{*}{{\bf Network}} & \multirow{2}{*}{\begin{tabular}[c]{@{}c@{}}{\bf Uplink/Downlink}\\ (Mbps)\end{tabular}} & \multirow{2}{*}{{\bf Accuracy}} & \multicolumn{2}{c}{{\bf Add. bandwidth needed}} \\ \cline{4-5} 
+%  &  &  & Uplink & Downlink \\ \hline
+% Cellular 4G & 5.1/17.5 & 68.5\% & 3.8x & 10.2x \\ \hline
+% Satellite & 8.5/15 & 69.2\% & 3.8x & 10.2x \\ \hline
+% \textbf{{\name}}  & -/- & {\bf 77.8\%} & 0 & 0 \\ \hline
+% \end{tabular}
+\begin{tabular}{cccccc}
+\hline
+\multirow{2}{*}{} & \multicolumn{2}{c}{Bandwidth (Mbps)} & \multirow{2}{*}{Acc.} & \multicolumn{2}{c}{Bandwidth Gap} \\ \cline{2-3} \cline{5-6} 
+ & Uplink & Downlink &  & Uplink & Downlink \\ \hline
+Cellular & 5.1 & 17.5 & 68.5\% & 10.2$\times$ & 3.8$\times$ \\ \hline
+Satellite & 8.5 & 15 & 69.2\% & 5.9$\times$ & 4.4$\times$ \\ \hline
+Cellular ($2\times$) & 10.2 & 35 & 71.2\% & 5.1$\times$ & 1.9$\times$ \\ \hline
+% Cellular ($2\times$) & 5.1 & 17.5 & 68.5\% & 3.8$\times$ & 10.2$\times$ \\ \hline
+{\bf \name} & - & - & {\bf 77.8\%} & {\bf -} & {\bf -} \\ \hline
+\end{tabular}
+\caption{\label{tab:cloudexpt}\small\bf Retraining in the cloud under different networks~\cite{39-getmobile, 57-getmobile, getmobile} versus using {\name} at the edge. \name achieves better accuracy without using expensive satellite and cellular links. 
+%{\name} delivers retrained models faster than the upload-download delay of modern edge network links, achieving a higher accuracy. %\junchen{needs to update the satellite row}
+}
+\end{table}

@@ -1,0 +1,137 @@
+% Code figure
+\newcommand\colmult{0.23}
+\begin{figure*}[t]
+~
+% Task co-location
+~
+\begin{subfigure}[b]{\colmult \textwidth}
+  \centering
+  \begin{minted}[fontsize=\tiny,breaksymbolleft=\tiny\ensuremath{},breakautoindent=true]{python}
+def task_colocation():
+ constraint = sum([t.resources for t in coloc_tasks])
+ set_resource("co-grp", len(coloc_tasks), constraint)
+ for task in coloc_tasks:
+  task.launch(res={"co-grp": 1})
+  \end{minted}
+  \caption{Task Co-location}
+  \label{fig:policycode:taskcoloc}
+\end{subfigure}
+~
+% Data locality TODO: Consider showing task based data locality too.
+~
+\begin{subfigure}[b]{\colmult\textwidth}
+  \centering
+  \begin{minted}[fontsize=\tiny,breaksymbolleft=\tiny\ensuremath{},stripnl=false]{python}
+def data_locality():
+  data_addr = get_location(data)  # Node id
+  set_resource("data-loc", 1, data_addr)
+  task.launch(res={"data-loc": 1})
+  
+  
+  \end{minted}
+  \caption{Data locality}
+  \label{fig:policycode:datalocality}
+\end{subfigure}
+~
+% Policy: Anti Affinity
+~
+\begin{subfigure}[b]{\colmult\textwidth}
+  \centering
+  \begin{minted}[fontsize=\tiny,breaksymbolleft=\tiny\ensuremath{},stripnl=false]{python}
+def anti_affinity():
+  for node in nodes:
+    set_resource("anti_aff", 1, node)
+  for task in anti_affinity_tasks:
+    task.launch(res={"anti_aff": 1})
+
+  \end{minted}
+  \caption{Anti-affinity}
+  \label{fig:policycode:antiaff}
+\end{subfigure}
+~
+% Static Load Balancing
+~
+\begin{subfigure}[b]{\colmult\textwidth}
+  \centering
+  \begin{minted}[fontsize=\tiny,breaksymbolleft=\tiny\ensuremath{}]{python}
+def static_load_bal():
+ cap = ceiling(num_tasks/num_nodes)
+ for node in nodes:
+  set_resource("load_bal", cap, node)
+ for task in tasks:
+  task.launch(res={"load_bal": 1})
+  \end{minted}
+  \caption{Static Load Balancing}
+  \label{fig:policycode:staticloadbal}
+\end{subfigure}
+
+\newline
+\vspace{2.0mm}
+
+~
+% Dynamic Load Balancing
+~
+\begin{subfigure}[b]{\colmult\textwidth}
+  \centering
+  \begin{minted}[fontsize=\tiny,breaksymbolleft=\tiny\ensuremath{}]{python}
+def load_monitor():
+ while True:
+  res = get_cluster_status()
+  if res["load_bal"] == 0 on all nodes:
+   set_resource("load_bal", increment 1, all_nodes)
+  if res["load_bal"] >= 1 on all nodes:
+   set_resource("load_bal", decrement 1, all_nodes)
+def dynamic_load_bal():
+  task.launch(res={"load_bal": 1})
+  \end{minted}
+% for task in tasks:
+%   task.resources = {"load_bal": 1}
+%   task.launch()
+  \caption{Dynamic Load Balancing}
+  \label{fig:policycode:dynloadbal}
+\end{subfigure}
+~
+% Policy: Binpacking
+~
+\begin{subfigure}[b]{\colmult\textwidth}
+  \centering
+  \begin{minted}[fontsize=\tiny,breaksymbolleft=\tiny\ensuremath{},stripnl=false,escapeinside=||,mathescape=true]{python}
+def expand_binpack_nodes(res):
+ find node where node.resources > res:
+  set_resource("binpack", |$\infty$|, node)
+
+
+def binpacking():
+  cluster_res = get_cluster_status()
+  if task_res is not subset(binpack_nodes):
+    expand_binpack_nodes(task_res)
+  task.launch(res={"binpack": 1})
+  
+  
+  \end{minted}
+  \caption{Bin-packing}
+  \label{fig:policycode:binpacking}
+\end{subfigure}
+~
+% Policy: Gang sched
+~
+\begin{subfigure}[b]{\colmult\textwidth}
+  \centering
+  \begin{minted}[fontsize=\tiny,breaksymbolleft=\tiny\ensuremath{}]{python}
+def ghost_task(child_tasks, timeout):
+  set_resource("reserved", len(child_tasks))
+  wait(child_tasks, timeout)
+  set_resource("reserved", 0)
+
+def gang_scheduling():
+ ghost_task(gang_tasks).launch(res = sum(task_resreqs))
+ for t in gang_tasks: 
+   t.launch(res={"reserved": 1})
+  \end{minted}
+  \caption{Gang Scheduling}
+  \label{fig:policycode:gangsched}
+\end{subfigure}
+
+\caption{\small Implementation of popular scheduling policies with ephemeral resources. \name{} can allow locality based policies by creating ephemeral resources on nodes which can satisfy the said locality. \name{} can also be used to implement dynamic policies such as load-balancing and bin-packing by implementing lightweight processes which can adjust ephemeral resource capacities on the fly.}
+\label{fig:policycode}
+\end{figure*}

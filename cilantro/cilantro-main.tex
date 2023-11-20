@@ -1,0 +1,79 @@
+% \documentclass[letterpaper,twocolumn,10pt]{article}
+% \documentclass[letterpaper,twocolumn,10pt]{article}
+% \usepackage{usenix2019_v3}
+% \usepackage[utf8]{inputenc}
+
+% \documentclass[sigconf]{acmart}
+% \documentclass[sigplan,review,anonymous, 10pt]{acmart}
+% \documentclass[letterpaper,twocolumn,10pt]{article}
+
+
+% Adjust spacing before and after section/subsection headers
+% \usepackage[compact,noindentafter]{titlesec}
+% \titlespacing{\section}{2pt}{2ex}{1ex}
+% \titlespacing{\subsection}{0pt}{1.5ex}{0.75ex}
+% \titlespacing{\subsubsection}{0pt}{1ex}{0.5ex}
+
+% \newcommand{\kkcomment}[1]{\textcolor{magenta}{(#1 --KK)}}
+% \newcommand{\rbcomment}[1]{\textcolor{orange}{(#1 --RB)}}
+%\newcommand{\bhcomment}[1]{\textcolor{green}{(#1 --BH)}}
+%\newcommand{\ioncomment}[1]{\textcolor{green}{(#1 --Ion)}}
+%\newcommand{\wg}[1]{\textcolor{teal}{(#1 --WG)}}
+%\newcommand{\fillme}{{\bf XXX}\xspace}
+%%\newcommand{\cameratext}[1]{{\color{blue}{#1}}}
+%\newcommand{\cameratext}[1]{{#1}}
+%\newcommand{\kkcomment}[1]{}
+%\newcommand{\rbcomment}[1]{}
+
+% \usepackage{draftwatermark}
+% \SetWatermarkText{Draft -- do not distribute}
+% \SetWatermarkScale{0.45}
+% \SetWatermarkColor[gray]{0.9}
+
+\newtheorem*{theorem*}{Theorem}
+
+
+% \title{\sysname: Hierarchical Fair and Strategy-proof Learning of Resource Requirements in
+% Hierarchies}
+% \title{\LARGE \hmmfltext: Learning Resource Requirements in Hierarchies for
+% \\
+% Efficient, Fair,
+% and Strategy-proof Allocations}
+% \title{Learning Resource Requirements for \\ Utility-aware Fair Sharing}
+% \title{Learning Resource Requirements for \\ Satisfaction Fairness}
+% \title{Learning Resource Requirements \\ for Satisfaction Fairness}
+% \title{Cilantro: Online Learning for Efficient \\  Resource Allocations}
+% \title{\huge Cilantro: A Framework for Performance-Aware Resource Allocation via Online Learning}
+\chapter{Cilantro: Performance-Aware Resource Allocation for General Objectives via Online Feedback}
+\label{ch_cilantro}
+
+% \renewcommand{\shortauthors}{Bhardwaj et al.}
+% \renewcommand{\shorttitle}{\large \hmmfltext}
+
+\newcommand{\cilantropolicyheader}[1]{\underline{#1}}
+
+% Remove page numbers
+% \pagenumbering{gobble}
+% Artifact badges
+% \usepackage[available,functional]{usenixbadges}
+
+\input{cilantro/abstract}
+
+%\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+%\footnotetext{* Co-primary authors.}
+
+
+\input{cilantro/figures}
+\input{cilantro/tables}
+\input{cilantro/intro_osdi}
+\input{cilantro/related}
+\input{cilantro/method}
+\input{cilantro/policies}
+\input{cilantro/discussion}
+\input{cilantro/implementation_exp}
+\input{cilantro/experiments}
+\input{cilantro/conclusion}
+\input{cilantro/acknowledgements}
+
+
+%\input{cilantro/appendix}

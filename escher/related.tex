@@ -1,0 +1,74 @@
+\section{Related Work}
+\label{sec:related-work}
+
+
+
+%Cluster scheduling has received considerable attention over the past few decades. Unfortunately, despite this attention, most schedulers are not general enough to simultaneously support or compose the variety of policies required by increasingly complex distributed applications.
+%Here, we discuss some of the most representative cluster schedulers proposed so far \rliaw{better intro herre}.
+
+%Most schedulers are not general enough to simultaneously support or compose the variety of policies required by increasingly complex distributed applications.
+
+\textbf{Monolithic schedulers.}
+Monolithic cluster schedulers aim to implement both the scheduling policy and mechanism for a distributed application.
+Some provide a single generic scheduling discipline, such as fair sharing~\cite{isardquincy,ghodsi2011dominant}, gang scheduling~\cite{mpi}, or delay scheduling~\cite{delay-scheduling}. These schedulers provide little control to the application beyond the ability to set some configuration knobs, such as the time to wait before scheduling a task on a node that doesn't store its inputs~\cite{delay-scheduling}.
+%Because these schedulers target a specific policy, they are inflexible and support only a limited set of applications.
+
+Other monolithic schedulers aim for generality and provide APIs to allow applications to express scheduling constraints.
+Examples are YARN~\cite{yarn}, Condor's ClassAds~\cite{condor}, and Kubernetes~\cite{kubernetes}.
+Their monolithic design makes it hard to add support for new policies and their compositions.
+For instance, adding support for gang scheduling to Kubernetes requires deep structural and API changes, and was eventually implemented as a standalone system~\cite{kubernetes-gang-scheduling}.
+Often the API they provide is complex as well, since it must be expressive enough to capture complex constraints such as composition. 
+For instance, the specification of ClassAds~\cite{classads} is 35 pages~\cite{classads-refman}.
+\name{} achieves both \textit{simplicity} and \textit{evolvability} by decoupling policy specification and the resource-matching mechanism.
+% This abstraction is backed by a basic scheduler that implements only one functionality: ensure that the capacity constraints of all resources are satisfied.
+% This results in a simple design that is easy to scale and enables expression of dynamic and composable policies that cannot be supported in monolithic schedulers.
+
+Like ESCHER, DCM~\cite{dcm-osdi20} also aims to maximize extensibility of framework schedulers by using a declarative model for applications to specify their desired policy behavior as SQL queries. In doing so, DCM deploys a custom scheduler and optimizer running with Kubernetes.
+%These queries operate on cluster state stored in a database and are encoded as optimization problems to be solved by off-the-shelf solvers.
+While this is well suited for policies which optimize for global objectives, expressing application-level constraints requires users to create and maintain a table in cluster state database, which can be challenging in a distributed environment. ESCHER's emphasis lies on supporting application-level scheduling goals, allowing it to easily handle task-task dependencies (Primitive P2 in \cref{sec:sched:primitive}). Moreover, \name{} reuses existing virtual resource implementations, thus requiring no additional services or schedulers to be deployed in the cluster framework.
+
+Rayon~\cite{rayon} is a space-time reservation admission system, allowing applications to reserve a \textit{skyline} of resource capacity, $c(t)$, as a function of time. ESCHER can implement a discrete version of this by having a ghost task evaluate $c(t)$ and update ephemeral resources to match $c(t)$ at any instant.
+
+\noindent\textbf{Two-level schedulers.}
+% At the other extreme, there are schedulers which give all resource management and scheduling control to applications.
+Rather than trying to implement application level policies, some cluster management frameworks are designed explicitly to give all resource management and scheduling control to the application.
+Many of these frameworks employ a two-level hierarchy~\cite{yarn,mesos}, where the first level manages only resource isolation between applications, while the second level exposes physical resources to applications. These applications are then responsible for building their own scheduler. Omega~\cite{omega} follows a similar separation by providing transaction semantics on a shared cluster state for distributed schedulers.
+While this approach grants maximum flexibility to applications, it adds significant complexity to application code since the application must now handle both scheduling policy and the mechanisms to ensure resource coordination between tasks.
+Some popular frameworks, such as Spark~\cite{spark} and Flink~\cite{carbone2015flink} obviate the need for distributed coordination by designating a special node (e.g., master) to spawn all tasks. However, they too have monolithic designs that are not evolvable.
+In contrast, \name{} focuses on providing a generic scheduling framework where the application only focuses on the scheduling policy.
+Indeed, \name{} can be used in tandem with two-level schedulers by launching an \name{} scheduler to manage resources allocated by the top-level scheduler.
+
+
+
+% At the other extreme, there are schedulers that give substantial control to applications. Many of these schedulers employ a two-level hierarchy~\cite{yarn,mesos,omega}. At the first level, these schedulers allocate the resources across applications (frameworks, or users) using a generic policy, such as fair sharing or strict priority. At the second level, they expose physical resources to applications, and then leave each application to implement its own scheduling policy. This provides applications maximum flexibility but it comes with significant complexity. While applications that require simple policies (e.g., MapReduce or MPI) can cope with this complexity as they implement their own scheduling policies and mechanisms, it is daunting for more demanding applications to implement the mechanisms for their scheduling policies. For example, RL applications need to implement scheduling policies to support workloads as different as data processing, training, serving and simulations simultaneously in a single application. This is no easier than implementing a fully featured cluster scheduler.
+
+\noindent\textbf{Label-based and declarative scheduling.} 
+\cite{kubernetes,yarn,omega,classads,borg} provide mechanisms to annotate nodes with resource types and use these labels (e.g., "GPU:Nvidia:V100") for placement constraints.
+%by which the application can attach labels such as resource type  to a node.
+% These labels are then used to filter matching nodes during task placement.
+%Thus, the application can specify a limited set of policies, e.g., anti-affinity, via labels.
+In some cases, these labels do not have an associated capacity (e.g., string key-value pairs), rendering infeasible implementation of policies with \emph{quantitative} conditions. 
+In other cases, quantitative labels are static.
+% This makes it infeasible to use simple labels to implement policies that have some \emph{quantitative} condition, e.g., a policy that limits each node to 4 concurrent tasks.
+% Thus, they cannot be employed to implement policies that require placement structure, such as anti-affinity and gang scheduling without incurring multiple rounds of resource requests or hardcoding the features.
+TetriSched~\cite{tetrisched} operates on labelled resources by allowing declarative resource constraint specification and composition. Wrasse~\cite{wrasse-socc12} uses the bins and balls abstraction along with user-defined utilization functions to come up with a specification language. However, neither of these provide support for \textit{dynamic} scheduling policies, e.g., making inter-task constraints hard to implement in a single shot. %task-to-task affinity hard to implement. 
+The expressivity of declarative schedulers is restricted to information known \textit{a priori} (i.e., static label information). Circular inter-task dependencies~(\cite{naiad-sosp13}) are fundamentally impossible to implement without a dynamic mechanism to unroll the dependency (\Cref{sec:motivation:label}).
+% The dynamics of resource labels cannot be captured or leveraged. 
+We note, however, that declarative schedulers (\cite{tetrisched,dcm-osdi20}) are synergistic with \name{}.
+Ephemeral resources can be used as an intermediate representation (IR) for their frontend API (e.g., SQL~\cite{dcm-osdi20} and STRL~\cite{tetrisched}).
+% whose resource constraints can be compiled to \name{}, using it as the intermediate representation (IR).
+% \name{} can be used as the intermediate representation (IR) to which declarative resource constraints are compiled.
+
+Some existing schedulers provide the ability to configure non-physical resources, e.g., the \emph{extended resources} API in Kubernetes~\cite{kubernetesextres}.
+The original purpose of this mechanism is for the cluster operator to add accounting for custom resources  (e.g., accelerators).
+Meanwhile, generic application-level scheduling policies like affinity and load balancing are still implemented in the Kubernetes core. In contrast, \name{} obviates the need to implement these policies in the core scheduler, deferring it to the application level via the mechanism of ephemeral resources.
+% The insight provided in \name{} is that these policies need not be implemented in the core scheduler at all.
+% Instead, we show that applications can directly implement their scheduling policies through ephemeral resources. 
+In fact, the \name{} implementation on Kubernetes repurposes extended resources to implement \emph{all} scheduling policies and simplifies the Kubernetes scheduler to only resource matching.
+Finally, the ability to dynamically update ephemeral resources at runtime enables expressing previously inexpressible, e.g., inter-task ``happens-before'' relationships and iterative task graphs.
+% (Section~\ref{sec:arch:evolve}).
+
+
+% By doing so, ESCHER adopts a reductionist approach which advocates against baking scheduling policies in the Kubernetes core scheduler and instead espouses the use of Kubernetes's \emph{extended resources} API to keep the core scheduler minimal.
+
+% \name{} is consistent with the end-to-end argument~\cite{e2e-argument} in that it provides a minimalist yet flexible API, while pushing the job of implementing custom schedulers to the application layer, as the application is in the best position to decide the "optimal" scheduling policy. \name{} is also similar to the Exokernel~\cite{exokernel}---an extensible operating system for single-node machines. Like the Exokernel, \name{} implements accounting for resource allocation, enforces resource capacity constraints, and pushes the implementation of the scheduling policies to the application. However, unlike the Exokernel, the focus in \name{} is on an extensible scheduling architecture for heterogeneous distributed systems.

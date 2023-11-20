@@ -1,0 +1,169 @@
+
+
+\section{Background \& Related Work}
+\label{sec:related}
+
+\textbf{Policies for multi-tenant resource allocation:}
+Organizations typically have a finite pool of cluster resources that must be shared
+among multiple users running different applications.
+In all but trivial settings, there is a scarcity of resources and we cannot satisfy the resource
+requirements of all users.
+Hence, multi-tenant schedulng policies attempt to balance the performance goals
+while satisfying some notion of fairness.
+The simplest, yet popular approach to this is a \emph{resource fair} policy,
+which simply divides the resource
+equally (or proportional to some weights) without accounting for the users'
+performance~\citep{jiang2012improving,isard2009quincy,hadoopfs,mo2000fair}.
+However, there has been recent interest in performance-aware fairness policies.
+% There are however several classes of policies 
+We review two common classes of such policies. 
+
+% ============== Perf based policies ================
+\emph{Welfare-based fairness policies.}
+% Historically,  the networking literature has considered user performance in fair
+% allocation.
+These policies typically work with a notion of \emph{utility}, which is the satisfaction
+derived by a user from a given performance.
+The most popular such welfare policy is Kelly's model~\citep{kelly1998rate},
+which stipulates that we maximize the
+\emph{social welfare}, i.e sum of user utilities, when determining allocations.
+% $\alpha$-fairness~\citep{mo2000fair} is an application of Kelly's model which defines a concrete mathematical form for utilities; however, in data centre
+% applications, utilities defined on the basis of SLOs can be varied and not uniformly conform to
+% specific forms.
+An alternative approach to maximise the
+\emph{egalitarian welfare}, i.e minimum of user utilities.
+Recently, 
+Minerva~\citep{nathan2019end} studies egalitarian welfare when allocating bandwidth 
+in a video streaming application.
+% One recent work which considers egalitarian welfare is
+% Minerva~\citep{nathan2019end}, who allocate a finite amount of bandwidth among multiple
+% users in a video streaming application.
+
+
+\emph{Demand-based fairness policies.}
+A second class of methods are demand-based, where each user specifies their resource
+\emph{demand} and the scheduler allocates resources based on the submitted demands.
+% Such policies guarantee fairness as follows:
+% each user has an equal share to the resource; if their demand is larger than their share, they are
+% guaranteed to get at least their share; but if their demand is smaller, then the excess resources will
+% be allocated to those with large demand to improve resource efficiency.
+Examples include weighted fair allocation~\citep{demers1989analysis} and dominant resource
+fairness~\citep{ghodsi2011dominant}, and their queueing
+variants~\citep{waldspurger1994lottery,stiliadis1998latency,ghodsi2012multi}.
+% Some have also applied the
+% MMF principle to design various queuing mechanisms such as lottery
+% scheduling~\citep{waldspurger1994lottery} and weighted fair
+% queuing~\citep{stiliadis1998latency,bennett1996wf}.
+In principle, such demand-based policies can be used for performance-aware allocation when there are
+well defined SLOs (or other performance goals), by defining the demand of a user to be the
+minimum resources needed to meet their SLO.
+For instance, in  Fig.~\ref{fig:toyexample}, we may set the demand of the first and
+second users to be 40 and 60 respectively.
+However, existing implementations of these policies typically rely on
+proxies such as work-queue lengths
+to compute the demand~\citep{bennett1996wf,hindman2011mesos,ghodsi2013choosy}.
+Consequently, the resulting allocations may fall short on fairness and/or resource efficiency from
+a performance point of view.
+
+% necessary to meet 
+% a unit of work for their job (e.g., based on resource requirements or other
+% mechanisms like work-queue lengths), and 
+% then the mechanism allocates resources based on these submitted requests while accounting for their fair shares.~\citet{demers1989analysis} introduced the popular max-min fairness (MMF) procedure, subsequent work
+% have applied the same principle for allocating resources in data centers.
+% Some have also applied the
+% MMF principle to design various queuing mechanisms such as lottery
+% scheduling~\citep{waldspurger1994lottery} and weighted fair
+% queuing~\citep{stiliadis1998latency,bennett1996wf}.
+% Prior work has also studied demand-based fairness for multi-resource environments. Some examples include dominant resource fairness and its queuing variants~\citep{ghodsi2011dominant,ghodsi2012multi,gutman2012fair} which extend MMF to multi-resource settings.%, and Allox~\citep{le2020allox} which interpolates between work-based fairness and average completion time minimisation. 
+
+
+\textbf{Systems for resource allocation.}
+% To simplify resource coordination between users
+% and to enforce policy-based constraints on resource sharing,
+There is a long line of work for resource management both in the multi-tenant setting and for
+application-level task scheduling. 
+% \textbf{Systems for scheduling microservices:}
+Paragon~\citep{delimitrou2013paragon} accounts for resource heterogeneity and interference
+among jobs to achieve performance guarantees.
+Quasar~\citep{delimitrou2014quasar} uses proxy metrics, requires
+offline profiling of jobs, and has a fixed operator-centric policy that aims to maximize cluster
+utilization instead of fairness.
+Autopilot~\citep{rzadca2020autopilot} performs application load and resource
+requirement prediction to minimize the amount of unutilized resources. But it does not account for
+actual application performance and instead uses surrogate metrics such as out-of-memory (OOM) rates
+to determine allocations.
+Morpheus~\citep{morpheus} aims to mitigate performance unpredictability by
+defining SLOs and satisfying their resource demands by using models based on historical data.
+% While Morpheus relies on resource reservation to re-provision resources, its automated SLO
+% generation is
+% synergistic with Cilantro towards achieving a zero-configuration cluster scheduler.
+All the above work do not directly account for users' peformance when determining
+allocations.
+% Moreover, all
+Regardless, they highlight the need for automatically learning resource requirements instead of
+relying on users to estimate them.
+
+There has been some recent work on feedback-driven systems which account
+ for performance metrics and SLOs in resource allocation.
+Jockey~\citep{jockey} satisfies latency SLOs by modelling
+internal job dependencies to dynamically re-provision resources, but focuses on a single
+job.
+Ernest~\citep{venkataraman2016ernest} provides methods for estimating performance curves using
+limited amount of data, but does not study using these estimates for
+resource allocation under scarcity.
+Parties~\citep{chen2019parties} 
+allocates resources to jobs within the same server while always satisfying SLOs.
+If the SLOs of all jobs cannot be met, it evicts one or more of the jobs to a different server;
+thus, it does not apply to our setting where there is a fixed amount of
+resources and such eviction may not be
+possible.
+
+
+Recently, there has been interest in performance-aware resource allocation when there is elasticity in
+resource availability, but we need to keep costs down, e.g. the cloud;
+hence, they are not directly comparable to our work.
+Examples include Sinan~\citep{zhang2021sinan}, DS2~\citep{kalavri2018three},
+and FIRM~\citep{qiu2020firm}.
+While cloud resource management is an emerging application area, traditional cluster management
+still remains pertinent.
+Organizations do not need to spend additional money if they use their own clusters.
+Moreover, even when using cloud, long-term rentals are significantly cheaper than on-demand
+instances.
+
+The focus on demand-based policies has also influenced the design of scheduling frameworks, such as Kubernetes~\cite{kubernetes}, Mesos~\citep{hindman2011mesos} and
+YARN~\citep{yarn}. 
+These frameworks exclusively implement demand-based fairness policies and do not fundamentally support welfare-based policies.
+To execute resource allocations from policies,
+Kubernetes and YARN use resource reservations while Mesos negotiates allocations through
+resource offers. In doing so, these frameworks focus on one-way resource allocations
+and do not provide any mechanisms for the policy
+to get feedback on application performance.
+% Instead, they just focus on one-way allocations of resources and do
+% not collect any feedback on the given allocation.
+% This prevents policies from observing application
+% performance, and 
+Consequently, policies are forced to make invasive changes to application logic to extract
+relevant metrics~\citep{xiao2018gandiva}.
+% In the next section, we discuss how Cilantro overcomes
+% this performance-obliviousness by designing and allowing policies to adjust resource allocations in
+% response to application performance.
+
+
+% Completion time based policies
+% Closest work
+% Autopilot, Paragon, Quasar
+
+% Domain specific - These are L2 schedulers
+% Pollux
+% Hypersched 
+% Jockey
+% Morpheus
+% \rbcomment{Make the case for modularity here.}
+
+
+
+
+% or simply deprovisioned  to reduce costs~\citep{rzadca2020autopilot}.
+% This can correspond several millions
+% of USD of unrealised revenue or unnecessary costs at scale~\citep{rzadca2020autopilot}.
+% These excess resources can be reallocated to other jobs which need them.

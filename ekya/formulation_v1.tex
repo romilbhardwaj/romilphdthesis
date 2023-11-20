@@ -1,0 +1,86 @@
+\begin{table}[t!]
+\small
+\begin{tabular}{cl}
+{\bf Notation} & {\bf Description}\\\hline
+$V$ & Set of video cameras\\
+$v$ & Single video camera\\\hline
+$G$ & Total GPU resources\\
+$g^v_R$ & Resources for retraining video stream $v$\\
+$g^v_I$ & Resource for inference on video stream $v$\\\hline
+$\Gamma_v$ & Set of all configurations for retraining $v$\\
+ & (each configuration is referred to as $\gamma_v$)\\
+$\Lambda_v$ & Set of all configurations for inference on $v$\\
+ & (each configuration is referred to as $\lambda_v$)\\\hline
+$a_v$ & Accuracy of inference on video stream $v$\\
+$\alpha_v$ & Accuracy of inference over time window\\
+$T$ & Retraining window duration\\\hline\\
+\end{tabular}
+\caption{\label{tab:notations}\small\bf Notations used in {\name}'s description.}
+\end{table}
+
+\subsection{\hspace{-0.2cm}Formulation of joint inference-retraining scheduling}
+\label{subsec:formulation}
+% Setup
+We maximize the inference accuracy of all video streams in a retraining window. Table \ref{tab:notations} has the list of relevant notations.
+We consider a pool of edge GPUs $G$ (each edge server might have a few GPUs~\cite{azure-ase}) shared by the inference and retraining jobs of a set of video streams $V$, with video $v$($\in V$)'s inference job getting $g^{v}_I$ GPU resources and its training job getting $g^{v}_R$ GPU resources\footnote{\junchen{need to clarify why we only share GPU cycles, not RAM, etc.}}. 
+For each video $v \in V$, we denote its inference accuracy $a_v$, which could be improved by retraining.
+$\gamma_v$ is the retraining configuration, picked from a pool of \textit{configurations} $\Gamma_v$, to retrain the model of video $v$.
+$\lambda_v$ is the inference configuration (e.g., frame sampling rate), picked from an inference resource-accuracy profile $\Lambda_v$ \cite{videostorm, chameleon}, to run the inference job of video $v$.
+Note that inference configurations are always chosen such that its resource demand does not exceed the allocation $g^v_I$ for inference.
+
+Given the retraining and inference configurations ($\gamma_v,\lambda_v$) and resource allocations ($g^{v}_R, g^{v}_I$) of a video $v$, its inference accuracy at time $t$ is
+$a_v(t, g^v_R, \gamma_v, g^v_I, \lambda_v)$ and inference accuracy measured over the retraining window $T$ can be expressed by 
+\[
+\alpha_v (T) = \frac{1}{T} \int_{t=0}^{T} a_v(t, g^v_R, \gamma_v, g^v_I, \lambda_v)\ dt
+\]
+
+
+%Edge deployments have one or few edge servers that have multiple video cameras $V$ streaming to them for analytics (\S\ref{subsec:edge}). The analytics on the video streams in $V$ share the same GPU resource pool $G$ (typically, a few GPUs per edge server \cite{azure-ase}). For each video stream $v \in V$, there is a continuous inference job whose inference accuracy is $a_v$. A retraining job is run periodically per video stream which improves $a_v$. The resource pool $G$ must be split across the inference and retraining jobs of all video streams, with video $v$'s inference job getting $g^{v}_I$ GPU resources and its training job getting $g^{v}_R$ GPU resources. Table \ref{tab:notations} has the list of relevant notations.
+
+
+
+% Training Profiles. Not going into details on how performance scales with resources..
+%Every retraining job of video $v$ has a pool of \textit{configurations} $\Gamma_v$ (\S\ref{subsec:profiles}). Each configuration $\gamma_v \in \Gamma_v$ specifies the hyperparameters and an associated accuracy-resource\_time profile. Increased resource allocation to training grants more resource\_time to the training job, allowing it to achieve a higher accuracy for the same wall\_time. Once a retraining job completes, it updates the inference job with the new model. Similar to the training configurations, the inference job of each camera $c$ has a inference performance profile, which dictates the scaling of the inference accuracy as the inference resource allocation changes.
+%\noindent{\bf Configurations:} Every retraining job of video $v$ has a pool of \textit{configurations} $\Gamma_v$. Each configuration $\gamma_v \in \Gamma_v$ specifies the hyperparameters and its accuracy (see \S\ref{subsec:profiles}). Increasing resource allocation to retraining ($g^v_R$) allows it complete faster and update the inference job sooner with the new model.% with higher accuracy. 
+%
+%The inference job of each video stream $v$ also has a resource-accuracy profile $\Lambda_v$ \cite{videostorm, chameleon}, with each configuration $\lambda_v \in \Lambda_v$ (e.g., frame sampling rate) in the profile specifying the current inference accuracy ($a_v$) as well as the resource {\em demand} to keep up with the processing of the live video stream. %All the inference configurations can keep up with processing the live video stream if its corresponding resource demand is allocated, but their accuracies will vary. % which dictates the scaling of the inference accuracy as the inference resource allocation changes.
+%Inference configurations are always chosen such that its resource demand does not exceed the allocation $g^v_I$ for inference.
+
+% Define inference accuracy.
+%\noindent{\bf Inference accuracy over time:} 
+%The inference accuracy of a video $v$ measured over the retraining window depends on the inference configuration (which in turn depends on its resources allocation $g^v_I$) as well as the inference model (pre-retraining and post-retraining). The accuracy of the model post-retraining depends on the retraining configuration $\gamma_v \in \Gamma_v$ and the GPU allocation to the retraining $g^v_R$. Thus, for a video stream $v$ whose inference accuracy at any point in time is $a_v$, the inference accuracy $\alpha_v$ averaged over time $t=0 \rightarrow T$ is (where $T$ is the retraining window):
+%\[
+%\alpha_v (T) = \frac{1}{T} \int_{t=0}^{T} a_v(t, g^v_R, \gamma_v, g^v_I, \lambda_v)\ dt
+%\]
+
+% Objective - What are the metrics and why
+\noindent The joint retraining-inference optimization maximizes the average accuracy over a retraining window across all videos through selecting configurations ($\gamma_v$ and $\lambda_v$) and allocating resource between retraining ($g^{R}_v$) and inference ($g^{I}_v$):
+\begin{equation}
+    \begin{aligned}
+        & \underset{g_{R}^v, g_{I}^v, \gamma_v, \lambda_v}{\text{maximize}}
+        %& & \frac{\sum_{v \in V}\alpha_v(T, g_{R}^v, \gamma_v, g_{I}^v, \lambda_v)}{|V|} \\
+        & & \frac{\sum_{v \in V}\alpha_v(T)}{|V|} \\
+        & \text{s.t.}
+        & & \sum_{v \in V} g_{R}^v + g_{I}^v \leq G\\
+        %&&& a_v(t, g_{R}^v, \gamma_v, g_{I}^v, \lambda_v) \geq a_\text{MIN} \\
+        &&& a_v(t) \geq a_\text{MIN}, \forall v \in V, 0 \leq t \leq T 
+        %TODO(romilb): Cleanup this min accuracy expression
+    \end{aligned}
+    \label{eqn:optimization}
+\end{equation}
+The joint retraining-inference scheduling essentially balances the inference accuracy before retraining finishes and the optimization of long-term accuracy by finishing model retraining as soon as possible.
+This fundamentally differs from optimization for only inference accuracy or only training accuracy in two aspects.
+Additionally, we allow for the inference accuracy $a_v$ at any point in time to be bounded by a minimum $a_\text{MIN}$ (application-specific bound), so that the inference results remain useful to the application, especially when the model is being retrained.
+
+
+%As shown in \S\ref{subsec:motivation-sched-example}, optimizing for only the inference accuracy or only the retraining accuracy does not maximize the inference accuracy over the retraining window, $\alpha_v (T)$. % over all cameras $v \in V$. 
+%%optimizing for maximum training accuracy is immaterial since the goal is not just to retrain the model, but also use it while it is still useful. Thus the objective is to maximize the mean inference accuracy across all cameras $C$ present in the system by picking the correct configurations and resource allocations, constrained by the size of the resource pool available.
+%% https://jcnts.wordpress.com/2009/11/11/formatting-optimization-problems-with-latex/
+%%\noindent{\bf Optimization formulation:} 
+%
+%We seek to maximize the average inference accuracy over the retraining window $T$ (i.e., $\alpha_v(T)$) across all videos $v \in V$ by picking the configurations $\gamma_v$ and $\lambda_v$ for each video stream $v$'s retraining and inference, and allocating the edge's GPU resource $G$ for retraining ($g^{R}_v$) and inference ($g^{I}_v$). Additionally, we allow for the inference accuracy $a_v$ at any point in time to be bounded by a minimum $a_\text{MIN}$ (application-specific bound), so that the inference results remain useful to the application.
+
+% computationally intractable
+\mypara{Complexity analysis}
+The complexity of the above optimization is combinatorial in the number of configurations and cameras. As a result, we proceed to devise an efficient scheduling heuristic.% that provides good results in practice.
+\junchen{Kevin, the complexity discussion can be here}

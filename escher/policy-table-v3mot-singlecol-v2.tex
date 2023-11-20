@@ -1,0 +1,184 @@
+% https://docs.google.com/spreadsheets/d/16M7Ia2e4X7hofFKPAhwRx6LiYlhBFzlqwzldHgewwCQ/edit?usp=sharing
+%\newcommand{\centered}[1]{\begin{tabular}{l} #1 \end{tabular}}
+\newcommand\colw{0.8}
+
+\newcommand{\xmark}{\ding{55}}
+
+\begin{table}[!t]
+  \small
+  \centering
+  \begin{xtabular}{|p{0.45\linewidth}|
+  p{\colw em}|p{1.6em}|p{\colw em}||p{\colw em}|p{\colw em}|p{\colw em}|}
+  \cline{2-7}
+  \multicolumn{1}{c|}{}  &  \multicolumn{3}{c||}{\textbf{Framework}} & \multicolumn{3}{c|}{\textbf{Scheduler}}\\
+  \hline
+    \textbf{Policy} 
+  \vspace{13mm} & 
+  \textbf{\rotatebox[origin=c]{90}{YARN CS~\cite{yarn}}} &
+  \textbf{\rotatebox[origin=c]{90}{\parbox{2.2cm}{Kubernetes~\cite{kubernetes} Core / Labels}}} &
+  \textbf{\rotatebox[origin=c]{90}{Spark~\cite{spark}}} &
+  \textbf{\rotatebox[origin=c]{90}{Sparrow~\cite{sparrow}}} &
+  \textbf{\rotatebox[origin=c]{90}{Gandiva~\cite{gandiva}}} &
+  \textbf{\rotatebox[origin=c]{90}{Gorila~\cite{gorila}}}
+  \\
+  \hline
+  
+  % Begin info
+  
+  \textbf{Task co-location}\newline
+  Place $n$ tasks on the same physical machine.
+  %\vspace{1mm}
+    % \begin{minted}[autogobble]{python}
+    % coloc_tasks = [...]
+    % res_constraint = sum([t.resources for t in coloc_tasks])
+    % set_resource("coloc-group", len(coloc_tasks), res_constraint)
+    % for task in coloc_tasks:
+    %     task.launch(resources={"coloc-group": 1})
+    % \end{minted}
+  &
+  $\checkmark$& % YARN CS
+  $\checkmark\text{/\checkmark}$& % Kubernetes
+  $\text{\xmark}$& % Spark
+  $\checkmark$& % Sparrow
+  $\checkmark$& % Gandiva
+  $\checkmark$% Gorila
+  \\
+  \hline
+  
+  \textbf{Data locality}\newline
+  Place tasks with operands.
+  \vspace{0.01em}
+    % \begin{minted}[autogobble]{python}
+    % data_addr = nodeid  # Node id where the data is
+    % set_resource("data-loc", 1, data_addr)
+    % task.launch(resources={"data-loc": 1})
+    % \end{minted}
+  &
+  $\checkmark$& % YARN CS
+  $\checkmark\text{/\checkmark}$& % Kubernetes
+  $\checkmark$& % Spark
+  $\checkmark$& % Sparrow
+  $\text{\xmark}$& % Gandiva
+  $\text{\xmark}$ % Gorila
+  \\
+  \hline
+  
+%   \textbf{Static Load Balancing}\newline
+%   Given $n$ tasks, evenly spread them out across $m$ workers.
+%   %\vspace{1mm} 
+% %     \begin{minted}[autogobble]{python}
+% %   resource_capacity = ceiling(num_tasks/num_nodes)
+% %   for node in nodes:
+% %     set_resource("load_bal", resource_capacity, node)
+% %   for task in tasks:
+% %     task.launch(resources = {"load_bal": 1})
+% %     \end{minted}
+%   &
+%   $\checkmark$& % YARN CS
+%   $\checkmark\text{/\checkmark}$& % Kubernetes
+%   $\checkmark$& % Spark
+%   $\checkmark$& % Sparrow
+%   $\checkmark$& % Gandiva
+%   $\checkmark$% Gorila
+%   \\
+%   \hline
+  
+  \textbf{Elastic Load Balancing}\newline
+  Given an unknown number of tasks, evenly spread them out across $m$ workers. 
+  \vspace{-4mm}
+%   \begin{minted}[autogobble]{python}
+%     def load_monitor():
+%       while True:
+%         avail_res = get_cluster_status()
+%         if avail_res["load_bal"] == 0 on all nodes:
+%             set_resource("load_bal", increment 1, all_nodes)
+%         if avail_res["load_bal"] >= 1 on all nodes:
+%             set_resource("load_bal", decrement 1, all_nodes)
+
+%     def dynamic_load_balancing():
+%       load_monitor.launch()
+%       for task in tasks:
+%         task.resources = {"load_bal": 1}
+%         task.launch()
+%     \end{minted}
+  &
+  $\checkmark$& % YARN CS
+  $\checkmark$\text{{/\xmark}}& % Kubernetes
+  $\text{\xmark}$& % Spark
+  $\checkmark$& % Sparrow
+  $\checkmark$& % Gandiva
+  $\checkmark$% Gorila
+  \\
+  \hline
+  
+  \textbf{Bin-packing}\newline 
+  Given an unknown number of incoming tasks, minimize the number of workers used to complete the tasks.
+  %\vspace{1mm}
+  &
+  $\checkmark$& % YARN CS
+  $\checkmark$\text{{/\xmark}}& % Kubernetes
+  $\text{\xmark}$& % Spark
+  $\text{\xmark}$& % Sparrow
+  $\checkmark$& % Gandiva
+  $\text{\xmark}$% Gorila
+  \\
+  \hline
+  
+  \textbf{Anti-affinity}\newline 
+  Given two tasks, place them on distinct nodes.
+  &
+  $\checkmark$& % YARN CS
+  $\checkmark$\text{{/\checkmark}}& % Kubernetes
+  $\text{\xmark}$& % Spark
+  $\text{\xmark}$& % Sparrow
+  $\checkmark$& % Gandiva
+  $\text{\xmark}$% Gorila
+  \\
+  \hline
+  
+  \textbf{Gang scheduling}\newline 
+  Given a set of tasks, enforce all-or-none run semantics.
+  \vspace{1mm}
+  &
+  $\text{\xmark}$& % YARN CS
+  $\text{\xmark}\text{{/\xmark}}$& % Kubernetes
+  $\checkmark$& % Spark
+  $\text{\xmark}$& % Sparrow
+  $\text{\xmark}$& % Gandiva
+  $\checkmark$% Gorila
+  \\
+  \hline
+  
+  \textbf{Weighted Fair Queuing\cite{wfq}}\newline 
+  Given a set of tasks, enforce priority ordering. 
+  &
+  $\checkmark$& % YARN CS
+  $\checkmark\text{{/\xmark}}$& % Kubernetes
+  $\checkmark$& % Spark
+  $\checkmark$& % Sparrow
+  $\text{\xmark}$& % Gandiva
+  $\text{\xmark}$% Gorila
+  \\
+  \hline
+
+  \textbf{Soft-constraints}\newline  
+  For a priority ordering of resource constraints, schedule a task with the highest possible resource satisfiability.
+  &
+  $\text{\xmark}$& % YARN CS
+  $\checkmark\text{{/\xmark}}$& % Kubernetes
+  $\text{\xmark}$& % Spark
+  $\text{\xmark}$& % Sparrow
+  $\text{\xmark}$& % Gandiva
+  $\text{\xmark}$% Gorila
+  \\
+  \hline
+  
+  \end{xtabular}
+  \vspace{2mm}
+  \caption{\small Common scheduling policies and off-the-shelf support from existing schedulers. Kubernetes comparision includes both modes of operation, using just the core scheduling functionality and using labels. In addition to these policies, ephemeral resources allow applications to specify and compose custom policies.
+  %\romil{Once format is approved, reorder columns to fit the category. Frameworks: YARN, Kubernetes, Spark}
+  %\swang{Make the vertical line between "Frameworks" and "Schedulers" bold}
+  }
+  \label{tab:sched-pols}
+\vspace{-6mm}
+\end{table}
