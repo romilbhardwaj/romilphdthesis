@@ -10,7 +10,7 @@
 The ~\cilantro ~scheduler and client architecture. The scheduler generates resource allocations for jobs and the clients collect performance feedback to report to the scheduler. 
 %Cilantro clients collect application feedback which is used to train performance and load prediction models. Policies ingest resource-performance confidence bound estimates from the learners and produce resource allocations.
 \label{fig:scheme}
-\vspace{-0.2in}
+%\vspace{-0.2in}
 }
 \end{figure}
 }
@@ -38,7 +38,7 @@ To obtain a recommendation, we compute a UCB $demhatjr$ on the demand (where SLO
 $\payoffcheckj$) and $\dembarjr$ via equation~\eqref{eqn:ofudemand}.
 % \rbcomment{Should we label y axis. Aren't $\payoffhatj$ and $\payoffcheckj$ incorrectly labelled}
 \label{fig:demandrecillus}
-\vspace{-0.05in}
+% \vspace{-0.05in}
 }
 \end{figure}
 }
@@ -131,7 +131,7 @@ and $\njcfair$~\eqref{eqn:njcfair} metrics for each policy.
 % \kkcomment{Is this example useful? Does it need more explanation?}
 }
 \label{fig:strategycompare}
-\vspace{-0.1in}
+% \vspace{-0.1in}
 }
 \end{figure*}
 }
@@ -152,7 +152,7 @@ when they under-report, and
 when they over-report.
 The plot normalizes with respect to truthful reporting, but the bars are
 annotated with the absolute value.
-\vspace{-0.2in}
+%\vspace{-0.2in}
 \label{fig:spness}
 \insertFigCaptionSpace
 }
@@ -175,7 +175,7 @@ We evaluate \cilantronjcs when
 5 out of 20 users use this option.
 Since the true demand cannot be known, we use either half or twice the true demand under the median
 load from our profiled data.
-\vspace{-0.1in}
+% \vspace{-0.1in}
 \label{fig:fallback}
 \insertFigCaptionSpace
 }
@@ -200,7 +200,7 @@ performance goals (SLO).
 A user's demand is the amount of CPUs needed for her SLO.
 % A 50-50 fair allocation of resources causes user 2 to miss their SLO, while user 1 has already exceeded their SLO.
 \label{fig:toyexample}
-\vspace{-0.25in}
+% \vspace{-0.25in}
 }
 \end{figure}
 }
@@ -230,7 +230,7 @@ knowledge of the performance mappings.
 % \rbcomment{Can we reduce the height of this figure and add grids (plt.grid()). Also increase x and y label font sizes?}
 \label{fig:metrics}
 }
-\vspace{-0.1in}
+% \vspace{-0.1in}
 \end{figure*}
 }
 
@@ -248,7 +248,7 @@ knowledge of the performance mappings.
 Convergence over time of social, egalitarian welfares and NJC fairness for the three Cilantro policies.
 \label{fig:timeseriesutilities}
 }
-\vspace{-0.2in}
+% \vspace{-0.2in}
 \end{figure}
 }
 
@@ -286,7 +286,7 @@ amount of data processed per second on the $y$-axis.
 To obtain accurate estimates, we sampled low resources allocations more
 densely.
 \label{fig:profiling}
-\vspace{-0.1in}
+% \vspace{-0.1in}
 }
 \end{figure*}
 }
@@ -308,7 +308,7 @@ refers to jobs using the DB-0, ML training, DB-1, and prediction
 serving workloads from \S~\ref{sec:fixedclus}.
 % \rbcomment{can we add horizontal grids (ax.grid(axis='y')?}
 \label{fig:userutils}
-\vspace{-0.1in}
+% \vspace{-0.1in}
 }
 \end{figure*}
 }
@@ -394,7 +394,7 @@ serving workloads from \S~\ref{sec:fixedclus}.
 \emph{Right:} The time-averaged P99 latency vs time.
 \label{fig:microservices}
 }
-\vspace{-0.1in}
+% \vspace{-0.1in}
 \end{figure*}
 }
 
@@ -418,7 +418,7 @@ The frequency of performance updates (per hour) for
 4 different users from the experiment in \S\ref{sec:fixedclus}.
 % \label{fig:frequpdate}
 }
-\vspace{-0.1in}
+% \vspace{-0.1in}
 \end{figure}
 }
 
@@ -433,7 +433,7 @@ The frequency of performance updates (per hour) for
 Cost (\# replicas) v time for the auto scaling experiment.
 \label{fig:autoscaling}
 }
-\vspace{-0.1in}
+% \vspace{-0.1in}
 \end{figure}
 }
 
@@ -530,7 +530,7 @@ We evaluate \cilantronjcs when 5 out of 20 users use this option. Since the true
 % (right) The frequency of performance updates (per hour) for 4 different users from the experiment in \S\ref{sec:fixedclus}.
 \emph{Right:} The three performance metrics for \cilantronjcs when we artificially introduce error to the
 confidence intervals of the performance and load.
-    \vspace{-0.1in}
+    % \vspace{-0.1in}
     \label{fig:microbenchmarks}
     }
 \end{figure*}
@@ -551,7 +551,7 @@ confidence intervals of the performance and load.
 %     The decoupling of l
 }
     \label{fig:cilantrooverview}
-    \vspace{-0.15in}
+    % \vspace{-0.15in}
 \end{figure}
 }
 
@@ -563,6 +563,6 @@ confidence intervals of the performance and load.
     \vspace{-1mm}
     \caption{\small Scheduling latency in Cilantro with varying number of jobs. Even with 10000 jobs, the total time taken to allocate resources for all jobs remains less than 110ms. \rbcomment{Switch to box plot instead of violin? Add text in paper. Also seems to be inconsistent with 12a. Remove, move data to text.}}
     \label{fig:schedlatency}
-    \vspace{-2mm}
+    % \vspace{-2mm}
 \end{figure}
 }

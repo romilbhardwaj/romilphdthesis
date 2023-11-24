@@ -32,7 +32,7 @@ Compared to uploading videos to the cloud for retraining, our approach has advan
     \caption{\small Resource-accuracy}
     \label{fig:darmstadt-profile}
   \end{subfigure}  
-  \caption{\bf\small Measuring retraining configurations. % with the Cityscapes dataset \cite{cityscapes}.
+  \caption{Measuring retraining configurations. % with the Cityscapes dataset \cite{cityscapes}.
   GPU seconds refers to the duration taken for retraining with $100\%$ GPU allocation. (a) varies two example hyperparameters, keeping others constant. Note the Pareto boundary of configurations in (b); for every non-Pareto configuration, there is at least one Pareto configuration that is better than it in {\em both} accuracy and GPU cost. }
   \label{fig:resource-profiles}
 \end{figure}
@@ -78,7 +78,7 @@ Video B Cfg1B       & 90    & 80    & 98    & 80       \\ \midrule
 Video B Cfg2B (*)   & 85    & 50    & 90    & 70\\ 
 \bottomrule
 \end{tabular}
-\caption{\label{tab:schedmot-hypparams}\small\bf Hyperparameter configurations for retraining jobs in Figure \ref{fig:schedmot}'s example. At the start of retraining window 1, camera A's inference model has an accuracy of 65\% and camera B's inference model has an accuracy of 50\%. Asterisk (*) denotes the configurations picked in Figures \ref{fig:schedmot-res-prioritization} and \ref{fig:schedmot-prioritization}.
+\caption{\label{tab:schedmot-hypparams}Hyperparameter configurations for retraining jobs in Figure \ref{fig:schedmot}'s example. At the start of retraining window 1, camera A's inference model has an accuracy of 65\% and camera B's inference model has an accuracy of 50\%. Asterisk (*) denotes the configurations picked in Figures \ref{fig:schedmot-res-prioritization} and \ref{fig:schedmot-prioritization}.
 %\romil{FIX: The GPU time cost between retraining windows cannot be different. The cost for the configs also be the same across videos. }
 % \ion{Is 20\% a realistic accuracy? I mean at this accuracy the system is quite useless, no?}
 }
@@ -131,7 +131,7 @@ Video B Cfg2B (*)   & 85    & 50    & 90    & 70\\
     \label{fig:schedmot-prioritization}
   \end{subfigure}
   ~~
-  \caption{\bf\small Resource allocations (top) and inference accuracies (bottom) over time for two retraining windows (each of $120$s). The left figures show a uniform scheduler which evenly splits the $3$ GPUs, and picks configurations resulting in the most accurate models. The right figures show the accuracy-optimized scheduler that prioritizes resources and optimizes for inference accuracy averaged over the retraining window ($73\%$ compared to the uniform scheduler's $56\%$). The accuracy-optimized scheduler also ensures that inference accuracy never drops below a minimum (set to $40\%$ in this example, denoted as $a_\text{MIN}$). %\ga{Needs better colors.} \ga{Visually align x-axes in Figures 5a, 5c and Figures 5b, 5d.}
+  \caption{Resource allocations (top) and inference accuracies (bottom) over time for two retraining windows (each of $120$s). The left figures show a uniform scheduler which evenly splits the $3$ GPUs, and picks configurations resulting in the most accurate models. The right figures show the accuracy-optimized scheduler that prioritizes resources and optimizes for inference accuracy averaged over the retraining window ($73\%$ compared to the uniform scheduler's $56\%$). The accuracy-optimized scheduler also ensures that inference accuracy never drops below a minimum (set to $40\%$ in this example, denoted as $a_\text{MIN}$). %\ga{Needs better colors.} \ga{Visually align x-axes in Figures 5a, 5c and Figures 5b, 5d.}
   %\ion{The problem I have with this example is that the "optimal" solution in (d) gets lower minima. It is just not clear to me why a better average but a lower min is necessary better than a lower average but a higher min.} 
   %\romil{Make this easier to read by adding text annotations to accuracy when it changes }
   %Resource allocation maps for toy retraining schedules in Figure \ref{fig:schedmot}. (\ref{fig:schedmot-naive}) and (\ref{fig:schedmot-res-optimalcfg}) run a fair scheduler which evenly splits resources between the two cameras. (\ref{fig:schedmot-res-prioritization}) deprioritizes Camera B's inference task due because of its low accuracy, and instead focuses resources on retraining it. On the other hand, Camera A's inference job is already at an high accuracy, thus it deprioritizes it's retraining job until Camera B is retrained.

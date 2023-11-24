@@ -20,11 +20,10 @@ This allows the application to make targeted placement decisions (Figure~\ref{fi
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.92\linewidth]{escher/figures/logicalres_demo.pdf}
+    \includegraphics[width=0.82\linewidth]{escher/figures/logicalres_demo.pdf}
     \caption{\small Example using ephemeral resources for task placement. Applications create ephemeral resources (\emph{my-resource}) on the nodes where they wish to place a task and then launch a task requesting \emph{my-resource}. The resource-matching scheduler ensures the task is placed on the desired node.}
     %  Assuming a minimalist framework scheduler that matches task resource requests to node resource availabilities,
     \label{fig:er-example}
-    \vspace{-4mm}
 \end{figure}
 
 \subsection{ESCHER Workflow}
@@ -67,7 +66,7 @@ Note that the scheduler does not need to satisfy any other constraints, such as 
 
 \begin{figure}[t]
     \centering
-     \includegraphics[width=0.95\linewidth]{escher/figures/idea_esl_arch.pdf}
+     \includegraphics[width=0.85\linewidth]{escher/figures/idea_esl_arch.pdf}
     \caption{
         \small ESCHER task submission workflow with an ESL mediating the implementation. A task requests a supported scheduling policy from the ESL, which invokes the ESCHER API if necessary and returns the resource specification which would satisfy the policy. The task is launched with the returned resource specification.
     }

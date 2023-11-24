@@ -427,7 +427,6 @@ The red X indicates the completion of a short job. %, and EscherTune re-schedule
 \includegraphics[width=0.92\columnwidth]{escher/plots/result_gangsched_design_compare.pdf}
 \caption{\small Request latency for gang scheduling implemented in the application space, with (\textit{LibSpace}) and without (\textit{AppSpace}) coordination, versus the framework space (\textit{FrameSpace}). \textit{FrameSpace} is 1624 lines of code (LoC), \textit{LibSpace} with 261 LoC and \textit{AppSpace} with 78 LoC.}
 \label{fig:gangscheddesign-results}
-\vspace{-1em}
 \end{figure}
 
 \subsection{Microbenchmarks}
@@ -507,7 +506,6 @@ In general, the overhead of creating or deleting an ephemeral resource should be
 \vspace{-4mm}
 \caption{\small \name{} microbenchmarks. \textbf{(a)} Mean per-resource creation latency in Ray. Creating ephemeral resources in \name{} is a low-cost operation that scales linearly with the number of resources created. \textbf{(b)} Scheduling latency overheads from presence of ephemeral resources. Makespan of a 10000 task workload remains unaffected by the count of ephemeral resources in the cluster. \textbf{(c)} Effect of task resource requirements on scheduling latency in an environment with 10000 resources.}
 \label{fig:microbenchfig}
-\vspace{-3mm}
 \end{figure*}
 
 

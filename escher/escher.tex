@@ -36,7 +36,6 @@ We now describe how these constraints can be cast as resource requirements with 
 \item [1] If $T_1$ and $T_2$ are long-running, the application cannot use the nodes they are running on for other anti-affinity placements. To avoid this, we have two short-lived ghost tasks $T_1^g$ and $T_2^g$ request 1 unit of $E$ each, create ephemeral resources $E_1$ and $E_2$, and then terminate. $T_1$ requests $E_1$ and $T_2$ requests $E_2$.
 \end{tablenotes}
 \caption{Expressing scheduling constraints with ephemeral resources}
-\vspace{-1em}
 \label{tab:escher-constraints-policies}
 \end{threeparttable}
 \end{table*}
@@ -155,7 +154,6 @@ def composite_scheduling():
 
 \caption{\small Scheduling with \name{}. \textbf{(a)} Soft constraints with \name{}. \textbf{(b)} Composition of load-balancing and co-location policies with ephemeral resources in \name{}.}
 \label{fig:schedpseudo2}
-\vspace{-5mm}
 \end{figure}
 
 \subsubsection{Cluster Policy: Hierarchical Fair Sharing}

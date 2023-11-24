@@ -61,7 +61,7 @@ For instance, in  Fig.~\ref{fig:toyexample}, we may set the demand of the first 
 second users to be 40 and 60 respectively.
 However, existing implementations of these policies typically rely on
 proxies such as work-queue lengths
-to compute the demand~\citep{bennett1996wf,hindman2011mesos,ghodsi2013choosy}.
+to compute the demand~\citep{bennett1996wf,mesos,ghodsi2013choosy}.
 Consequently, the resulting allocations may fall short on fairness and/or resource efficiency from
 a performance point of view.
 
@@ -130,7 +130,7 @@ Organizations do not need to spend additional money if they use their own cluste
 Moreover, even when using cloud, long-term rentals are significantly cheaper than on-demand
 instances.
 
-The focus on demand-based policies has also influenced the design of scheduling frameworks, such as Kubernetes~\cite{kubernetes}, Mesos~\citep{hindman2011mesos} and
+The focus on demand-based policies has also influenced the design of scheduling frameworks, such as Kubernetes~\cite{kubernetes}, Mesos~\citep{mesos} and
 YARN~\citep{yarn}. 
 These frameworks exclusively implement demand-based fairness policies and do not fundamentally support welfare-based policies.
 To execute resource allocations from policies,

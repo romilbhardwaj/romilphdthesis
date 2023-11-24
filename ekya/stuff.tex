@@ -22,7 +22,7 @@
     \label{fig:schedmot-res-prioritization}
   \end{subfigure}
   ~~
-  \caption{\bf\small Resource allocation maps for toy retraining schedules in Figure \ref{fig:schedmot}. (\ref{fig:schedmot-naive}) and (\ref{fig:schedmot-res-optimalcfg}) run a fair scheduler which evenly splits resources between the two cameras. (\ref{fig:schedmot-res-prioritization}) deprioritizes Camera B's inference task due because of its low accuracy, and instead focuses resources on retraining it. On the other hand, Camera A's inference job is already at an high accuracy, thus it deprioritizes it's retraining job until Camera B is retrained. \ga{Unused GPUs when retraining is not happening; can we fix it?}}
+  \caption{Resource allocation maps for toy retraining schedules in Figure \ref{fig:schedmot}. (\ref{fig:schedmot-naive}) and (\ref{fig:schedmot-res-optimalcfg}) run a fair scheduler which evenly splits resources between the two cameras. (\ref{fig:schedmot-res-prioritization}) deprioritizes Camera B's inference task due because of its low accuracy, and instead focuses resources on retraining it. On the other hand, Camera A's inference job is already at an high accuracy, thus it deprioritizes it's retraining job until Camera B is retrained. \ga{Unused GPUs when retraining is not happening; can we fix it?}}
   \label{fig:schedmot-res}
 \end{figure}
 
@@ -47,4 +47,3 @@ With checkpointing (\romilc{Figure xx}), \name{} must decide if at every timeste
 \]
 
 \textbf{Checkpointing Decision} Thus, models must be checkpointed only when $acc > base\_acc$, and this decision is evaluated at every time instant $t$. Whenever this statment is true at the current $t$, the model is checkpointed.
-

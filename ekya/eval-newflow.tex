@@ -173,17 +173,16 @@ Note that the evaluation always keeps up with the video frame rate (\ie no indef
 \begin{figure}[t]
 \captionsetup[subfigure]{justification=centering}
   \centering
-  \begin{subfigure}[t]{0.9\linewidth}
+  \begin{subfigure}[t]{0.75\linewidth}
     \centering
     \includegraphics[width=\linewidth]{ekya/results/sys_impl/sysimpl_varyingcities_streams_cityscapes.pdf}
-    \caption{\small Cityscapes}
+    \caption{Cityscapes}
     \label{fig:sys-impl-cityscapes}
   \end{subfigure}
-  \\
-  \begin{subfigure}[t]{0.9\linewidth}
+  \begin{subfigure}[t]{0.75\linewidth}
     \centering
     \includegraphics[width=\linewidth]{ekya/results/sys_impl/sysimpl_varyingcities_streams_waymo.pdf}
-    \caption{\small Waymo}
+    \caption{Waymo}
     \label{fig:sys-impl-waymo}
   \end{subfigure}
   ~~~
@@ -191,17 +190,17 @@ Note that the evaluation always keeps up with the video frame rate (\ie no indef
 %   \begin{subfigure}[t]{0.45\linewidth}
 %     \centering
 %     \includegraphics[width=\linewidth]{results/sys_impl/sysimpl_varyingcities_streams_cityscapes_2gpu.pdf}
-%     \caption{\small Two provisioned GPUs}
+%     \caption{Two provisioned GPUs}
 %     \label{fig:sys-impl-2gpu}
 %   \end{subfigure}
 %   ~
 %   \begin{subfigure}[t]{0.3\linewidth}
 %     \centering
 %     \includegraphics[width=\linewidth]{results/sys_impl/sysimpl_varyingcities_streams_cityscapes_4gpu.pdf}
-%     \caption{\small 4 GPU}
+%     \caption{4 GPU}
 %     \label{fig:sys-impl-4gpu}
 %   \end{subfigure}
-  \caption{\small \bf  Effect of adding video streams on accuracy with different schedulers. When more video streams share resources, \name's accuracy gracefully degrades while the baselines' accuracy drops faster. (``Uniform (Cfg 1, 90\%)'' means the \fair scheduler allocates 90\% GPU to inference, 10\% to retraining)
+  \caption{Effect of adding video streams on accuracy with different schedulers. When more video streams share resources, \name's accuracy gracefully degrades while the baselines' accuracy drops faster. (``Uniform (Cfg 1, 90\%)'' means the \fair scheduler allocates 90\% GPU to inference, 10\% to retraining)
     % Effect of adding more video streams on accuracy for different schedulers. When insufficient resources are provisioned, \name{} gracefully degrades to the No-retrain baseline, while the retraining decisions made by the fair scheduler reduce the mean inference accuracy.
   }
   \label{fig:scalability-sysimpl-fixedGPUs-accuracy}
@@ -225,13 +224,13 @@ In contrast, increasing the number of streams forces the \fair baseline to alloc
 % \begin{figure}
 %  	%\includegraphics[width=0.4\textwidth]{ekya/figures/eval_placeholders/single-tradeoffs.pdf}
 %  	\includegraphics[width=\linewidth]{results/scalability/scalability_cams_fixedGPUs_cityscapes.pdf}
-% 	\caption{\small \bf Effect of adding more video streams on accuracy for different schedulers. When insufficient resources are provisioned, \name{} gracefully degrades to the No-retrain baseline, while the retraining decisions made by the fair scheduler reduce the mean inference accuracy.}
+% 	\caption{ Effect of adding more video streams on accuracy for different schedulers. When insufficient resources are provisioned, \name{} gracefully degrades to the No-retrain baseline, while the retraining decisions made by the fair scheduler reduce the mean inference accuracy.}
 % 	\label{fig:scalability-fixedGPUs-accuracy}
 % \end{figure}
 % \begin{figure}
 %  	%\includegraphics[width=0.4\textwidth]{ekya/figures/eval_placeholders/single-tradeoffs.pdf}
 %  	\includegraphics[width=\linewidth]{results/scalability/scalability_cams_fixedGPUs_cityscapes_golden_model.pdf}
-% 	\caption{\small \bf Using Simulator. Effect of adding more video streams on accuracy for different schedulers. When insufficient resources are provisioned, \name{} gracefully degrades to the No-retrain baseline, while the retraining decisions made by the fair scheduler reduce the mean inference accuracy. \junchen{drop the ``no-retrain'' line}}
+% 	\caption{ Using Simulator. Effect of adding more video streams on accuracy for different schedulers. When insufficient resources are provisioned, \name{} gracefully degrades to the No-retrain baseline, while the retraining decisions made by the fair scheduler reduce the mean inference accuracy. \junchen{drop the ``no-retrain'' line}}
 % 	\label{fig:scalability-fixedGPUs-accuracy}
 % \end{figure}
 
@@ -248,7 +247,7 @@ Uniform (Config 2, 90\%) & 2 & 4 & 2x \\ \hline
 Uniform (Config 2, 50\%) & 2 & 4 & 2x \\ \hline
 Uniform (Config 2, 30\%) & 0 & 2 & - \\ \hline
 \end{tabular}
-\caption{\small \bf Capacity (number of video streams that can be concurrently supported subject to accuracy target 0.75) vs. number of provisioned GPUs.
+\caption{ Capacity (number of video streams that can be concurrently supported subject to accuracy target 0.75) vs. number of provisioned GPUs.
 \name scales better than the \fair baselines with more available compute resource.
 %The accuracy threshold is a multiplicative factor of the maximum achievable mean accuracy for a workload given $\infty$ resources.
 }
@@ -259,7 +258,7 @@ Uniform (Config 2, 30\%) & 0 & 2 & - \\ \hline
 % \begin{figure}
 %  	%\includegraphics[width=0.4\textwidth]{ekya/figures/eval_placeholders/single-tradeoffs.pdf}
 %  	\includegraphics[width=\linewidth]{results/scalability/scalability_GPUs_cams_cityscapes.pdf}
-% 	\caption{\small \bf Capacity measured as number of video streams that can be concurrently supported for different resource sizes subject to accuracy thresholds. \romil{We have just two data points per plot here with our sys impl..}
+% 	\caption{ Capacity measured as number of video streams that can be concurrently supported for different resource sizes subject to accuracy thresholds. \romil{We have just two data points per plot here with our sys impl..}
 % 	%The accuracy threshold is a multiplicative factor of the maximum achievable mean accuracy for a workload given $\infty$ resources.
 % 	}
 % 	\label{fig:scalability-gpu-vs-cam-thresholded}
@@ -277,18 +276,18 @@ Uniform (Config 2, 30\%) & 0 & 2 & - \\ \hline
   \begin{subfigure}[t]{0.9\linewidth}
     \centering
     \includegraphics[width=\linewidth]{ekya/results/generality/e2e_1gpu_cityscapes_objclass.pdf}
-    \caption{\small \revtext{Generalize across object classification models}}
+    \caption{\revtext{Generalize across object classification models}}
     \label{fig:sys-impl-generality-objclass}
   \end{subfigure}
   \\
   \begin{subfigure}[t]{0.9\linewidth}
     \centering
     \includegraphics[width=\linewidth]{ekya/results/generality/e2e_1gpu_cityscapes_objdet.pdf}
-    \caption{\small \revtext{Object Detection Models}}
+    \caption{\revtext{Object Detection Models}}
     \label{fig:sys-impl-generality-objdet}
   \end{subfigure}
   ~~~
-  \caption{\small \bf  \revtext{Improvement of \name extends to two more compressed DNN classifiers and two popular object detectors.
+  \caption{ \revtext{Improvement of \name extends to two more compressed DNN classifiers and two popular object detectors.
 %   General applicability of \name across different ML models with varying number of video streams. 
 %   \name can improve the performance of other compressed models in object classification and also extend to models in object detection.
   }}
@@ -342,7 +341,7 @@ Table~\ref{tab:scalability-gpu-vs-cam-thresholded} uses the Cityscapes results (
 %   \begin{subfigure}[t]{0.5\linewidth}
 %     \centering
 %     \includegraphics[width=\linewidth]{results/multicam/multicam_acc_vs_res_cityscapes.pdf} 
-%     \caption{\small Cityscapes}
+%     \caption{Cityscapes}
 %     \label{fig:scalability-gpus-cityscapes}
 %   \end{subfigure}
 %   ~~~
@@ -350,57 +349,57 @@ Table~\ref{tab:scalability-gpu-vs-cam-thresholded} uses the Cityscapes results (
 %     \centering
 %     % \includegraphics[width=\linewidth]{ekya/figures/motivation/Class_Incrementality/class_distribution_change_sf_27.png}
 %     \includegraphics[width=\linewidth]{results/multicam/multicam_acc_vs_res_waymo.pdf}
-%      \caption{\small Waymo}
+%      \caption{Waymo}
 %     \label{fig:scalability-gpus-waymo}
 %   \end{subfigure}
 %   \begin{subfigure}[t]{0.3\linewidth}
 %     \centering
 %     \includegraphics[width=\linewidth]{results/multicam/cityscapes_across_resources.pdf} 
-%     \caption{\small Cityscapes}
+%     \caption{Cityscapes}
 %     \label{fig:scalability-gpus-cityscapes-golden}
 %   \end{subfigure}
 %   ~~~
 %   \begin{subfigure}[t]{0.3\linewidth}
 %     \centering
 %     \includegraphics[width=\linewidth]{results/multicam/waymo_across_resources.pdf} 
-%     \caption{\small Waymo}
+%     \caption{Waymo}
 %     \label{fig:scalability-gpus-waymo-golden}
 %   \end{subfigure}
 %   ~~~
 %   \begin{subfigure}[t]{0.3\linewidth}
 %     \centering
 %     \includegraphics[width=\linewidth]{results/multicam/waymo_across_resources.pdf} 
-%     \caption{\small \junchen{long video?}}
+%     \caption{\junchen{long video?}}
 %     \label{fig:scalability-gpus-waymo-golden}
 %   \end{subfigure}
   \begin{subfigure}[t]{0.47\linewidth}
     \centering
     \includegraphics[width=\linewidth]{ekya/results/multicam/cityscapes_scheduler_comparison_across_resources.pdf}
-    \caption{\small Cityscapes}
+    \caption{Cityscapes}
     \label{fig:scalability-gpus-cityscapes-golden}
   \end{subfigure}
   ~~~
   \begin{subfigure}[t]{0.47\linewidth}
     \centering
     \includegraphics[width=\linewidth]{ekya/results/multicam/waymo_scheduler_comparison_across_resources.pdf} 
-    \caption{\small Waymo}
+    \caption{Waymo}
     \label{fig:scalability-gpus-waymo-golden}
   \end{subfigure}
   \\
   \begin{subfigure}[t]{0.47\linewidth}
     \centering
     \includegraphics[width=\linewidth]{ekya/results/multicam/las_vegas_scheduler_comparison_across_resources.pdf} 
-    \caption{\small Urban Building}
+    \caption{Urban Building}
     \label{fig:scalability-gpus-lasvegas-golden}
   \end{subfigure}
   ~~~
   \begin{subfigure}[t]{0.47\linewidth}
     \centering
     \includegraphics[width=\linewidth]{ekya/results/multicam/bellevue_10cam_scheduler_comparison_across_resources.pdf} 
-    \caption{\small Urban Traffic}
+    \caption{Urban Traffic}
     \label{fig:scalability-gpus-bellevue-golden}
   \end{subfigure}
-  \caption{\small \bf Inference accuracy of different schedulers when processing 10 video streams under varying GPU provisionings.
+  \caption{Inference accuracy of different schedulers when processing 10 video streams under varying GPU provisionings.
   }
   \label{fig:scalability-gpus}
 \end{figure}
@@ -457,7 +456,7 @@ Contention is, however, common in the edge since the resources are tightly provi
 %\centering
 %\includegraphics[width=0.6\columnwidth]{ekya/figures/eval_placeholders/history-trained-vs-retrained-cdf.pdf}
 %\vspace{-0.2cm}
-%\caption{\bf\small Gap between accuracy of the model retrained in the current and accuracy of re-using a model retrained in a history window that share similar class distribution.
+%\caption{\bfGap between accuracy of the model retrained in the current and accuracy of re-using a model retrained in a history window that share similar class distribution.
 %\vspace{-0.2cm}}
 %\label{fig:history-vs-current}
 %\end{figure}
@@ -489,24 +488,24 @@ Contention is, however, common in the edge since the resources are tightly provi
   \begin{subfigure}[t]{0.45\linewidth}
     \centering
     \includegraphics[width=\linewidth]{ekya/results/multicam/long_video_gpu_allocation_vs_time_cam1.pdf}
-    \caption{\small Video stream \#1 \\(Inference accuracy = 0.82)}
+    \caption{Video stream \#1 \\(Inference accuracy = 0.82)}
     \label{fig:temporal-video-1}
   \end{subfigure}
   ~
   \begin{subfigure}[t]{0.45\linewidth}
     \centering
     \includegraphics[width=\linewidth]{ekya/results/multicam/long_video_gpu_allocation_vs_time_cam5.pdf} 
-    \caption{\small Video stream \#2 \\(Inference accuracy = 0.83)}
+    \caption{Video stream \#2 \\(Inference accuracy = 0.83)}
     \label{fig:temporal-video-2}
   \end{subfigure}
-  \caption{\small \bf \name's resource allocation to two video streams over time. \name adapts when to retrain each stream's model and allocates resource based on the retraining benefit to each stream.}
+  \caption{\name's resource allocation to two video streams over time. \name adapts when to retrain each stream's model and allocates resource based on the retraining benefit to each stream.}
   \label{fig:temporal-resource-allocation}
 \end{figure}
 
 % \begin{figure} [t!]
 %  	%\includegraphics[width=0.4\textwidth]{ekya/figures/eval_placeholders/single-tradeoffs.pdf}
 %  	\includegraphics[width=\linewidth]{results/ablation_waymo.pdf}
-% 	\caption{\small \bf {\name} factor analysis by removing  dynamic resource allocation and reducing the hyperparameter space.}
+% 	\caption{{\name} factor analysis by removing  dynamic resource allocation and reducing the hyperparameter space.}
 % 	\label{fig:factor-analysis}
 % \end{figure}
 
@@ -541,7 +540,7 @@ Figure~\ref{fig:factor-analysis} shows that both adaptive resource allocation an
 % \begin{figure} [t!]
 %  	%\includegraphics[width=0.4\textwidth]{ekya/figures/eval_placeholders/single-tradeoffs.pdf}
 %  	\includegraphics[width=0.85\linewidth]{results/ablation_cityscapes_2.pdf}
-% 	\caption{\small \bf A factor analysis of \name that shows the impact of removing dynamic resource allocation (Ekya-FixedRes) or removing retraining configuration adaptation (Ekya-FixedConfig). 
+% 	\caption{A factor analysis of \name that shows the impact of removing dynamic resource allocation (Ekya-FixedRes) or removing retraining configuration adaptation (Ekya-FixedConfig). 
 % % 	\romil{Nit: Legend textures are not clear, can reduce legend font size by a bit to avoid overlapping the ylabel} 
 % % 	\junchen{this should be \fair => \name (w/o config adaptation) => \name (w/o resource allocation) => \name. needs to update!}
 % 	}
@@ -555,7 +554,7 @@ Figure~\ref{fig:factor-analysis} shows that both adaptive resource allocation an
 \mypara{Retraining window sensitivity analysis}
 % \begin{figure} [t!]
 %  	\includegraphics[width=0.9\linewidth]{results/sensitivity/retraining_window_sensitivity.pdf}
-% 	\caption{\small \bf A sensitivity analysis of the retraining window parameter. \name is robust to a wide range of retraining window values and gracefully degrades to an accuracy equivalent of no retraining if the window size is too small. If the window size is too large, the model's generalizability becomes the limiting factor, slowly reducing the accuracy as more training data accumulates.
+% 	\caption{A sensitivity analysis of the retraining window parameter. \name is robust to a wide range of retraining window values and gracefully degrades to an accuracy equivalent of no retraining if the window size is too small. If the window size is too large, the model's generalizability becomes the limiting factor, slowly reducing the accuracy as more training data accumulates.
 % 	}
 % 	\label{fig:window-sensititvity}
 % \end{figure}
@@ -587,7 +586,7 @@ Though the runtime also increases to 9.5 seconds, it is still a tiny fraction ($
 %     \centering
 %     \includegraphics[width=\linewidth]{results/sensitivity/scheduler_resourcetime.pdf}
 %   \end{subfigure}
-%   \caption{\small \bf Thief scheduler latency for scheduling 10 video streams with varying available resource quantities and retraining period durations. The scheduler latency is a tiny fraction compared to the duration of the retraining period.  }
+%   \caption{Thief scheduler latency for scheduling 10 video streams with varying available resource quantities and retraining period durations. The scheduler latency is a tiny fraction compared to the duration of the retraining period.  }
 %   \label{fig:sensitivity-schedlatency}
 % \end{figure}
 
@@ -597,7 +596,7 @@ Though the runtime also increases to 9.5 seconds, it is still a tiny fraction ($
 %%%\centering
 %%%    \includegraphics[width=\linewidth]{results/sensitivity/sensitivity_delta_acc_runtime_cityscapes_48gpu.pdf}
 %%%  \end{subfigure}
-%%%  \caption{\small \bf {Effect of the $\Delta$ parameter on the thief scheduler. Smaller values increase the runtime (though still a tiny fraction of a retraining window of 200s) but improve the accuracy.}}
+%%%  \caption{{Effect of the $\Delta$ parameter on the thief scheduler. Smaller values increase the runtime (though still a tiny fraction of a retraining window of 200s) but improve the accuracy.}}
 %%%  \label{fig:sensitivity-delta}
 %%%\end{figure}
 
@@ -608,7 +607,7 @@ Though the runtime also increases to 9.5 seconds, it is still a tiny fraction ($
   \begin{subfigure}[t]{0.45\linewidth}
     \centering
     \includegraphics[width=\linewidth]{ekya/results/ablation_cityscapes_2.pdf}
-    \caption{\small Factor analysis}
+    \caption{Factor analysis}
     \label{fig:factor-analysis}
   \end{subfigure}
   \begin{subfigure}[t]{0.48\linewidth}
@@ -618,7 +617,7 @@ Though the runtime also increases to 9.5 seconds, it is still a tiny fraction ($
     \label{fig:window-sensititvity}
   \end{subfigure}
   ~~~
-  \caption{\revtext{\small \bf (a) Component-wise impact of removing dynamic resource allocation (50\% allocation) or removing retraining configuration adaptation (fixed Cfg 2). (b) Robustness of \name to a wide range of retraining window values.% and a graceful degradation to the baseline when retraining is infeasible.
+  \caption{\revtext{(a) Component-wise impact of removing dynamic resource allocation (50\% allocation) or removing retraining configuration adaptation (fixed Cfg 2). (b) Robustness of \name to a wide range of retraining window values.% and a graceful degradation to the baseline when retraining is infeasible.
   }
   }
   \label{fig:factor-sensisitvity-group}
@@ -637,18 +636,18 @@ Though the runtime also increases to 9.5 seconds, it is still a tiny fraction ($
   \begin{subfigure}[t]{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth]{ekya/results/microprofiling/microprofiling_accerror.pdf}
-    \caption{\small Distribution of accuracy estimation errors.}
+    \caption{Distribution of accuracy estimation errors.}
     \label{fig:microprofiling-benchmark}
   \end{subfigure}
   ~
   \begin{subfigure}[t]{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth]{ekya/results/sensitivity/sensitivity_profileerrors_cityscapes.pdf} 
-    \caption{\small Impact of an controlled error $\epsilon$ to accuracy estimates.}
+    \caption{Impact of an controlled error $\epsilon$ to accuracy estimates.}
     \label{fig:sensitivity-accuracy-error}
   \end{subfigure}
   \caption{
-      \small \bf Evaluation of microprofiling performance. (a) shows the distribution of microprofiling's actual estimation errors, and (b) shows the robustness of \name's performance against microprofiling's estimation errors.
+      Evaluation of microprofiling performance. (a) shows the distribution of microprofiling's actual estimation errors, and (b) shows the robustness of \name's performance against microprofiling's estimation errors.
   }
 %   \label{fig:temporal-resource-allocation}
 \end{figure}
@@ -683,7 +682,7 @@ Figure~\ref{fig:sensitivity-accuracy-error} shows that \name is robust to accura
 
 % \begin{figure}
 % 	\includegraphics[width=\linewidth]{results/sensitivity/sensitivity_profileerrors_cityscapes.pdf}
-% 	\caption{\small \bf Adding a controlled error $\epsilon$ to the accuracy prediction -  \name{}'s performance degrades, but only marginally.}
+% 	\caption{Adding a controlled error $\epsilon$ to the accuracy prediction -  \name{}'s performance degrades, but only marginally.}
 % 	\label{fig:sensitivity-accuracy-error}
 % \end{figure}
 
@@ -737,7 +736,7 @@ For the cloud alternatives to match {\name}'s accuracy, we will need to provisio
 
 % \begin{figure}
 %  	\includegraphics[width=0.8\linewidth]{results/cloud_expt.pdf}
-% 	\caption{\small \bf Training in the cloud versus using Ekya at the edge. Ekya retrains faster and exploits models for longer. Training in the cloud requires expensive network transfers of data and models, which reduces the overall inference accuracy.}
+% 	\caption{Training in the cloud versus using Ekya at the edge. Ekya retrains faster and exploits models for longer. Training in the cloud requires expensive network transfers of data and models, which reduces the overall inference accuracy.}
 % 	\label{fig:cloud-expt}
 % \end{figure}
 
@@ -754,20 +753,20 @@ For the cloud alternatives to match {\name}'s accuracy, we will need to provisio
   \begin{subfigure}[t]{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth]{ekya/results/reuse_cached_model/new_sf_060_069_golden_label.pdf}
-    \caption{\small \revtext{\name vs. re-using cached models over time}}
+    \caption{\revtext{\name vs. re-using cached models over time}}
     \label{fig:reuse-cached-model-1}
   \end{subfigure}
   ~
   \begin{subfigure}[t]{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth]{ekya/results/reuse_cached_model/new_waymo_reuse_cached_model_boxplot.pdf} 
-    \caption{\small \cameratext{Average gains in accuracy across video streams} 
+    \caption{\cameratext{Average gains in accuracy across video streams} 
     %\ga{Can we change y-axis to just be direct? (Ekya's accuracy - Baseline's accuracy)}
     }
     \label{fig:reuse-cached-model-2}
   \end{subfigure}
-%   \caption{\small \bf \revtext{Re-using cached models vs using \name. (a) plots the accuracy over different retraining windows as time progresses. Models retrained with \name are robust to data-drift and are able to maintain a consistently high accuracy, compared to cached-model selection techniques.}
-    \caption{\small \bf \revtext{\name vs. re-using cached models. Compared to cached-model selection techniques, models retrained with \name maintain a consistently high accuracy, since it fully leverages the latest training data and is thus more robust to data-drift.}
+%   \caption{\revtext{Re-using cached models vs using \name. (a) plots the accuracy over different retraining windows as time progresses. Models retrained with \name are robust to data-drift and are able to maintain a consistently high accuracy, compared to cached-model selection techniques.}
+    \caption{ \revtext{\name vs. re-using cached models. Compared to cached-model selection techniques, models retrained with \name maintain a consistently high accuracy, since it fully leverages the latest training data and is thus more robust to data-drift.}
   % \romil{1) Pick a graph which has more diversity in the baseline results 2) Why are we better? Is there some data/more plots we can use to show why the baselines are worse/ekya is better? (e.g. Training with same class distribution does not give good accuracy. Why - because the data is different)}
   }
   \label{fig:reuse-cached-model}

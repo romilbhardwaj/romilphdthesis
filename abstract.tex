@@ -2,11 +2,8 @@
 
 \begin{abstract}
 
-% The text of the abstract goes here.  If you need to use a \section
-% command you will need to use \section*, \subsection*, etc. so that
-% you don't get any numbering.  You probably won't be using any of
-% these commands in the abstract anyway.
+The increasing computational demands of Machine Learning (ML) models, coupled with a slowdown in hardware advancements, have led to a significant compute supply-demand gap. This gap is evident in the rising costs and limited availability of resources needed for training complex ML models like GPT-4. These challenges hinder the progress and accessibility of ML.
 
-Invasive brag; forbearance.
+This thesis aims to bridge the compute supply-demand gap by improving resource efficiency of ML. We introduce Ekya, Cilantro, and ESCHER, three new systems and methods for improving resource efficiency at different layer in the ML stack. Ekya, at the ML application layer, implements a Thief Scheduling algorithm and a Microprofiler to intelligently redistribute resources between inference and retraining tasks, thereby making continuous learning four times more resource-efficient. Cilantro, in the cluster management layer, utilizes online learning to develop dynamic resource-performance models, enabling performance-aware resource allocation in multi-tenant environments. At the orchestration layer, ESCHER  introduces ephemeral resources, allowing ML applications to specify custom scheduling requirements without overhauling the underlying cluster manager. This unique approach provides applications with the flexibility to adapt to evolving needs while maintaining simplicity in system design. Together, these systems represent a comprehensive approach to mitigating the compute supply-demand gap, contributing sustainable and efficient resource management techniques.
 
 \end{abstract}
