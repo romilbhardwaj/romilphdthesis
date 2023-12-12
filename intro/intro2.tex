@@ -1,6 +1,8 @@
 \chapter{Introduction}
 \label{ch_intro}
 
+% Ion can leave comments with \ion{comment}
+
 % Define fillme
 \newcommand{\fillme}{\textcolor{red}{FILL ME}}
 
@@ -16,7 +18,6 @@ Machine learning workloads, characterized by their intensive resource requiremen
     \label{fig:compute_demand}
 \end{figure}
 
-% ML has large demand
 % ML has large demand
 On the other hand, the supply of compute is struggling to keep up with the demand. Moore's law, which postulates that the number of transistors on a chip doubles every two years, is hitting a wall. As transistors become smaller, reaching the size of a few nanometers, physical limitations such as quantum effects and heat dissipation become significant challenges. This makes it increasingly difficult to continue shrinking components at the pace predicted by Moore's Law. Worse yet, Dennard scaling, which refers to the shrinking of transistors while maintaining constant power density, has ended because of increased leakage currents and heat dissipation issues at smaller transistor sizes. Combined, these factors have led to a plateau in the growth of compute performance.
 
@@ -37,8 +38,11 @@ How do we improve resource efficiency? Examining the ML stack reveals opportunit
 
 \begin{enumerate}
 \item \textbf{Application Layer:} This layer comprises ML models and their training algorithms. Tools like PyTorch and TensorFlow are commonly used for model definition and workflow specification.
-\item \textbf{Cluster Manager:} Responsible for managing machine clusters for ML training, this layer oversees job scheduling, resource allocation, and progress tracking, with systems like Kubernetes and Mesos.
-\item \textbf{Specialized Accelerators:} This hardware layer, including GPUs and TPUs, accelerates ML training, managed by lower-level schedulers.
+\romil{Orchestration Layer}
+
+\item \textbf{Cluster Manager:} Responsible for managing machine clusters for ML training, this layer oversees job scheduling, resource allocation, and progress tracking, with systems like Kubernetes and Mesos. \romil{ Cluster scheduling/RM layer.}
+
+\item \textbf{Specialized Accelerators:} This hardware layer, including GPUs and TPUs, accelerates ML training, managed by lower-level schedulers. \romil{ML Application Layer - optimizes for inference}
 \end{enumerate}
 
 % Ekya - Specialized accelerators
