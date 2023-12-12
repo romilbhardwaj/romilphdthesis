@@ -1,14 +1,6 @@
 \chapter{Conclusion}
 \label{ch_conclusion}
 
-\section{Conclusion}
-
-\begin{enumerate}
-    \item Talk about how efficiency helped reduce supply-demand gap
-    \item Lessons - Flexibility vs Complexity, user experience for resource allocation, 
-    \item Future Work - LLMs for expressing policies, Finer-grained GPU sharing support to boost utilization (and how it differs from classic CPU sharing - requires HBM loading etc.), Explain that availability is also contributes to supply - SkyPilot solves availability
-\end{enumerate}
-
 In this thesis, we explored the use of scheduling techniques to improve resource efficiency of machine learning workloads and bridge the compute supply-demand gap.
 
 At the ML application layer, we targeted a specific machine learning workload - continuous learning in resource constrained settings - and developed Ekya to balance resource allocation between inference and re-training. In doing so, we discovered that selecting optimal configurations for retraining and identifying most promising tasks for allocating GPU cycles can yield upto $4\times$ improvements in GPU efficiency.
