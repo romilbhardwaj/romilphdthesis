@@ -52,7 +52,7 @@ However,
 recognizing that end users may have varied scheduling objectives,
 these frameworks support and implement multiple policies.
 % Consequently, policies are forced to make invasive changes to application logic to extract
-% relevant metrics~\cite{xiao2018gandiva}.
+% relevant metrics~\cite{gandiva}.
 % \rbcomment{Say something about users being bad at estimating resource demands and maybe move this para first.}
 
 
@@ -81,7 +81,7 @@ The above works do not directly account for users' performance \cameratext{goals
 % and do not provide any mechanisms for the policy
 % to get feedback on application performance.
 % Consequently, policies are forced to make invasive changes to application logic to extract
-% relevant metrics~\cite{xiao2018gandiva}.
+% relevant metrics~\cite{gandiva}.
 % 
 
 \relworkheading{Methods which use offline profiling}
@@ -99,7 +99,7 @@ resource allocation under scarcity.
 Sinan~\cite{zhang2021sinan} partly
 uses profiled information for auto-scaling in a cloud environment.
 \cameratext{Quincy's~\cite{isard2009quincy} min-cost flow formulation aims at providing fairness, but relies on offline estimates of data movement costs.}
-For reasons explained in \S\ref{sec:intro}, offline profiling can be problematic
+For reasons explained in \S\ref{sec:cilantro_intro}, offline profiling can be problematic
 and it is desirable to rely on real-time feedback to determine resource allocations.
 
 \relworkheading{Methods which use online feedback}

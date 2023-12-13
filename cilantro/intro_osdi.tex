@@ -1,6 +1,6 @@
 
 \section{Introduction}
-\label{sec:intro}
+\label{sec:cilantro_intro}
 
 % \rbcomment{Needs a nicer opening.}
 
@@ -22,7 +22,7 @@ organization's overall goals.
 % Traditionally, scheduling policies have optimized on various objectives,
 Traditionally, resource allocation policies have aimed to
 provide fairness~\cite{ghodsi2011dominant,demers1989analysis},
-maximize resource utilization~\cite{xiao2018gandiva},
+maximize resource utilization~\cite{gandiva},
 maximize the amount of work done~\cite{ghodsi2011dominant},
 or
 minimize queue lengths~\cite{racksched,sparrow}.
@@ -56,7 +56,7 @@ However, in practice, this  mapping is usually not available
 and performance-oblivious scheduler will likely be suboptimal.
 % scheduler results in a sub-optimal allocation.
 For instance, a CPU-based fair allocation algorithm would allocate 50 CPUs to each user, which would result in U2 getting just 59 QPS, thus missing its SLO.
-% the scheduler is forced to use hints  from the user, such as task resource requirements\cite{dean2004mapreduce, moritz2018ray, kubernetes}, which may be challenging to accurate estimate for user. 
+% the scheduler is forced to use hints  from the user, such as task resource requirements\cite{dean2004mapreduce, ray, kubernetes}, which may be challenging to accurate estimate for user. 
 % Worse yet, a performance-oblivious scheduler may optimize for other objectives, such as a fair-scheduler which will allocates 50-50 resources.  will not achieve the SLO of the second user.
 
 % People have realized this is important.

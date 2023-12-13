@@ -1,27 +1,26 @@
-
+Going a layer above in the stack, we now look at the cluster management layer where resources are shared between multiple machine learning applications. Here, we observe that 
 % \vspace{-0.05in}
 % a data centers or elastic cloud.
 % Historically, fairness metrics
-Traditional systems for allocating finite cluster resources among competing jobs
+traditional systems for allocating finite cluster resources among competing jobs
 %  in multi-tenant environments have either
 have either aimed at providing fairness,
 relied on users to specify their resource requirements,
 or have estimated these requirements via surrogate metrics (e.g. CPU utilization).
-These approaches do not account for a job's real world performance (e.g. P95 latency).
-Existing performance-aware systems use offline profiled data and/or
-are designed for specific allocation objectives.
+These approaches do not account for a job's real world performance (e.g. P95 latency), and as a result produce inefficient resource allocations.
+% Existing performance-aware systems use offline profiled data and/or
+% are designed for specific allocation objectives.
 % These approaches fall short on what a user cares most: how well their job performs in
 % the real world (e.g. P95 latency).
 % % This emphasis on resource-fairness neglects the metric
 % % that is most important to users - the performance of their jobs.
-In this work, 
+
+In this chapter, 
 we argue that resource allocation systems should directly account for real-world
 performance and the varied allocation objectives of users.
 In this pursuit, we build \cilantro{}. %a framework for performance-aware resource allocation.
 % , a framework for performance-aware resource allocation.
 % metrics
-
-\vspace{-0.05in}
 
 At the core of \cilantro~is an online learning mechanism which forms feedback loops with the jobs
 to estimate the resource to performance mappings and load shifts.

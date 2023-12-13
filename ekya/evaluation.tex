@@ -52,13 +52,13 @@ Further, Figure \ref{fig:multicam-timeseries} compares the inference accuracy of
 
 % \begin{figure}[h!]
 % 	\includegraphics[width=0.4\textwidth]{figures/eval_placeholders/sharing-tradeoffs.pdf}
-% 	\caption{\small \bf Multiple video streams sharing an edge cluster: Ours (with adaptive sharing) vs. ours (with fair sharing) vs. various baseline DNNs (without retraining). Our adaptive resource sharing scheme outperforms fair sharing because it is aware of the heterogeneous utility of resource to improve accuracy by different video streams.}
+% 	\caption{\bf Multiple video streams sharing an edge cluster: Ours (with adaptive sharing) vs. ours (with fair sharing) vs. various baseline DNNs (without retraining). Our adaptive resource sharing scheme outperforms fair sharing because it is aware of the heterogeneous utility of resource to improve accuracy by different video streams.}
 % 	\label{fig:sharing-tradeoffs}
 % \end{figure}
 
 % \begin{figure}[h!]
 % 	\includegraphics[width=0.4\textwidth]{results/schedcompare_10cams.pdf}
-% 	\caption{\small \bf Our performance gain over baselines increases with more GPUs. \romil{Instead of just mean over cameras, consider putting error bars at every marker}}
+% 	\caption{\bf Our performance gain over baselines increases with more GPUs. \romil{Instead of just mean over cameras, consider putting error bars at every marker}}
 % 	\label{fig:scalability-gpus}
 % \end{figure}
 
@@ -69,7 +69,7 @@ Further, Figure \ref{fig:multicam-timeseries} compares the inference accuracy of
   \begin{subfigure}[t]{0.5\linewidth}
     \centering
     \includegraphics[width=\linewidth]{results/multicam/multicam_acc_vs_res_cityscapes.pdf} 
-    \caption{\small Cityscapes}
+    \caption{Cityscapes}
     \label{fig:scalability-gpus-cityscapes}
   \end{subfigure}
   ~~~
@@ -77,16 +77,16 @@ Further, Figure \ref{fig:multicam-timeseries} compares the inference accuracy of
     \centering
     % \includegraphics[width=\linewidth]{figures/motivation/Class_Incrementality/class_distribution_change_sf_27.png}
     \includegraphics[width=\linewidth]{results/multicam/multicam_acc_vs_res_waymo.pdf}
-     \caption{\small Waymo}
+     \caption{Waymo}
     \label{fig:scalability-gpus-waymo}
   \end{subfigure}
-  \caption{\small \bf Our performance gain over baselines increases with more GPUs. \romil{Instead of just mean over cameras, consider putting error bars at every marker}}
+  \caption{\bf Our performance gain over baselines increases with more GPUs. \romil{Instead of just mean over cameras, consider putting error bars at every marker}}
   \label{fig:scalability-gpus}
 \end{figure}
 
 % \begin{figure}
 % 	\includegraphics[width=0.4\textwidth]{figures/eval_placeholders/scalability-cameras.pdf}
-% 	\caption{\small \bf Our performance gain over baselines increases with more GPUs. \romil{Instead of just mean over cameras, consider putting error bars at every marker}}
+% 	\caption{\bf Our performance gain over baselines increases with more GPUs. \romil{Instead of just mean over cameras, consider putting error bars at every marker}}
 % 	\label{fig:scalability-cameras}
 % \end{figure}
 
@@ -96,7 +96,7 @@ Further, Figure \ref{fig:multicam-timeseries} compares the inference accuracy of
   \begin{subfigure}[t]{0.5\linewidth}
     \centering
     \includegraphics[width=\linewidth]{results/multicam/multicam_individual_stream_acc_cityscapes.pdf} 
-    \caption{\small Cityscapes}
+    \caption{Cityscapes}
     \label{fig:multicam-cities-cityscapes}
   \end{subfigure}
   ~~~
@@ -104,7 +104,7 @@ Further, Figure \ref{fig:multicam-timeseries} compares the inference accuracy of
     \centering
     % \includegraphics[width=\linewidth]{figures/motivation/Class_Incrementality/class_distribution_change_sf_27.png}
     \includegraphics[width=\linewidth]{results/multicam/multicam_individual_stream_acc_waymo.pdf}
-     \caption{\small Waymo}
+     \caption{Waymo}
     \label{fig:multicam-cities-waymo}
   \end{subfigure}
   \caption{Multi-video performance: Ours (with continuous retraining) vs. Fair Share Scheduler. Compared across cities, we do consistently better. Some cities see bigger gains, some see smaller.}
@@ -114,13 +114,13 @@ Further, Figure \ref{fig:multicam-timeseries} compares the inference accuracy of
 % \begin{figure}[h!]
 %  	%\includegraphics[width=0.4\textwidth]{figures/eval_placeholders/single-tradeoffs.pdf}
 %  	\includegraphics[width=0.4\textwidth]{figures/eval_placeholders/singlecam_e2e.png}
-% 	\caption{\small \bf Multi-video performance: Ours (with continuous retraining) vs. Fair Share Scheduler. Compared across cities, we do consistently better. Some cities see bigger gains, some see smaller.}
+% 	\caption{\bf Multi-video performance: Ours (with continuous retraining) vs. Fair Share Scheduler. Compared across cities, we do consistently better. Some cities see bigger gains, some see smaller.}
 % 	\label{fig:multi-acrosscities}
 % \end{figure}
 
 \begin{figure}
 	\includegraphics[width=0.4\textwidth]{results/multicam/multicam_taskwise_acc_zurich_4_cityscapes.pdf}
-	\caption{\small \bf Timeseries of our performance vs. fair sharing. Again, adaptive resource sharing constantly outperforms fair sharing. \romil{Accuracy drops over time.}}
+	\caption{\bf Timeseries of our performance vs. fair sharing. Again, adaptive resource sharing constantly outperforms fair sharing. \romil{Accuracy drops over time.}}
 	\label{fig:multicam-timeseries}
 \end{figure}
 
@@ -153,14 +153,14 @@ Figure \ref{fig:single-tradeoffs} highlights the accuracy-cost characteristic de
 \begin{figure*}
  	%\includegraphics[width=0.4\textwidth]{figures/eval_placeholders/single-tradeoffs.pdf}
  	\includegraphics[width=\linewidth]{results/singlecam/singlecam_acc_vs_cost_cityscapes.pdf}
-	\caption{\small \bf Single-video performance: Ours (with continuous retraining) vs. various baseline DNN configurations (without retraining). Retraining allows ours to achieve much better accuracy-cost tradeoffs.}
+	\caption{\bf Single-video performance: Ours (with continuous retraining) vs. various baseline DNN configurations (without retraining). Retraining allows ours to achieve much better accuracy-cost tradeoffs.}
 	\label{fig:single-tradeoffs}
 \end{figure*}
 
 
 % \begin{figure}[h!]
 % 	\includegraphics[width=0.4\textwidth]{figures/eval_placeholders/single-timeseries.pdf}
-% 	\caption{\small \bf Performance of ours (with continuous retraining) vs. baseline (without retraining) over time. Ours constantly outperforms the baseline due to continuous retraining. \romil{I assume this is similar to Figure 1?}}
+% 	\caption{\bf Performance of ours (with continuous retraining) vs. baseline (without retraining) over time. Ours constantly outperforms the baseline due to continuous retraining. \romil{I assume this is similar to Figure 1?}}
 % 	\label{fig:single-timeseris}
 % \end{figure}
 
@@ -168,7 +168,7 @@ Figure \ref{fig:single-tradeoffs} highlights the accuracy-cost characteristic de
 % \begin{figure}[h!]
 %  	%\includegraphics[width=0.4\textwidth]{figures/eval_placeholders/single-tradeoffs.pdf}
 %  	\includegraphics[width=0.4\textwidth]{figures/eval_placeholders/singlecam_e2e.png}
-% 	\caption{\small \bf Single-video performance: Ours (with continuous retraining) vs. Fair Share Scheduler. Compared across cities, we do consistently better.}
+% 	\caption{\bf Single-video performance: Ours (with continuous retraining) vs. Fair Share Scheduler. Compared across cities, we do consistently better.}
 % 	\label{fig:single-acrosscities}
 % \end{figure}
 
@@ -183,7 +183,7 @@ Figure \ref{fig:single-tradeoffs} highlights the accuracy-cost characteristic de
 
 \begin{figure}
 	\includegraphics[width=0.4\textwidth]{figures/eval_placeholders/sensitivity-accuracy-error.pdf}
-	\caption{\small \bf We add a controlled amount of error to the accuracy prediction and our performance does degrade but only marginally. \romil{Pick 5 cities, horizontal graph}}
+	\caption{\bf We add a controlled amount of error to the accuracy prediction and our performance does degrade but only marginally. \romil{Pick 5 cities, horizontal graph}}
 	\label{fig:sensitivity-accuracy-error}
 \end{figure}
 
@@ -197,7 +197,7 @@ Figure \ref{fig:single-tradeoffs} highlights the accuracy-cost characteristic de
 %   \begin{subfigure}[t]{0.5\linewidth}
 %     \centering
 %     \includegraphics[width=\linewidth]{results/sensitivity/sensitivity_delta_cityscapes.pdf} 
-%     \caption{\small Accuracy}
+%     \caption{Accuracy}
 %     \label{fig:scalability-gpus-cityscapes}
 %   \end{subfigure}
 %   ~~~
@@ -205,16 +205,16 @@ Figure \ref{fig:single-tradeoffs} highlights the accuracy-cost characteristic de
 %     \centering
 %     % \includegraphics[width=\linewidth]{figures/motivation/Class_Incrementality/class_distribution_change_sf_27.png}
 %     \includegraphics[width=\linewidth]{results/sensitivity/sensitivity_delta_runtime_cityscapes.pdf}
-%      \caption{\small Runtime}
+%      \caption{Runtime}
 %     \label{fig:scalability-gpus-waymo}
 %   \end{subfigure}
-  \caption{\small \bf Effect of the $\delta$ parameter on the thief scheduler. Larger values decrease the accuracy but are faster to compute.}
+  \caption{\bf Effect of the $\delta$ parameter on the thief scheduler. Larger values decrease the accuracy but are faster to compute.}
   \label{fig:sensitivity-delta}
 \end{figure}
 
 % \begin{figure}[h!]
 % 	\includegraphics[width=0.4\textwidth]{figures/eval_placeholders/sensitivity-video-accuracy.pdf}
-% 	\caption{\small \bf Improvement by videos: Accuracy comparison ours vs baseline on different videos (with given cost budget).}
+% 	\caption{\bf Improvement by videos: Accuracy comparison ours vs baseline on different videos (with given cost budget).}
 % 	\label{fig:sensitivity-video-accuracy}
 % \end{figure}
 

@@ -1,7 +1,48 @@
 
-
-
-
+\begin{table}[t!]
+   \centering
+   \begin{tabular}{cl}
+   {\bf Notation} & {\bf Description}\\\hline
+   $\mathcal{V}$ & Set of video streams\\
+   $v$ & A video stream ($v \in \mathcal{V}$)\\\hline
+   $T$ & A retraining window with duration $\lVert T \rVert$ \\\hline
+   %$t$ & A point in time within a retraining window\\\hline
+   $\Gamma$ & Set of all retraining configurations\\
+   $\gamma$ & A retraining configuration ($\gamma \in \Gamma$)\\\hline
+   $\Lambda$ & Set of all inference configurations\\
+   $\lambda$ & An inference configuration ($\lambda \in \Lambda$)\\\hline
+   $\mathcal{G}$ & Total number of GPUs\\
+   $\delta$ & The unit for GPU resource allocation \\\hline
+   %$\Theta$ & The set of all possible GPU allocations  \\
+   %      & $\Theta = \{0, 1, ..., \frac{\mathcal{G}}{\delta}\}$\\
+   %$\mathcal{R}$ & The number of GPU resource unit $\delta$\\ 
+   %         & allocated for retraining ($\mathcal{R} \in \Theta$)\\
+   %$\mathcal{I}$ & The number of GPU resource unit $\delta$\\ 
+   %         & allocated for inference ($\mathcal{I} \in \Theta$)\\\hline
+   %$M_{v}^t$ & Set of all DNN instances for video $v$ at window $t$\\
+   %$m_{v\gamma}^t$ & A DNN instance based on $\gamma$ for video $v$ at $t$\\
+   %$\hat{m}_{v\gamma}^t$ & A \emph{retrained} DNN instance based on $\gamma$ for $v$ at $t$\\\hline
+   %$C^R(v, t, \gamma)$ & Retraining cost using $v$ and $\gamma$ at window $t$ \\
+   %$C^I(v, t, \gamma, \lambda)$ & Inference cost using $v$, $\gamma$, $\lambda$ at window $t$ \\
+   $A_T(v, \gamma, \lambda, \mathcal{R}, \mathcal{I} )$ & Inference accuracy for video $v$ for\\%at retraining \\
+                                       %& window $T$ 
+                                       &given configurations and allocations\\% given retraining configuration $\gamma$ \\
+                                       %& inference configuration $\lambda$, $\mathcal{R}\delta$ GPUs for\\
+                                       %& retraining, and $\mathcal{I}\delta$ GPUs for inference \\
+   $C_T(v, \gamma, \lambda)$ & Compute cost in GPU-time for video $v$ for\\%at retraining \\
+                                       %& window $T$ for 
+                                       &given configurations and allocations\\\hline%, given retraining configuration $\gamma$ \\
+                                       %& and inference configuration $\lambda$ \\\hline
+   %$r_{vt\gamma g}$ & A binary variable indicates the system retrains \\
+   %& a DNN based on $\gamma$ for video $v$ at $t$ on GPU $g$\\\hline
+   $\phi_{v\gamma\lambda\mathcal{R}\mathcal{I}}$ & A set of binary variables ($\phi_{v\gamma\lambda\mathcal{R}\mathcal{I}}\in\{0,1\}$). \\
+   & $\phi_{v\gamma\lambda\mathcal{R}\mathcal{I}} = 1$ iff we use retraining config $\gamma$, \\
+   %& configuration $\gamma$, 
+   &inference config $\lambda$, $\mathcal{R}\delta$ GPUs for retraining,\\
+   & $\mathcal{I}\delta$ GPUs for inference for video $v$\\\hline
+   \end{tabular}
+   \caption{\label{tab:notations}Notations used in {\name}'s description.}
+   \end{table}
 
 \subsection{Formulation of joint inference and retraining}
 \label{subsec:formulation}
@@ -11,14 +52,13 @@ All work must be done in $\mathcal{G}$ GPUs.
 Thus, the total compute capability is $\mathcal{G}\lVert T \rVert$ GPU-time. Without loss of generality, let $\delta$ be the smallest granularity of GPU allocation.  %(e.g., if $\delta = 1\%$ of GPU, $150\delta =$ 1.5 GPU). Let $\Theta$ be the set of all possible GPU allocations $\Theta = \{0, 1, ..., \frac{\mathcal{G}}{\delta}\}$.
 Each video $v \in V$ has a set of \emph{retraining} configurations $\Gamma$
 and a set of \emph{inference} configurations $\Lambda$ (\S\ref{subsec:profiles}).
-Table \ref{tab:notations} (\S{\ref{appendix:scheduler}}) lists the notations. 
-
+Table \ref{tab:notations} lists the notations. 
 
 
 \noindent\textbf{Decisions.} For each video $v\in\mathcal{V}$ in a window $T$, we decide: (1) the retraining configuration $\gamma\in\Gamma$ ($\gamma = \emptyset$ means no retraining); (2) the inference configuration $\lambda\in\Lambda$; and (3) how many GPUs (in multiples of $\delta$) % (in terms of GPU resource units $\delta$)
 to allocate for retraining ($\mathcal{R}$) %\in\Theta$) 
 and inference ($\mathcal{I}$). %\in\Theta$). 
-We use binary variables $\phi_{v\gamma\lambda\mathcal{R}\mathcal{I}}\in\{0,1\}$ to denote these decisions (see Table \ref{tab:notations} \S{\ref{appendix:scheduler}} for the definition). 
+We use binary variables $\phi_{v\gamma\lambda\mathcal{R}\mathcal{I}}\in\{0,1\}$ to denote these decisions (see Table \ref{tab:notations} for the definition). 
 These decisions require $C_T(v, \gamma, \lambda)$ GPU-time and yields overall accuracy of $A_T(v, \gamma, \lambda, \mathcal{R}, \mathcal{I})$. $A_T(v, \gamma, \lambda, \mathcal{R}, \mathcal{I})$ is averaged across the window $T$ (\S\ref{subsec:motivation-sched-example}), and the above decisions determine the inference accuracy at {\em each point in time}.
 %Specifically, let $a_t(v, \gamma, \lambda, \mathcal{R}, \mathcal{I})$ be the inference accuracy for video $v$ at a point in time $t$, % given retraining configuration $\gamma$, inference configuration $\lambda$, $\mathcal{R}\delta$ GPUs for retraining, and $\mathcal{I}\delta$ GPUs for inference, we have:
 %\[

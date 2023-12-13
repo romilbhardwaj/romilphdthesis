@@ -77,10 +77,14 @@
 \chapter{Ekya: Efficient Continuous Learning on the Edge}
 \label{ch_ekya}
 
-Video analytics applications use edge compute servers for processing videos.  
-Compressed models that are deployed on the edge servers for inference suffer from {\em data drift} where the live video data diverges from the training data. Continuous learning handles data drift by periodically retraining the models on new data. Our work addresses the challenge of jointly supporting inference and retraining tasks on edge servers, which requires navigating the fundamental tradeoff between the retrained model's accuracy and the inference accuracy. 
+We start by examining the bottom layer of the stack - the ML application layer. An emerging class of ML applications are {\em continuous learning} applications, which continuously retrain their models on new data to adapt to changes in the data distribution. 
+
+Continuous learning is particularly important for video analytics applications which use edge compute servers for processing videos. 
+Compressed models that are deployed on the edge servers for inference suffer from {\em data drift} where the live video data diverges from the training data. Continuous learning handles data drift by periodically retraining the models on new data. However, since edge servers are resource-constrained, retraining models on the edge servers can impact the inference accuracy and requires careful resource management.
+
+In this Chapter, we introduce \name, which addresses the challenge of jointly supporting inference and retraining tasks on edge servers, which requires navigating the fundamental tradeoff between the retrained model's accuracy and the inference accuracy. 
 %because during retraining, resources are diverted away from inference tasks. %thereby lowering their accuracy. %We design a scheduling solution {\name} that balances this tradeoff, across multiple video streams simultaneously, and optimizes for the inference accuracy over the retraining window's duration. 
-Our solution \name balances this tradeoff across multiple models and uses a micro-profiler to identify the models most in need of retraining. {\name}'s accuracy gain compared to a baseline scheduler is $29\%$ higher, and the baseline requires $4\times$ more GPU resources to achieve the same accuracy as \name.
+\name balances this tradeoff across multiple models and uses a micro-profiler to identify the models most in need of retraining. {\name}'s accuracy gain compared to a baseline scheduler is $29\%$ higher, and the baseline requires $4\times$ more GPU resources to achieve the same accuracy as \name.
 
 
 \input{ekya/introduction}
@@ -100,7 +104,7 @@ Our solution \name balances this tradeoff across multiple models and uses a micr
 %\bibliographystyle{abbrv}
 %\bibliography{sigproc}
 %
-\input{ekya/appendix}
+% \input{ekya/appendix}
 
 
 %\bibliographystyle{ACM-Reference-Format}

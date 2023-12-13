@@ -3,10 +3,10 @@
 
 \newcommand{\insertFigScheme}{
 % Figure source: https://docs.google.com/drawings/d/17G9wpRjLqORqKyWoqDkPONW7_nt0bLVAiO3xylnvqQ8/edit?usp=sharing
-\begin{figure}
+\begin{figure}[!t]
 \centering
-\includegraphics[width=2.5in]{cilantro/figs/Cilantro_Architecture_OSDI23.pdf}
-\caption{\small
+\includegraphics[width=3.2in]{cilantro/figs/Cilantro_Architecture_OSDI23.pdf}
+\caption{ 
 The ~\cilantro ~scheduler and client architecture. The scheduler generates resource allocations for jobs and the clients collect performance feedback to report to the scheduler. 
 %Cilantro clients collect application feedback which is used to train performance and load prediction models. Policies ingest resource-performance confidence bound estimates from the learners and produce resource allocations.
 \label{fig:scheme}
@@ -18,9 +18,9 @@ The ~\cilantro ~scheduler and client architecture. The scheduler generates resou
 \newcommand{\insertFigDemRecIllus}{
 \begin{figure}
 \centering
-\includegraphics[width=3.1in]{cilantro/figs/algo_illus/mmflearn_opt.pdf}
+\includegraphics[width=4.1in]{cilantro/figs/algo_illus/mmflearn_opt.pdf}
 \vspace{-0.1in}
-\caption{\small
+\caption{ 
 Illustration of Cilantro's uncertainty-aware demand-based policies.
 We first obtain a UCB $\volhatj$ from the load forecaster, which ensures
 that we have a conservative estimate on the job's load.
@@ -46,9 +46,9 @@ $\payoffcheckj$) and $\dembarjr$ via equation~\eqref{eqn:ofudemand}.
 \newcommand{\insertFigUtilityIllus}{
 \begin{figure*}
 \centering
-\includegraphics[height=1.1in]{cilantro/figs/utility_curves/utility_curve_all_toplegend.pdf} %height = 1.1 for top legend, 0.8 for side legend
+\includegraphics[height=1in]{cilantro/figs/utility_curves/utility_curve_all_toplegend.pdf} %height = 1.1 for top legend, 0.8 for side legend
 \vspace{-0.25in}
-\caption{\small
+\caption{ 
 Three candidates for SLO-based utility functions.
 The left-most figure shows a job's performance $\payoffj$ as a function of the resources (for fixed
 load).
@@ -76,7 +76,7 @@ where small SLO violations are not very significant.
 % \centering
 % \includegraphics[width=2in]{cilantro/figs/payoffillus_v2}
 % \vspace{-0.1in}
-% \caption{\small
+% \caption{ 
 % An SLO-aware utility (blue curve, $y$-axis on right) derived from the raw
 % performance metric (red curve, $y$-axis on left).
 % While we have used this form of utilities for our evaluation in this work,
@@ -92,9 +92,10 @@ where small SLO violations are not very significant.
 \centering
 % \begin
 \hspace{-0.8in}
-\includegraphics[width=2.0in]{cilantro/figs/strategy_compare}
-\hspace{0.07in}
+\includegraphics[width=1.7in]{cilantro/figs/strategy_compare}
+\hspace{0.02in}
 \begin{minipage}[t]{4in}
+\footnotesize
 \vspace{-1.15in}
 \begin{tabular}{l||cc|cc|cc||c|c|c}
  & \multicolumn{6}{c||}{allocation (utility)}  & \multicolumn{3}{c}{metrics} \\
@@ -108,7 +109,7 @@ Resource fair & 20 & (1.0) & 20 & (0.4) & 20 & (0.22) & 0.54 & 0.22 & 1.0 \\
 \end{tabular}
 \end{minipage}
 \vspace{-0.1in}
-\caption{\small
+\caption{ 
 \cameratext{Comparison of the three (oracular) fair allocation criteria described in \S\ref{sec:oracularpolicies}
 in a synthetic example with $60$ CPUs.
 \emph{Left:} Utility curves for three jobs. The $y$ axis is the utility
@@ -140,12 +141,12 @@ and $\njcfair$~\eqref{eqn:njcfair} metrics for each policy.
 \newcommand{\insertFigSP}{
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.83\linewidth]{cilantro/figs/sp_results_nofonts.pdf}
+\includegraphics[width=0.63\linewidth]{cilantro/figs/sp_results_nofonts.pdf}
 \\
-\includegraphics[width=\linewidth]{cilantro/figs/sp_legend_nofonts.pdf}
+\includegraphics[width=0.7\linewidth]{cilantro/figs/sp_legend_nofonts.pdf}
 \insertFigCaptionSpace
 \vspace{-0.3in}
-\caption{\small
+\caption{ 
 The utility of \incmtt{db16} under the three online learning policies,
 when they report truthfully,
 when they under-report, and
@@ -168,7 +169,7 @@ annotated with the absolute value.
 \includegraphics[width=\linewidth]{cilantro/figs/fallback_legend}
 \insertFigCaptionSpace
 \vspace{-0.3in}
-\caption{\small
+\caption{ 
 Evaluation of Cilantro's fallback option, where users provide a demand value if they cannot
 report performance metrics.
 We evaluate \cilantronjcs when 
@@ -192,7 +193,7 @@ load from our profiled data.
 % \hspace{0.1in}
 % \includegraphics[width=1.5in]{cilantro/figs/resource_qps_bin1.pdf}
 \vspace{-0.1in}
-\caption{\small
+\caption{ 
 Two users, \cameratext{U1 and U2}, serving TPC-DS benchmark queries with different resource-throughput mappings and 
 performance goals (SLO).
 % While the users' throughput may increase when she receives more resources, their utility
@@ -207,17 +208,18 @@ A user's demand is the amount of CPUs needed for her SLO.
 
 
 \newcommand{\insertFigMetrics}{
-\begin{figure*}[ht]
+\begin{figure*}[!t]
 \centering
 % \includegraphics[width=3.5in]{cilantro/figs/util_drawing.png}
-\includegraphics[width=3.2in]{cilantro/figs/util_vs_fairness_nofonts.pdf}
+\includegraphics[width=2.9in]{cilantro/figs/util_vs_fairness_nofonts.pdf}
 \hspace{0.4in}
-\includegraphics[width=3.2in]{cilantro/figs/egal_vs_fairness_nofonts.pdf}
+\includegraphics[width=2.9in]{cilantro/figs/egal_vs_fairness_nofonts.pdf}
 \\[0.05in]
+\vspace{0.1in}
 \includegraphics[width=6.5in]{cilantro/figs/welf_vs_fairness_legend_nofonts.pdf}
 % \vspace{-0.1in}
-\vspace{-0.1in}
-\caption{\small
+\vspace{-0.15in}
+\caption{ 
 NJC fairness vs the social and egalitarian welfare
 (see~\S\ref{sec:oracularpolicies}) for all policies.
 We report the average value over the 6 hour period.
@@ -234,17 +236,19 @@ knowledge of the performance mappings.
 \end{figure*}
 }
 
+\newcommand{\convergencewidthleg}{5.2in}
+\newcommand{\convergencewidth}{5in}
 \newcommand{\insertFigTimeseriesUtilities}{
 \begin{figure}
 \centering
 % \includegraphics[width=3.5in]{cilantro/figs/util_drawing.png}
-\includegraphics[width=\linewidth]{cilantro/figs/timeseries_results/ts_legend_nofonts.pdf}
+\includegraphics[width=\convergencewidthleg]{cilantro/figs/timeseries_results/ts_legend_nofonts.pdf}
 \\[-0.07in]
-\includegraphics[width=0.95\linewidth]{cilantro/figs/timeseries_results/util_welfare_long_nofonts.pdf}
-\includegraphics[width=0.95\linewidth]{cilantro/figs/timeseries_results/egal_welfare_long_nofonts.pdf}
-\includegraphics[width=0.95\linewidth]{cilantro/figs/timeseries_results/max_fairness_viol_long_nofonts.pdf}
+\includegraphics[width=\convergencewidth]{cilantro/figs/timeseries_results/util_welfare_long_nofonts.pdf}
+\includegraphics[width=\convergencewidth]{cilantro/figs/timeseries_results/egal_welfare_long_nofonts.pdf}
+\includegraphics[width=\convergencewidth]{cilantro/figs/timeseries_results/max_fairness_viol_long_nofonts.pdf}
 \vspace{-0.1in}
-\caption{\small
+\caption{ 
 Convergence over time of social, egalitarian welfares and NJC fairness for the three Cilantro policies.
 \label{fig:timeseriesutilities}
 }
@@ -252,10 +256,10 @@ Convergence over time of social, egalitarian welfares and NJC fairness for the t
 \end{figure}
 }
 
-\newcommand{\profwidth}{1.6in}
+\newcommand{\profwidth}{1.5in}
 \newcommand{\profhspace}{0.05in}
 \newcommand{\insertFigProfiling}{
-\begin{figure*}[ht]
+\begin{figure*}[!t]
 \centering
 % \includegraphics[width=3.5in]{cilantro/figs/util_drawing.png}
 \includegraphics[width=\profwidth]{cilantro/figs/prof_craydb0_nofonts.pdf}
@@ -266,7 +270,7 @@ Convergence over time of social, egalitarian welfares and NJC fairness for the t
 \hspace{\profhspace}
 \includegraphics[width=\profwidth]{cilantro/figs/prof_craymltrain_nofonts.pdf}
 \vspace{-0.1in}
-\caption{\small
+\caption{ 
 Performance vs resource-allocation-per-unit-load 
 obtained after profiling the database querying, predicition serving and ML training workloads. %described in \S\ref{sec:fixedclus} for \~9 hours.
 % The resource to performance mappings obtained via the adaptive binning estimator
@@ -293,14 +297,14 @@ densely.
 
 
 \newcommand{\insertFigUserUtilities}{
-\begin{figure*}[ht]
+\begin{figure*}[!t]
 \centering
 % \includegraphics[width=3.5in]{cilantro/figs/util_drawing.png}
 \includegraphics[width=6in]{cilantro/figs/util_plot_nofonts.pdf}
 \\
 \includegraphics[width=4in]{cilantro/figs/leg_util_plot_nofonts.pdf}
 \vspace{-0.15in}
-\caption{\small
+\caption{ 
 The average utility achieved by the 20 jobs for the three online learning
 methods in Cilantro and \equalshare.
 Here, \incmtt{db0x}, \incmtt{mltx}, \incmtt{db1x}, and \incmtt{prsx}
@@ -334,7 +338,7 @@ serving workloads from \S~\ref{sec:fixedclus}.
 % \hspace{0.05in}
 % \includegraphics[height=1.4in]{cilantro/figs/cum_p99}
 % \vspace{-0.1in}
-% \caption{\small
+% \caption{ 
 % Results for the microservices experiment comparing four methods on P99
 % latency over 6 hours.
 % \emph{Left:} The time-averaged P99 latency over the duration of the experiment.
@@ -388,7 +392,7 @@ serving workloads from \S~\ref{sec:fixedclus}.
  \label{fig:avgmsp99}
 \end{subfigure}
 \vspace{-8mm}
-\caption{\small
+\caption{ 
 \emph{Left:} Microservices architecture of the hotel reservation benchmark\cite{deathstarbench}. Blue boxes are business logic, red boxes are caching services, yellow boxes are databases and purple boxes are networking services.
 \emph{Center:} Results for the microservices experiment comparing four methods on P99 latency over 6 hours, plotting the instantaneous P99 latency vs time.
 \emph{Right:} The time-averaged P99 latency vs time.
@@ -413,7 +417,7 @@ serving workloads from \S~\ref{sec:fixedclus}.
 % \includegraphics[width=3.5in]{cilantro/figs/util_drawing.png}
 \includegraphics[width=0.8\linewidth]{cilantro/figs/update_freq}
 \vspace{-0.1in}
-\caption{\small
+\caption{ 
 The frequency of performance updates (per hour) for
 4 different users from the experiment in \S\ref{sec:fixedclus}.
 % \label{fig:frequpdate}
@@ -429,7 +433,7 @@ The frequency of performance updates (per hour) for
 % \includegraphics[width=3.5in]{cilantro/figs/util_drawing.png}
 \includegraphics[width=0.8\linewidth]{cilantro/figs/autoscaling_db1}
 \vspace{-0.1in}
-\caption{\small
+\caption{ 
 Cost (\# replicas) v time for the auto scaling experiment.
 \label{fig:autoscaling}
 }
@@ -441,7 +445,7 @@ Cost (\# replicas) v time for the auto scaling experiment.
 \begin{figure}[t]
     \centering
     \includegraphics[width=\linewidth]{cilantro/figs/twitter_trace_nofonts.pdf}
-    \caption{\small Sampled query arrival rate from the twitter trace collected over the duration of a day.}
+    \caption{Sampled query arrival rate from the twitter trace collected over the duration of a day.}
     \label{fig:twitter_trace}
 \end{figure}
 }
@@ -452,7 +456,7 @@ Cost (\# replicas) v time for the auto scaling experiment.
     % https://docs.google.com/drawings/d/1L6rxyGkY2bmtLTxUOTn_fVI9L4Sumbn6MQS9HXe_1lc/edit?usp=sharing
     \includegraphics[width=0.85\linewidth]{cilantro/figs/HotelServicesArch.pdf}
     \vspace{-3mm}
-    \caption{\small Microservices architecture of the hotel reservation benchmark\cite{deathstarbench}. Blue components indicate business logic implemented in Go. Red boxes indicate caching services, yellow boxes are databases and purple boxes are networking and tracing services.}
+    \caption{Microservices architecture of the hotel reservation benchmark\cite{deathstarbench}. Blue components indicate business logic implemented in Go. Red boxes indicate caching services, yellow boxes are databases and purple boxes are networking and tracing services.}
     \label{fig:hotelresarch}
     \vspace{-2mm}
 \end{figure}
@@ -461,9 +465,9 @@ Cost (\# replicas) v time for the auto scaling experiment.
 
 \newcommand{\insertFigMicrobenchmarks}{
 
-\begin{figure*}[]
+\begin{figure*}[t]
     \begin{subfigure}[b]{0.22\textwidth}
-    \footnotesize
+    \tiny
     % \begin{table}[ht]
     % \begin{center}
     \raisebox{16mm}{
@@ -495,7 +499,7 @@ Cost (\# replicas) v time for the auto scaling experiment.
     %\vspace{-8mm}
     % \end{table}
     \end{subfigure}
-    \hspace{8mm}
+    \hspace{12mm}
     \begin{subfigure}[b]{0.45\textwidth}
     \centering
         \includegraphics[width=\linewidth]{cilantro/figs/fallback_legend_nofonts.pdf}
@@ -512,7 +516,7 @@ Cost (\# replicas) v time for the auto scaling experiment.
 %          \caption{}
 %      \label{fig:frequpdate}
 %     \end{subfigure}
-    \hspace{1mm}
+    \hspace{-3mm}
     \begin{subfigure}[b]{0.25\textwidth}
          \raisebox{0mm}{
             \includegraphics[width=\textwidth]{cilantro/figs/error_mb_line_nofonts.pdf}
@@ -521,7 +525,7 @@ Cost (\# replicas) v time for the auto scaling experiment.
      \label{fig:frequpdate}
     \end{subfigure}
     \vspace{-8mm}
-    \caption{\small
+    \caption{ 
     Cilantro microbenchmarks.
 \emph{Left:} Mean time taken (in seconds) by \cilantro{} to update the performance model and for
 computing a new allocation for each of the three fixed cluster sharing policies. 
@@ -540,9 +544,9 @@ confidence intervals of the performance and load.
 \newcommand{\insertFigCilantroOverview}{
 \begin{figure}
     \centering
-    \includegraphics[width=3in]{cilantro/figs/cilantro_simple_arch.pdf}
+    \includegraphics[width=4.5in]{cilantro/figs/cilantro_simple_arch.pdf}
     \vspace{-2mm}
-    \caption{\small 
+    \caption{
     Cilantro overview. Cilantro uses continuous feedback to dynamically learn each job's
     resource-to-performance mappings.
     An uncertainty-aware resource allocation policy,
@@ -561,7 +565,7 @@ confidence intervals of the performance and load.
     \centering
     \includegraphics[width=3.2in]{cilantro/figs/sched_latency.pdf}
     \vspace{-1mm}
-    \caption{\small Scheduling latency in Cilantro with varying number of jobs. Even with 10000 jobs, the total time taken to allocate resources for all jobs remains less than 110ms. \rbcomment{Switch to box plot instead of violin? Add text in paper. Also seems to be inconsistent with 12a. Remove, move data to text.}}
+    \caption{Scheduling latency in Cilantro with varying number of jobs. Even with 10000 jobs, the total time taken to allocate resources for all jobs remains less than 110ms. \rbcomment{Switch to box plot instead of violin? Add text in paper. Also seems to be inconsistent with 12a. Remove, move data to text.}}
     \label{fig:schedlatency}
     % \vspace{-2mm}
 \end{figure}

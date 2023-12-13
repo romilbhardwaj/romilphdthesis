@@ -1,5 +1,5 @@
 \section{Scheduling retraining and inference jointly}
-\label{sec:motivation}
+\label{sec:ekya_motivation}
 % This section motivates the scheduler
 
 %Our goal is to utilize continuous learning (\S\ref{subsec:continuous}, \S\ref{subsec:continuous-measurement}) to maximize edge DNN accuracy in the face of data drift. 
@@ -22,14 +22,14 @@ Compared to uploading videos to the cloud for retraining, our approach has advan
    \begin{subfigure}[t]{0.47\linewidth}
     \centering
     \includegraphics[width=\linewidth]{ekya/figures/motivation/AccuracyResourceProfile/jena_hypparams.pdf}
-    \caption{\small Effect of Hyperparameters}
+    \caption{Effect of Hyperparameters}
     \label{fig:hyparam-zoom}
   \end{subfigure}
   ~~~
   \begin{subfigure}[t]{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth]{ekya/figures/motivation/AccuracyResourceProfile/jena.pdf}
-    \caption{\small Resource-accuracy}
+    \caption{Resource-accuracy}
     \label{fig:darmstadt-profile}
   \end{subfigure}  
   \caption{Measuring retraining configurations. % with the Cityscapes dataset \cite{cityscapes}.
@@ -66,7 +66,8 @@ With the changing characteristics of videos, it is challenging to efficiently ob
   \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
   
 \begin{table}[t]
-\footnotesize\addtolength{\tabcolsep}{-3pt}
+\centering
+\addtolength{\tabcolsep}{-3pt}
 \begin{tabular}{l cc cc}
 \toprule
 \multirow{2}{*}{\bf Configuration} & \multicolumn{2}{c}{\bf Retraining Window 1} & \multicolumn{2}{c}{\bf Retraining Window 2} \\
@@ -85,20 +86,20 @@ Video B Cfg2B (*)   & 85    & 50    & 90    & 70\\
 \end{table}
 
 % Scheduler motivation figure
-\begin{figure}[t]
+\begin{figure}[t!]
   \centering
     \begin{subfigure}[t]{0.47\columnwidth}
     \centering
     %\hspace*{0.02in}
     \includegraphics[width=\linewidth]{ekya/figures/motivation/Scheduler/schedmot_res_eventual_best_cfgs.pdf}
-    \caption{\small Uniform scheduler}
+    \caption{Uniform scheduler}
     \label{fig:schedmot-res-naive}
   \end{subfigure}  
 %  ~~
 %  \begin{subfigure}[t]{0.3\linewidth}
 %    \centering
 %    \includegraphics[width=\linewidth]{ekya/figures/motivation/Scheduler/schedmot_res_optimal_cfgs.pdf}
-%    \caption{\small Optimal cfgs for retraining window}
+%    \caption{Optimal cfgs for retraining window}
 %    \label{fig:schedmot-res-optimalcfg}
 %  \end{subfigure}
   ~~
@@ -106,28 +107,28 @@ Video B Cfg2B (*)   & 85    & 50    & 90    & 70\\
     \centering
     %\hspace*{0.05in}
     \includegraphics[width=\linewidth]{ekya/figures/motivation/Scheduler/schedmot_res_prioritization_and_optimal_cfgs.pdf}
-    \caption{\small Accuracy-optimal sched.}
+    \caption{Accuracy-optimal scheduler}
     \label{fig:schedmot-res-prioritization}
   \end{subfigure}
       ~~\\
   \begin{subfigure}[t]{0.47\columnwidth}
     \centering
     \includegraphics[width=\linewidth]{ekya/figures/motivation/Scheduler/schedmot_multiwindow_eventual_best_cfgs.pdf}
-    \caption{\small Uniform scheduler}
+    \caption{Uniform scheduler}
     \label{fig:schedmot-naive}
   \end{subfigure}  
 %  ~~
 %  \begin{subfigure}[t]{0.3\linewidth}
 %    \centering
 %    \includegraphics[width=\linewidth]{ekya/figures/motivation/Scheduler/schedmot_multiwindow_optimal_cfgs.pdf}
-%    \caption{\small Optimal cfgs for retraining window}
+%    \caption{Optimal cfgs for retraining window}
 %    \label{fig:schedmot-optimalcfg}
 %  \end{subfigure}
   ~~
   \begin{subfigure}[t]{0.47\columnwidth}
     \centering
     \includegraphics[width=\linewidth]{ekya/figures/motivation/Scheduler/schedmot_multiwindow_prioritization_and_optimal_cfgs.pdf}
-    \caption{\small Accuracy-optimal sched.}
+    \caption{Accuracy-optimal scheduler}
     \label{fig:schedmot-prioritization}
   \end{subfigure}
   ~~
@@ -168,10 +169,10 @@ Each retraining uses data samples accumulated since the {\em beginning of} the l
 %A retraining window consists of model retraining, inference during the retraining with the old model, and inference after the retraining with the retrained model.
 % setup and profiles
 To simplify the example, we assume the scheduler has knowledge of the resource-accuracy profiles, but these are expensive to get in practice (we describe our efficient solution for profiling in \S\ref{subsec:profiling}).
-Table \ref{tab:schedmot-hypparams} shows the retraining configurations ({\small Cfg1A, Cfg2A, Cgf1B, and Cgf2B}), their respective accuracies after the retraining, and GPU cost.
+Table \ref{tab:schedmot-hypparams} shows the retraining configurations ({Cfg1A, Cfg2A, Cgf1B, and Cgf2B}), their respective accuracies after the retraining, and GPU cost.
 The scheduler is responsible for selecting configurations and allocating resources for inference and retraining jobs.
 %Note that these values vary significantly in different windows because of data drift.
-%The retraining jobs for the two video streams, A and B, have two hyperparameter configurations each ({\small Cfg1A, Cfg2A, and Cgf1B, Cgf2B}), with their respective values of accuracy after the retraining and GPU cost. Note the difference in accuracy values of the same configurations between the two retraining windows. Further, there is also considerable difference among the configurations in their GPU costs for retraining, even when their accuracies are similar (e.g., {\small Cfg2A} and {\small Cfg2B} in the second retraining window).% Finally, as we see in the second retraining window, even while camera A's end accuracies (after retraining with Cfg2) is comparable to camera B's accuracies, the latter's current (starting) accuracies are far lower. 
+%The retraining jobs for the two video streams, A and B, have two hyperparameter configurations each ({Cfg1A, Cfg2A, and Cgf1B, Cgf2B}), with their respective values of accuracy after the retraining and GPU cost. Note the difference in accuracy values of the same configurations between the two retraining windows. Further, there is also considerable difference among the configurations in their GPU costs for retraining, even when their accuracies are similar (e.g., {Cfg2A} and {Cfg2B} in the second retraining window).% Finally, as we see in the second retraining window, even while camera A's end accuracies (after retraining with Cfg2) is comparable to camera B's accuracies, the latter's current (starting) accuracies are far lower. 
 
 
 
@@ -184,8 +185,8 @@ The scheduler is responsible for selecting configurations and allocating resourc
 %Figure \ref{fig:schedmot} shows the effect of resource allocation on the {\em inference} accuracies of the two camera streams --  before the retraining, during the retraining, and after the retraining. The example covers two retraining windows, the choice of configurations for the two video streams, and the resource allocations for retraining and inference (Figure \ref{fig:schedmot-res}).
 
 % fair scheduler
-%\noindent{\bf Fair scheduling:} A strawman solution for resource allocation is {\em fair} scheduling \cite{fair-1, fair-2, videostorm}. The fair scheduler evenly splits the GPUs between video streams, and each stream evenly partitions its allocated GPUs for retraining and inference tasks; see Figure \ref{fig:schedmot-res-naive}. The fair scheduler picks those configurations for retraining whose retrained model has the highest accuracy ({\small Cfg1A, Cfg1B} in Table \ref{tab:schedmot-hypparams} for both windows).
-\noindent{\bf {\Fair} scheduling:} Building upon prior work in cluster schedulers \cite{fair-1, fair-2} and video analytics systems \cite{videostorm}, a baseline solution for resource allocation evenly splits the GPUs between video streams, and each stream evenly partitions its allocated GPUs for retraining and inference tasks; see Figure \ref{fig:schedmot-res-naive}. Just like model training systems \cite{vizier,hyperband,pbt}, the baseline always picks the configuration for retraining that results in the highest accuracy ({\small Cfg1A, Cfg1B} for both windows).
+%\noindent{\bf Fair scheduling:} A strawman solution for resource allocation is {\em fair} scheduling \cite{fair-1, fair-2, videostorm}. The fair scheduler evenly splits the GPUs between video streams, and each stream evenly partitions its allocated GPUs for retraining and inference tasks; see Figure \ref{fig:schedmot-res-naive}. The fair scheduler picks those configurations for retraining whose retrained model has the highest accuracy ({Cfg1A, Cfg1B} in Table \ref{tab:schedmot-hypparams} for both windows).
+\noindent{\bf {\Fair} scheduling:} Building upon prior work in cluster schedulers \cite{fair-1, fair-2} and video analytics systems \cite{videostorm}, a baseline solution for resource allocation evenly splits the GPUs between video streams, and each stream evenly partitions its allocated GPUs for retraining and inference tasks; see Figure \ref{fig:schedmot-res-naive}. Just like model training systems \cite{vizier,hyperband,pbt}, the baseline always picks the configuration for retraining that results in the highest accuracy ({Cfg1A, Cfg1B} for both windows).
 
 
 Figure \ref{fig:schedmot-naive} shows the {\em inference} accuracies of the two live streams.
@@ -195,7 +196,7 @@ We see that when the retraining tasks take resources away from the inference tas
 %The inference accuracies during the first retraining window (Figure \ref{fig:schedmot-naive}) dropped from {$65\%$} $\rightarrow$ {$49\%$} for video A and {$50\%$} $\rightarrow$ {$37.5\%$} for video B, and a similar drop in the second window. % , there is little time to use the model for inference before the next retraining window. 
 %While the retrainings produced a model with higher accuracy, they also took a long time (due to high GPU costs) during which the inference accuracy was lower. 
 While the inference accuracy increases \emph{after} retraining, it leaves too little time in the window to reap the benefit of retraining. 
-%Averaged over the first retraining window, video A's and B's inference accuracies end up being $54\%$ and $57\%$, even though the configurations themselves ({\small Cfg1A, Cfg1B}) resulted in retrained models with much higher accuracies of $75\%$ and $90\%$ (Table \ref{tab:schedmot-hypparams}). 
+%Averaged over the first retraining window, video A's and B's inference accuracies end up being $54\%$ and $57\%$, even though the configurations themselves ({Cfg1A, Cfg1B}) resulted in retrained models with much higher accuracies of $75\%$ and $90\%$ (Table \ref{tab:schedmot-hypparams}). 
 Averaged across both retraining windows, the inference accuracy across the two video streams is only $56\%$ because the gains due to the improved accuracy of the retrained model are undercut by the time taken for retraining (during which inference accuracy suffered).
 %As a result, this schedule results in a low mean inference accuracy of 51.82\% when measured over the entire duration of the retraining window (\gaa{120s} in our example).
 %\ys{In Fig 4a, how do we ``fairly'' allocate resources after job B training finishes? Maybe we should plot the figures across two columns and vertically align a/c and b/d. }
@@ -208,19 +209,19 @@ Averaged across both retraining windows, the inference accuracy across the two v
 
 
 
-%\noindent{\bf Retraining-aware fair scheduling:} An alternative to the above fair scheduler is picking hyperparameter configurations with lower GPU demands that train faster ({\small Cfg2A} and {\small Cfg2B}; Table \ref{tab:schedmot-hypparams}), and thus allows for inference on the retrained model (with higher accuracy) for a longer duration in the retraining window (see Figure \ref{fig:schedmot-optimalcfg}). This scheme results in the average inference accuracy across the two retraining windows of 62.4\% for the two video streams. However, this scheme still equally partitions resources between the two video streams, allocating 1.5 GPU to each, and further equally allocates it's share to inference and retraining tasks (Figure \ref{fig:schedmot-res-optimalcfg}).  %This is a suboptimal resource allocation, as demonstrated in 
+%\noindent{\bf Retraining-aware fair scheduling:} An alternative to the above fair scheduler is picking hyperparameter configurations with lower GPU demands that train faster ({Cfg2A} and {Cfg2B}; Table \ref{tab:schedmot-hypparams}), and thus allows for inference on the retrained model (with higher accuracy) for a longer duration in the retraining window (see Figure \ref{fig:schedmot-optimalcfg}). This scheme results in the average inference accuracy across the two retraining windows of 62.4\% for the two video streams. However, this scheme still equally partitions resources between the two video streams, allocating 1.5 GPU to each, and further equally allocates it's share to inference and retraining tasks (Figure \ref{fig:schedmot-res-optimalcfg}).  %This is a suboptimal resource allocation, as demonstrated in 
 
 \noindent{\bf Accuracy-optimized scheduling:} %Figures \ref{fig:schedmot-res-prioritization} and \ref{fig:schedmot-prioritization} illustrate an accuracy-optimized scheduler, which takes a holistic view on the multi-dimensional tradeoffs in selecting hyperpareamter configurations and allocating resources.
 Figures \ref{fig:schedmot-res-prioritization} and \ref{fig:schedmot-prioritization} illustrate an accuracy-optimized scheduler, which by taking a holistic view on the multi-dimensional tradeoffs, provides an an average inference accuracy of $73\%$. In fact, to match the accuracies, the above {\fair} scheduler would require nearly twice the GPUs (i.e., $6$ GPUs instead of $3$ GPUs). 
 
-This scheduler makes three key improvements. First, the scheduler selects the hyperparameter configurations based on their accuracy improvements \emph{relative} to their GPU cost. It selects lower accuracy options ({\small Cfg2A/Cfg2B}) instead of the higher accuracy ones ({\small Cfg1A/Cfg1B}) because these configurations are substantially cheaper (Table \ref{tab:schedmot-hypparams}). 
+This scheduler makes three key improvements. First, the scheduler selects the hyperparameter configurations based on their accuracy improvements \emph{relative} to their GPU cost. It selects lower accuracy options ({Cfg2A/Cfg2B}) instead of the higher accuracy ones ({Cfg1A/Cfg1B}) because these configurations are substantially cheaper (Table \ref{tab:schedmot-hypparams}). 
 Second, the scheduler \emph{prioritizes} retraining tasks that yield higher accuracy, so there is more time to reap the benefit from retraining. For example, the scheduler prioritizes B's retraining in Window 1 as its inference accuracy after retraining increases by $35\%$ (compared to $5\%$ for video A).
 Third, the scheduler controls the accuracy drops during retraining by balancing the retraining time and the resources taken away from inference. %\footnote{The techniques in our scheduler apply to other optimization metrics too, like max-min of accuracy. Evaluating other metrics is left to future work.}
 
 %The scheduler ensures a minimum inference accuracy (40\% in this example) at all times.
 
 
-%($1$) Hyperparameter configurations are chosen based on the {\em improvement in accuracy} due to the retraining {\em relative to its GPU cost}. In the first retraining window, {\small Cfg2} is chosen for video B even though its accuracy is lower than {\small Cfg1}'s accuracy, because of {\small Cfg2}'s substantially cheaper resource cost (50 GPU-seconds as opposed to 80; Table \ref{tab:schedmot-hypparams}). 
+%($1$) Hyperparameter configurations are chosen based on the {\em improvement in accuracy} due to the retraining {\em relative to its GPU cost}. In the first retraining window, {Cfg2} is chosen for video B even though its accuracy is lower than {Cfg1}'s accuracy, because of {Cfg2}'s substantially cheaper resource cost (50 GPU-seconds as opposed to 80; Table \ref{tab:schedmot-hypparams}). 
 
 %\noindent{Resource} allocation is also based on the improvement in accuracy and resource costs. In Figure \ref{fig:schedmot-res-prioritization}, video B's retraining is prioritized in the first retraining window because its accuracy is expected to go up from {$50\%$} to $85\%$ while video A's accuracy improves from {$65\%$} to only $70\%$; see Figure \ref{fig:schedmot-prioritization}. Further, the cost of retraining B ($50$ GPU-seconds) is lower than retraining A ($65$ GPU-seconds). 
 %However, camera A's retraining is prioritized in the next window of Figure \ref{fig:schedmot-res-prioritization}.

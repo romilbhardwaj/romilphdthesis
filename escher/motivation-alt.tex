@@ -1,5 +1,5 @@
 \section{Motivation}
-\label{sec:motivation}
+\label{sec:escher_motivation}
 
 
 % \begin{table*}[]
@@ -26,7 +26,7 @@ We now give a motivating example that is insufficiently served by existing sched
 \input{escher/policy-table-v3mot-singlecol-v2}
 
 \subsection{Existing systems are hard to evolve}
-\label{sec:motivation:example}
+\label{sec:escher_motivation:example}
 
 % As model size increases, 
 As applications become increasingly diverse, the cluster schedulers must evolve to support novel scheduling policies required by these applications. Consider distributed training, which has emerged as a dominant ML workload. 
@@ -76,13 +76,13 @@ Thus, Gandiva remains limited to distributed training jobs that fit on a single 
 % \begin{figure}[ht]
 %     \centering
 %     \includegraphics[width=0.95\linewidth]{escher/figures/ESCHER-training.pdf}
-%     \caption{\small Task placement for 4 distributed training jobs on a cluster with 12 GPUs. Each training job comprises multiple tasks, and each task occupies 1 GPU. The jobs arrive in order from $A$-$D$, and all tasks can take a variable amount of time to start. Jobs can only make progress if all tasks are started (i.e., they require gang scheduling). \textbf{(a)} Task placement with affinity and anti-affinity, but no gang scheduling. $C$ has some tasks that are not placed before $D$ arrives, so neither $D$ nor $C$ can run. \textbf{(b)} Task placement with affinity, anti-affinity, and gang scheduling. $A$ is initially placed on Node 1 and $B$ on Node 2 (not shown). With gang scheduling, when $C$ arrives, $B$ can be migrated to Node 1 to allow $C$ to run. \romil{Candidate for cutting}}
+%     \caption{Task placement for 4 distributed training jobs on a cluster with 12 GPUs. Each training job comprises multiple tasks, and each task occupies 1 GPU. The jobs arrive in order from $A$-$D$, and all tasks can take a variable amount of time to start. Jobs can only make progress if all tasks are started (i.e., they require gang scheduling). \textbf{(a)} Task placement with affinity and anti-affinity, but no gang scheduling. $C$ has some tasks that are not placed before $D$ arrives, so neither $D$ nor $C$ can run. \textbf{(b)} Task placement with affinity, anti-affinity, and gang scheduling. $A$ is initially placed on Node 1 and $B$ on Node 2 (not shown). With gang scheduling, when $C$ arrives, $B$ can be migrated to Node 1 to allow $C$ to run. \romil{Candidate for cutting}}
 %     \label{fig:distributed-training}
 %     \vspace{-3mm}
 % \end{figure}
 
 \subsection{Static labels are insufficient}
-\label{sec:motivation:label}
+\label{sec:escher_motivation:label}
 Some frameworks~\cite{mesos,omega,yarn,kubernetes} already support \emph{static} label creation as string key-value pairs (e.g., "v100 GPU": 1) associated with cluster nodes.
 This allows cluster operators to tag nodes with physical resource attributes (e.g., CPU/GPU architecture, rack affinity) at cluster launch time, which can be requested by applications at execution time.
 %Then, at execution time, an application can request task placement on nodes with specific labels, using hard or soft constraints.
@@ -114,7 +114,7 @@ This is impossible to express using static labels alone, which cannot reason abo
 % Second, labels do not have an associated numerical capacity. Unlike a resource, tasks cannot acquire or consume labels, which makes it difficult to express policies which rely on evaluating task counts or utilization on different nodes. For instance, performing load-balancing with key-value labels would require the application to create unique labels on each node and track the number of tasks requesting each label. This is equivalent to implementing the complete scheduling logic in the application space. % Kubernetes' extended resources \cite{kubernetesextres} improves on labels by adding a numerical capacity to labels, but it remains static in it's current usage.
 
 % \subsection{An End-to-End Argument}
-% \label{sec:motivation:e2earg}
+% \label{sec:escher_motivation:e2earg}
 
 % \name{} applies the end-to-end principle~\cite{e2e-argument} to cluster scheduling by keeping the core scheduler mechanism simple yet scalable, while ephemeral resources provide applications with flexibility to express scheduling policies.
 % Similar to Exokernel~\cite{exokernel}, \name{} focuses on enabling applications to implement custom scheduling policies in a heterogeneous distributed system. 
@@ -214,7 +214,7 @@ This is impossible to express using static labels alone, which cannot reason abo
 % \subsection{Reinforcement Learning}
 
 % \rliaw{could use figure here}
-% Recently, reinforcement learning (RL) has led to breakthroughs in developing agents that exceed the human capabilities in playing computer games~\cite{dqn}, chess, and go~\cite{silver2016alphago}. As discussed in~\cite{ray-osdi}, implementing RL requires a system that support not only training, but model serving, and large scale simulations. Like in the case of Gandiva, this requires supporting a variety of policies: gang scheduling for multi-node distributed training and serving, anti-affinity (load balancing) to evenly distribute the simulations across the cluster, and affinity to run the tasks belonging to the same simulation on the same node. 
+% Recently, reinforcement learning (RL) has led to breakthroughs in developing agents that exceed the human capabilities in playing computer games~\cite{dqn}, chess, and go~\cite{silver2016alphago}. As discussed in~\cite{ray}, implementing RL requires a system that support not only training, but model serving, and large scale simulations. Like in the case of Gandiva, this requires supporting a variety of policies: gang scheduling for multi-node distributed training and serving, anti-affinity (load balancing) to evenly distribute the simulations across the cluster, and affinity to run the tasks belonging to the same simulation on the same node. 
 
-% Again, in the absence of cluster schedulers to support these policies simultaneously, researchers were left with no option but to implement specialized systems to support RL applications~\cite{gorila,evolution-strategy,ray-osdi}.
+% Again, in the absence of cluster schedulers to support these policies simultaneously, researchers were left with no option but to implement specialized systems to support RL applications~\cite{gorila,evolution-strategy,ray}.
 

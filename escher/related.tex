@@ -10,7 +10,7 @@
 
 \textbf{Monolithic schedulers.}
 Monolithic cluster schedulers aim to implement both the scheduling policy and mechanism for a distributed application.
-Some provide a single generic scheduling discipline, such as fair sharing~\cite{isardquincy,ghodsi2011dominant}, gang scheduling~\cite{mpi}, or delay scheduling~\cite{delay-scheduling}. These schedulers provide little control to the application beyond the ability to set some configuration knobs, such as the time to wait before scheduling a task on a node that doesn't store its inputs~\cite{delay-scheduling}.
+Some provide a single generic scheduling discipline, such as fair sharing~\cite{isard2009quincy,ghodsi2011dominant}, gang scheduling~\cite{mpi}, or delay scheduling~\cite{delay-scheduling}. These schedulers provide little control to the application beyond the ability to set some configuration knobs, such as the time to wait before scheduling a task on a node that doesn't store its inputs~\cite{delay-scheduling}.
 %Because these schedulers target a specific policy, they are inflexible and support only a limited set of applications.
 
 Other monolithic schedulers aim for generality and provide APIs to allow applications to express scheduling constraints.
@@ -52,7 +52,7 @@ In other cases, quantitative labels are static.
 % This makes it infeasible to use simple labels to implement policies that have some \emph{quantitative} condition, e.g., a policy that limits each node to 4 concurrent tasks.
 % Thus, they cannot be employed to implement policies that require placement structure, such as anti-affinity and gang scheduling without incurring multiple rounds of resource requests or hardcoding the features.
 TetriSched~\cite{tetrisched} operates on labelled resources by allowing declarative resource constraint specification and composition. Wrasse~\cite{wrasse-socc12} uses the bins and balls abstraction along with user-defined utilization functions to come up with a specification language. However, neither of these provide support for \textit{dynamic} scheduling policies, e.g., making inter-task constraints hard to implement in a single shot. %task-to-task affinity hard to implement. 
-The expressivity of declarative schedulers is restricted to information known \textit{a priori} (i.e., static label information). Circular inter-task dependencies~(\cite{naiad-sosp13}) are fundamentally impossible to implement without a dynamic mechanism to unroll the dependency (\Cref{sec:motivation:label}).
+The expressivity of declarative schedulers is restricted to information known \textit{a priori} (i.e., static label information). Circular inter-task dependencies~(\cite{naiad-sosp13}) are fundamentally impossible to implement without a dynamic mechanism to unroll the dependency (\Cref{sec:escher_motivation:label}).
 % The dynamics of resource labels cannot be captured or leveraged. 
 We note, however, that declarative schedulers (\cite{tetrisched,dcm-osdi20}) are synergistic with \name{}.
 Ephemeral resources can be used as an intermediate representation (IR) for their frontend API (e.g., SQL~\cite{dcm-osdi20} and STRL~\cite{tetrisched}).

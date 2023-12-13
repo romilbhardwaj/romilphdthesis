@@ -1,5 +1,5 @@
 \section{Motivation}
-\label{sec:motivation}
+\label{sec:escher_motivation}
 
 % Gandiva. Problems - conflicting policies, elastic scaling to more nodes, dynamic scheduling policy when jobs change, composable policies
 %\name{} is motivated by the challenges faced by applications in exercising fine-grained control over scheduling of compute resources  in a distributed environment. Consider Gandiva\cite{gandiva}, a system for distributed training of machine learning jobs which builds on Kubernetes \cite{kubernetes} for task orchestration. Gandiva applies compute and data co-locality and load-balancing through mechanisms such as time-sharing and task migration to speed up hyperparameter search in machine learning experiments. Co-locality avoids network overheads between jobs running across GPUs, while load-balancing ensures the workload is evenly split across the cluster to avoid network and compute bottlenecks. Additionally, some model-parallel jobs may require all-or-none scheduling semantics \cite{shivaram-gpustudy}, where all task instances requested by the job must run concurrently for it to progress.

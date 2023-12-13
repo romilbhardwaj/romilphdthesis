@@ -152,7 +152,7 @@ def composite_scheduling():
   \label{listing:compositionpolicy}
 \end{subfigure}
 
-\caption{\small Scheduling with \name{}. \textbf{(a)} Soft constraints with \name{}. \textbf{(b)} Composition of load-balancing and co-location policies with ephemeral resources in \name{}.}
+\caption{Scheduling with \name{}. \textbf{(a)} Soft constraints with \name{}. \textbf{(b)} Composition of load-balancing and co-location policies with ephemeral resources in \name{}.}
 \label{fig:schedpseudo2}
 \end{figure}
 
@@ -238,7 +238,7 @@ This preference places each task on the least utilized node, correct up to a fac
 %\label{policies:composition}
 %TODO(romilb): Add graphic to explain this better?
 % Some applications may have scheduling requirements that may be expressed as a hierarchical composition of the basic scheduling policies discussed above. For instance, an application might want to enforce co-location among a set of tasks, while evenly spreading out these groups of co-located tasks to load balance across the cluster. Implementing this policy on existing frameworks is challenging due to the highly specific needs of this application. Even if the application developer was to modify the core framework scheduler, the implementation of this policy is still complex, requiring significant developer effort to develop and maintain.
-Applications like hyperparameter search require a hierarchical composition of other policies~(\Cref{sec:motivation:example}).
+Applications like hyperparameter search require a hierarchical composition of other policies~(\Cref{sec:escher_motivation:example}).
 % With ephemeral resources a hierarchical policy can be easily expressed as a composition of other policies.
 Scheduling policy compositions can be logically expressed either as an AND conjunction or an OR conjunction. AND constraints are expressed by concatenating the ephemeral resource vectors for two policies. OR constraints are supported using soft constraints. % An OR composition of two policies P1 and P2 can be specified as the ordinal set [\{P1, P2\}, \{P1\}, \{P2\}].}
 For instance, if an application wants to co-locate $task1$ and $task2$ while load balancing their groups across the cluster, it can simply apply co-location on $task1$ and $task2$ and load balancing only on $task1$ as shown in \cref{listing:compositionpolicy}. Similarly, cluster-level policies can be composed with application-level policies (Section \ref{eval:hfs}). 

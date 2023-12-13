@@ -1,7 +1,7 @@
 \section{Introduction}
-\label{sec:intro}
+\label{sec:escher_intro}
 
-With the end of Moore’s law and Dennard scaling, developers are forced to distribute their applications to process an ever growing amount of data. As a result, the past decade has seen a proliferation of new distributed frameworks~\cite{kubernetes, ray-osdi, mesos} to handle a variety of workloads from big data (e.g., batch jobs, interactive query processing) to AI applications (e.g., model training and serving).
+With the end of Moore’s law and Dennard scaling, developers are forced to distribute their applications to process an ever growing amount of data. As a result, the past decade has seen a proliferation of new distributed frameworks~\cite{kubernetes, ray, mesos} to handle a variety of workloads from big data (e.g., batch jobs, interactive query processing) to AI applications (e.g., model training and serving).
 
 
 % https://docs.google.com/drawings/d/1jXbZJhnhrtNHtrjuyGhHoiT4LbjzwVerwn02Tnw-Kv0/edit
@@ -9,7 +9,7 @@ With the end of Moore’s law and Dennard scaling, developers are forced to dist
 \centering
 \includegraphics[width=0.92\linewidth]{escher/figures/escher-compare-arch.pdf}
 \caption{\small
-\textbf{(a)} A monolithic scheduler implements both scheduling and resource constraint matching~\cite{ghodsi2011dominant,isardquincy,mpi,kubernetes}. Some schedulers allow applications to express and compose certain policies~\cite{condor,tetrisched,kubernetes}, but custom application policies may require modifying the scheduler itself.
+\textbf{(a)} A monolithic scheduler implements both scheduling and resource constraint matching~\cite{ghodsi2011dominant,isard2009quincy,mpi,kubernetes}. Some schedulers allow applications to express and compose certain policies~\cite{condor,tetrisched,kubernetes}, but custom application policies may require modifying the scheduler itself.
 % Though this API abstracts away scheduling logic from the application, it is not expressive enough to allow applications to express compositions of scheduling policies.
 \textbf{(b)} To maximize flexibility, some frameworks expose physical resources \cite{mesos, omega}, but require applications to write custom schedulers that manage both policy and resource coordination~\cite{gandiva,DevinMasters,mapreduce}.
 %This burdens the application developer with explicitly handling resource allocation.
@@ -80,12 +80,12 @@ To alleviate the challenge of application complexity and provide protection agai
 %As the name suggests, ESLs are akin to libraries in today's programming languages which implement the most common functionality and expose it to developers through simple APIs, thus dramatically reducing development cost via code reuse and enabling composition of simple policies into more complex ones.
 
 %To evaluate \name{}, w
-To evaluate \name{}'s performance, we implement it on both Kubernetes~\cite{kubernetes} and Ray~\cite{ray-osdi} by leveraging their existing implementations 
+To evaluate \name{}'s performance, we implement it on both Kubernetes~\cite{kubernetes} and Ray~\cite{ray} by leveraging their existing implementations 
 %\swang{was it existing for Ray? I thought that we implemented it for this paper}
 % of ephemeral resources.
 for label-based scheduling, which were originally intended to represent custom physical resources rather than logical scheduling constraints.
 We run \name{} on a range of applications and policies, including  WordCount MapReduce with max-min fair sharing on Kubernetes as well as
-AlphaZero~\cite{silver2016alphago} and distributed model training on Ray~\cite{ray-osdi}. We show that \name{} does not impact the end-to-end performance of most applications when compared to a system that implements the same policies in the core scheduler. Meanwhile, the application can use \name{} to express additional policies not supported by the underlying core scheduler, e.g., composing gang scheduling with affinity~(\Cref{sec:eval:tune}). %increase the completion times of some applications, e.g., applications consisting of sub-millisecond level tasks. 
+AlphaZero~\cite{silver2016alphago} and distributed model training on Ray~\cite{ray}. We show that \name{} does not impact the end-to-end performance of most applications when compared to a system that implements the same policies in the core scheduler. Meanwhile, the application can use \name{} to express additional policies not supported by the underlying core scheduler, e.g., composing gang scheduling with affinity~(\Cref{sec:eval:tune}). %increase the completion times of some applications, e.g., applications consisting of sub-millisecond level tasks. 
 %\ion{I find the point that we can use ESCHER to implement the policy in the core scheduler confusing. I'd just say that in some cases there is overhead and give one or two examples of such cases.}
 %\romilc{While the performance of \name{} is largely comparable to policies hard-coded in a monolithic scheduler, the application-level mechanisms used to implement policies can add to the scheduling latency for some workloads. However, if performance is a priority, ESCHER can also be used to implement policies at the system level by modifying the core scheduler. In \Cref{sec:eval}, we evaluate the tradeoffs involved in moving policies to the system level.}
 %In the process, we show that \name{}~is able to match the performance of comparable policies hard-coded in a monolithic scheduler.

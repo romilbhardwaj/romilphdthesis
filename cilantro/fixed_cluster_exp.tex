@@ -11,11 +11,28 @@ cluster shared by 20 users.
 
 \textbf{Workloads.}
 We use three classes of workloads---database querying, prediction serving and
-machine learning training---which are used to create multiple jobs. The database querying workload runs TPC-DS~\cite{tpc-ds} 
-queries on replicated instances of sqlite3 database and uses the query latency as the performance metric. 
-The prediction serving workload runs queries on a ML model (random forest regressor) trained on the news popularity dataset~\cite{fernandes2015proactive}. 
-The ML training workload trains a neural network on the naval propulsion~\cite{coraddu2016machine} dataset using stochastic gradient descent. The database querying and prediction serving workloads use the query latency as the performance metric while ML training uses batch throughput to measure performance. Resource-performance mappings for informing the oracle baselines in \S\ref{sec:fixedclus} were obtained through offline profiling of all workloads. These profiles are visualized in Figure \ref{fig:profiling}. 
-More details of the workloads, including workload-specific parameters are available in the appendix.
+machine learning training---which are used to create multiple jobs.
+
+The database querying workload runs TPC-DS~\cite{tpc-ds} 
+queries on replicated instances of sqlite3 database and uses the query latency as the performance metric. The TPC-DS suite consists of 99 query templates out of which 27 were not compatible with the sqlite dialect and were discarded. The remainder were binned according to their mean latency when measured on a AWS m5.2xlarge instance. The chosen query types and their ids are listed in Table \ref{tab:querybinmap}. From the TPC-DS query set, we created two workloads (setting scale factor to 100): DB-0, which had queries that completed in under 100 ms and DB-1 which had queries that had a completion time between 100 and 300 ms. When a query is requested, we randomly pick a relevant query and dispatch it
+according to the trace. The performance metric of interest is  query latency. 
+
+\insertTableQueryBins
+
+In prediction serving, a job processes arriving queries
+to output a prediction, usually obtained via a machine learning model.
+In our set up, we use a random forest regressor as the model and the the news popularity
+dataset~\cite{fernandes2015proactive} for training and test queries in a 50:50 split.
+% Half of the dataset is used to train the model (before the experiment),
+% while the remaining half (test set) is used to generate queries for the workload.
+Queries are picked randomly from the test set and issued in batches of 4.
+The metric of interest is the serving latency.
+
+The ML training workload trains a neural network on the naval propulsion~\cite{coraddu2016machine} dataset using stochastic gradient descent. The database querying and prediction serving workloads use the query latency as the performance metric while ML training uses batch throughput to measure performance. Resource-performance mappings for informing the oracle baselines were obtained through offline profiling of all workloads. These profiles are visualized in Figure \ref{fig:profiling}.
+
+
+\textbf{Multi-tenant cluster jobs setup.} For the multi-tenant cluster resource sharing evaluation, we setup 20 jobs with different workloads and SLOs. Table \ref{tab:expjobsetup} details the exact SLO and utility function for each job.  The utility function for each job is either of \incmtt{linear}, which directly maps performance to utility (Figure \ref{fig:utilityillus}(a)), \incmtt{sqrt}, which performs a sublinear mapping of performance to utility (Figure \ref{fig:utilityillus}(b)), or \incmtt{quadratic}, which performs a superlinear mapping of performance to utility (Figure \ref{fig:utilityillus}(c)).
+\insertExpSetupTable
 
 % \newcommand{\wlheader}[1]{\emph{#1}}
 
@@ -46,7 +63,7 @@ More details of the workloads, including workload-specific parameters are availa
 % \wlheader{ML training:}
 % % Many real world machine learning deployments require that we continuously update the model
 % % from an input stream of data
-% % so as to account for changes in the data distribution~\cite{xiao2018gandiva}.
+% % so as to account for changes in the data distribution~\cite{gandiva}.
 % % \kkcomment{A good citation here.}
 % We use CPUs to train a neural network with four hidden layers of size 64 each.
 % We train our model on the naval propulsion~\cite{coraddu2016machine} dataset using
@@ -58,10 +75,12 @@ More details of the workloads, including workload-specific parameters are availa
 We
 use the Twitter API~\cite{twitter2020} to collect a trace of tweet arrival rates at Twitter's Asia datacenters;
 to bring to parity with our cluster, we subsample the arrival rate by a factor
-of 10. % for the database workloads and by a factor of 2 for the prediction serving workload.
+of 10. The query arrival rate of this trace is visualized in Figure \ref{fig:twitter_trace}.
+% for the database workloads and by a factor of 2 for the prediction serving workload.
 % The workload generator parses this trace and dispatches a query at every arrival.
 For the ML training workload, we draw queries from an essentially infinite pool to create a constant
 stream of work.
+\insertFigTwitterTrace
 % All these workloads are made to report their performance to the cilantro client
 % every 10 seconds. Tasks which are running when the performance is reported are discarded to avoid
 % affecting results for next reporting round.
@@ -94,7 +113,7 @@ We use the above 4 workloads to create 20 jobs as follows:
 % to reflect settings where small SLO violations may be either critical or inconsequential.
 To reflect settings where small SLO violations may be either critical or inconsequential,
 we discount the utility via one of the three options in Fig.~\ref{fig:utilityillus} for each job.
-Detailed information on the users' jobs is given in the appendix.
+% Detailed information on the users' jobs is given in the appendix.
 The estimated total amount of resources based on the median demand was 1637 CPUs;
 hence, even at full capacity, not all users can satisfy their SLOs.
 We evaluate all baselines for 6 hours.
@@ -116,7 +135,7 @@ criteria~\eqref{eqn:njcfair}.
 % 
 Fig.~\ref{fig:metrics} illustrates the results by
 plotting the time-averaged NJC fairness vs the two welfare criteria.
-Table~\ref{tab:metrics} (in the appendix) tabulates these values explicitly with error bars.
+Table~\ref{tab:metrics} tabulates these values explicitly with error bars.
 While the oracular methods perform best on their respective metrics, we find that the online
 learning policies in \cilantros come close to matching them.
 \equalshare{} achieves a perfect NJC score by definition, but performs poorly on social and

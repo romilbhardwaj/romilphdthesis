@@ -40,7 +40,7 @@
  \label{fig:hfs-3user-result}
 \end{subfigure}
 \vspace{-2em}
-\caption{\small 
+\caption{
 Data locality and hierarchical max-min fair sharing for WordCount.
 \textbf{(a)} Makespan of WordCount running on a 100-node Kubernetes cluster, comparing a random placement policy, ESCHER on Kubernetes with data locality, and Kubernetes' native data locality.
 \textbf{(b)} Makespan of WordCount MapReduce jobs in seconds across varying cluster sizes.
@@ -112,7 +112,7 @@ Throughout different scales, ESCHER performs comparably with the core Kubernetes
 % \begin{figure}
 % \centering
 % \includegraphics[width=0.8\columnwidth]{escher/plots/mapreduce_makespan.pdf}
-% \caption{\small Makespan of WordCount running on a 100-node Kubernetes cluster, comparing a random placement policy, ESCHER on Kubernetes with data locality, and Kubernetes' native data locality.
+% \caption{Makespan of WordCount running on a 100-node Kubernetes cluster, comparing a random placement policy, ESCHER on Kubernetes with data locality, and Kubernetes' native data locality.
 % %A random placement policy has high network overheads due to poor data-locality. ESCHER implementation on Kubernetes performs comparably with the off-the-shelf core Kubernetes data locality policy.
 % }
 % \label{fig:mapreduce-makespan}
@@ -131,7 +131,7 @@ Throughout different scales, ESCHER performs comparably with the core Kubernetes
 % \bottomrule
 % \end{tabular}
 % \end{center}
-% \caption{\small Makespan of WordCount MapReduce jobs in seconds, compared across varying cluster sizes.
+% \caption{Makespan of WordCount MapReduce jobs in seconds, compared across varying cluster sizes.
 % % As the cluster size increases, ESCHER scales similarly to core kubernetes scheduler, while outperforming the generic data-locality unaware scheduler.
 % }
 % \label{tab:mapreduce-xnode}
@@ -151,7 +151,7 @@ Throughout different scales, ESCHER performs comparably with the core Kubernetes
 % \includegraphics[width=0.93\columnwidth]{escher/plots/hfs/3user_hfs_sharing_mapreduce_50nodes_area_short.pdf}
 % % \caption{User-wise throughput}
 % % \end{subfigure}
-% \caption{\small Per-user WordCount throughput with hierarchical max-min fair sharing.
+% \caption{Per-user WordCount throughput with hierarchical max-min fair sharing.
 % A and B are in Sub-Org1 with weights 2:3; C is in Sub-Org2.
 % A, B, and C begin submitting tasks at $t=0,60,120$, respectively.
 % %(a) shows the organization chart for resource sharing between sub-org 1 and sub-org 2. Weights (w) are relative to other users under the same parent.
@@ -177,7 +177,7 @@ Throughout different scales, ESCHER performs comparably with the core Kubernetes
 % \caption{User-wise throughput}
 % \label{fig:hfs-2user-result}
 % \end{subfigure}
-% \caption{\small Min-Max Fair Sharing with ESCHER. Figure (a) shows the organization chart for resource sharing between User A and User B, each having equal weights (w=1). Figure (b) plots the throughput for users A and B. At time t=0, only user A is submitting tasks so the HFS ESL allocates all resources to user A. At time t=60 user B starts submitting tasks. The HFS ESL adjusts deallocates resources from user A and reassigns them to user B to maintain fairness.  
+% \caption{Min-Max Fair Sharing with ESCHER. Figure (a) shows the organization chart for resource sharing between User A and User B, each having equal weights (w=1). Figure (b) plots the throughput for users A and B. At time t=0, only user A is submitting tasks so the HFS ESL allocates all resources to user A. At time t=60 user B starts submitting tasks. The HFS ESL adjusts deallocates resources from user A and reassigns them to user B to maintain fairness.  
 % }
 % \label{fig:hfs-2user}
 % \end{figure}
@@ -309,6 +309,36 @@ Additionally, co-location with ephemeral resources adds insignificant overheads 
 
 
 
+\begin{figure*}[t]
+  \begin{subfigure}[b]{0.46\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{escher/plots/results_e2e_alphago_latencycdf_16node.pdf}
+    \caption{}
+    \label{fig:alphazerolatencycdf}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.46\textwidth}
+  \centering
+  \includegraphics[width=\textwidth,trim=0cm 0cm 1.5cm 0cm, clip]{escher/plots/result_migrationthroughput.pdf}
+  \caption{}
+  \label{fig:tune-results}
+  \end{subfigure}
+  % \begin{subfigure}[b]{0.3\textwidth}
+  %   \centering
+  %   \includegraphics[width=\textwidth]{escher/plots/results_e2e_alphago_pxxcompare_16node.pdf}
+  %   \caption{}
+  %   \label{fig:alphazerolatencypxx}
+  % \end{subfigure}
+  \caption{AlphaZero and distributed training performance on \name{}. 
+  % By co-locating the \textit{BoardAggregator}s and the \textit{PredictorAgent}s, the \name{} takes significantly lower time to generate and evaluate board states than an unaware scheduler. \name{} also performs comparably with a static policy that hard codes placement decisions, while offering the flexibility of a general scheduling policy.
+  \textbf{(a)} A CDF of AlphaZero board exploration latency, and
+  \textbf{(b)} Throughput comparison of a distributed training workload with a mix of short-running and long-running jobs. EscherTune is an augmentation of the hyperparameter search framework Tune~\cite{liaw2018tune}, using ESCHER to dynamically re-schedule jobs as others complete. %SCHER augments an existing application, Tune, to increase sample throughput. 
+  The red X indicates the completion of a short job. %, and EscherTune re-schedules the long-running job to claim the idle resources. % to utilize the co-location mechanism and decrease communication overhead compared to Tune.
+  }
+  \label{fig:alphazerolatencyfigure}
+  \vspace{-2mm}
+  \end{figure*}
+
+  
 \def\longjob{\emph{long-job}}
 \def\shortjobs{\emph{short-jobs}}
 % Distributed training for a ML model typically consists of multiple workers that compute model updates in parallel and in lockstep.
@@ -317,7 +347,7 @@ For a distributed training job, worker placement is critical to performance, as 
 %Typically, multiple jobs, each with different size and unpredictable completion time, will execute in parallel as part of a hyperparameter search~\cite{liaw2018tune}.
 % Moreover, training jobs in a shared cluster can be of different sizes and with unpredictable completion times.
 Gandiva \cite{gandiva} is a scheduler for deep learning jobs that aims to optimize training job performance. It composes a higher level \textit{load-balancing} policy and a lower-level \textit{co-location} policy to evenly spread jobs across machines while reducing intra-job communication overhead. 
-To demonstrate \name{}'s flexibility, we augment Gandiva's \cite{gandiva} worker co-location and migration policy with Gang Scheduling to support distributed training jobs, and integrate the policy into Tune \cite{liaw2018tune}, an open source distributed training library built on Ray \cite{ray-osdi}, which we will refer to as \textit{EscherTune}.
+To demonstrate \name{}'s flexibility, we augment Gandiva's \cite{gandiva} worker co-location and migration policy with Gang Scheduling to support distributed training jobs, and integrate the policy into Tune \cite{liaw2018tune}, an open source distributed training library built on Ray \cite{ray}, which we will refer to as \textit{EscherTune}.
 We modified the Trial abstraction in Tune to be wrapped in a ghost task that ensures gang scheduling and applied co-location on tasks belonging to the same Trial.
 %EscherTune records the current cluster placements during execution.
 EscherTune triggers a migration whenever it detects sufficient available resources to place all workers of a job on the same node.
@@ -336,7 +366,7 @@ Furthermore, EscherTune's implementation consists of only 50 lines of Python, wi
 % \begin{figure}[t]
 % \centering
 % \includegraphics[width=0.85\columnwidth]{escher/plots/result_migrationthroughput.pdf}
-% \caption{\small Throughput comparison of distributed training workloads with and without migration. ESCHER is able to augment an existing application, Tune, to increase sample throughput. 
+% \caption{Throughput comparison of distributed training workloads with and without migration. ESCHER is able to augment an existing application, Tune, to increase sample throughput. 
 % The red X indicates the termination of the short job, signaling EscherTune to utilize the co-location mechanism and decrease communication overhead compared to Tune.
 % }
 % % \caption{Throughput comparison of distributed training jobs with and without migration. 
@@ -349,20 +379,18 @@ Furthermore, EscherTune's implementation consists of only 50 lines of Python, wi
 % \end{figure}
 
 % \subsubsection{Implementing Kube-Batch with ESCHER}
-% To demonstrate ESCHER's ease-of-use, we add Gang Scheduling to Kubernetes using the Ephemeral Resources API and compare the implementation with a plug-in scheduler which adds this functionality to kubernetes. As described in Section \ref{sec:motivation}, adding gang scheduling to Kuberenetes in it's current form has been possible only through separate plug-in schedulers. One such plug-in is kube batch
-\begin{figure*}[t]
-\begin{subfigure}[b]{0.47\linewidth}
+% To demonstrate ESCHER's ease-of-use, we add Gang Scheduling to Kubernetes using the Ephemeral Resources API and compare the implementation with a plug-in scheduler which adds this functionality to kubernetes. As described in Section \ref{sec:escher_motivation}, adding gang scheduling to Kuberenetes in it's current form has been possible only through separate plug-in schedulers. One such plug-in is kube batch
+
+\begin{figure}[t]
   \centering
-\begin{subfigure}[t]{.22\textwidth}
+\begin{subfigure}[t]{.3\textwidth}
   \centering
   \begin{minted}[fontsize=\tiny,breaksymbolleft=\tiny\ensuremath{},breakautoindent=true]{python}
 class PredictorAgent():
-  def __init__(id):
-    # Create co-location resource.
-    set_resource(
-      name=id,
-      capacity=1)
-    ...
+ def __init__(id):
+   # Create co-location resource.
+   set_resource(name=id, capacity=1)
+   ...
   \end{minted}
 \end{subfigure}
 ~
@@ -378,7 +406,7 @@ class PredictorAgent():
 %     ...
 %   \end{minted}
 % \end{subfigure}
-\begin{subfigure}[t]{0.72\textwidth}
+\begin{subfigure}[t]{0.66\textwidth}
   \centering
   \begin{minted}[fontsize=\tiny,breaksymbolleft=\tiny\ensuremath{},breakautoindent=true]{python}
 def main():
@@ -391,41 +419,17 @@ def main():
     b = BoardAggregator(resources = {i: 1}).launch(p)
   \end{minted}
 \end{subfigure}
-  \caption{}
+  \caption{Implementing AlphaZero policy with ESCHER, composing co-location with load-balancing.}
   \label{fig:alphazerocode}
-\end{subfigure}
-\begin{subfigure}[b]{0.26\textwidth}
-  \centering
-  \includegraphics[width=\textwidth]{escher/plots/results_e2e_alphago_latencycdf_16node.pdf}
-  \caption{}
-  \label{fig:alphazerolatencycdf}
-\end{subfigure}
-\begin{subfigure}[b]{0.26\textwidth}
-\centering
-\includegraphics[width=\textwidth,trim=0cm 0cm 1.5cm 0cm, clip]{escher/plots/result_migrationthroughput.pdf}
-\caption{}
-\label{fig:tune-results}
-\end{subfigure}
-% \begin{subfigure}[b]{0.3\textwidth}
-%   \centering
-%   \includegraphics[width=\textwidth]{escher/plots/results_e2e_alphago_pxxcompare_16node.pdf}
-%   \caption{}
-%   \label{fig:alphazerolatencypxx}
-% \end{subfigure}
-\caption{\small AlphaZero and distributed training on \name{}. \textbf{(a)} Implementing AlphaZero policy with ESCHER, composing co-location with load-balancing.
-% By co-locating the \textit{BoardAggregator}s and the \textit{PredictorAgent}s, the \name{} takes significantly lower time to generate and evaluate board states than an unaware scheduler. \name{} also performs comparably with a static policy that hard codes placement decisions, while offering the flexibility of a general scheduling policy.
-\textbf{(b)} A CDF of AlphaZero board exploration latency, and
-\textbf{(c)} Throughput comparison of a distributed training workload with a mix of short-running and long-running jobs. EscherTune is an augmentation of the hyperparameter search framework Tune~\cite{liaw2018tune}, using ESCHER to dynamically re-schedule jobs as others complete. %SCHER augments an existing application, Tune, to increase sample throughput. 
-The red X indicates the completion of a short job. %, and EscherTune re-schedules the long-running job to claim the idle resources. % to utilize the co-location mechanism and decrease communication overhead compared to Tune.
-}
-\label{fig:alphazerolatencyfigure}
-\vspace{-2mm}
-\end{figure*}
+\end{figure}
+
+
 
 
 \begin{figure}[t]
-\includegraphics[width=0.92\columnwidth]{escher/plots/result_gangsched_design_compare.pdf}
-\caption{\small Request latency for gang scheduling implemented in the application space, with (\textit{LibSpace}) and without (\textit{AppSpace}) coordination, versus the framework space (\textit{FrameSpace}). \textit{FrameSpace} is 1624 lines of code (LoC), \textit{LibSpace} with 261 LoC and \textit{AppSpace} with 78 LoC.}
+\centering
+\includegraphics[width=0.7\columnwidth]{escher/plots/result_gangsched_design_compare.pdf}
+\caption{Request latency for gang scheduling implemented in the application space, with (\textit{LibSpace}) and without (\textit{AppSpace}) coordination, versus the framework space (\textit{FrameSpace}). \textit{FrameSpace} is 1624 lines of code (LoC), \textit{LibSpace} with 261 LoC and \textit{AppSpace} with 78 LoC.}
 \label{fig:gangscheddesign-results}
 \end{figure}
 
@@ -470,7 +474,7 @@ Since the \lstinline{set_resource} call is asynchronous, we verify that the reso
 % \begin{figure}
 %     \centering
 %     \includegraphics[width=\linewidth]{escher/plots/result_microbench_creationlatency_vs_numres.pdf}
-%     \caption{\small Mean per-resource creation latency in Ray. Creating ephemeral resources in \name{} is a low cost operation that scales linearly with the number of resources created.}
+%     \caption{Mean per-resource creation latency in Ray. Creating ephemeral resources in \name{} is a low cost operation that scales linearly with the number of resources created.}
 %     \label{fig:res-creation-microbench}
 % \end{figure}
 Figure \ref{fig:res-creation-microbench} compares the mean latency of creating an equal number of resources on each node in a 50-node \ray{} cluster.
@@ -504,7 +508,7 @@ In general, the overhead of creating or deleting an ephemeral resource should be
   \label{fig:schedlatency-taskrequest-microbench}
 \end{subfigure}
 \vspace{-4mm}
-\caption{\small \name{} microbenchmarks. \textbf{(a)} Mean per-resource creation latency in Ray. Creating ephemeral resources in \name{} is a low-cost operation that scales linearly with the number of resources created. \textbf{(b)} Scheduling latency overheads from presence of ephemeral resources. Makespan of a 10000 task workload remains unaffected by the count of ephemeral resources in the cluster. \textbf{(c)} Effect of task resource requirements on scheduling latency in an environment with 10000 resources.}
+\caption{\name{} microbenchmarks. \textbf{(a)} Mean per-resource creation latency in Ray. Creating ephemeral resources in \name{} is a low-cost operation that scales linearly with the number of resources created. \textbf{(b)} Scheduling latency overheads from presence of ephemeral resources. Makespan of a 10000 task workload remains unaffected by the count of ephemeral resources in the cluster. \textbf{(c)} Effect of task resource requirements on scheduling latency in an environment with 10000 resources.}
 \label{fig:microbenchfig}
 \end{figure*}
 
@@ -523,7 +527,7 @@ As the tasks do not have any specific resource requirements, the scheduler execu
         % \begin{figure}
         %     \centering
         %     \includegraphics[width=\linewidth]{escher/plots/result_microbench_schedlatency_vs_clusterresources.pdf}
-        %     \caption{\small Scheduling latency overheads from presence of ephemeral resources.  The makespan of a  10000 task workload remains unaffected by the count of ephemeral resources present in the cluster. }
+        %     \caption{Scheduling latency overheads from presence of ephemeral resources.  The makespan of a  10000 task workload remains unaffected by the count of ephemeral resources present in the cluster. }
         %     \label{fig:schedlatency-resources-microbench}
         %     \vspace{-4mm}
         % \end{figure}
@@ -538,7 +542,7 @@ Figure 8c highlights the scalability of the scheduler as the number of ephemeral
         % \begin{figure}
         %     \centering
         %     \includegraphics[width=\linewidth]{escher/plots/result_microbench_schedlatency_vs_resrequested.pdf}
-        %     \caption{\small Effect of task resource requirements on scheduling latency in an environment with 10000 resources spread over 10 nodes. As a task resource requests more resources, the scheduling latency increases, but even the most complex scheduling policies do not require more than tens of resources. }
+        %     \caption{Effect of task resource requirements on scheduling latency in an environment with 10000 resources spread over 10 nodes. As a task resource requests more resources, the scheduling latency increases, but even the most complex scheduling policies do not require more than tens of resources. }
         %     \label{fig:schedlatency-taskrequest-microbench}
         % \end{figure}
 

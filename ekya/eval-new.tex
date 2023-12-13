@@ -107,7 +107,7 @@ We compare the thief scheduler against a weighted {Fair Scheduler} \cite{fair-1,
 %   \begin{subfigure}[t]{0.5\linewidth}
 %     \centering
 %     \includegraphics[width=\linewidth]{results/multicam/multicam_acc_vs_res_cityscapes.pdf} 
-%     \caption{\small Cityscapes}
+%     \caption{Cityscapes}
 %     \label{fig:scalability-gpus-cityscapes}
 %   \end{subfigure}
 %   ~~~
@@ -115,23 +115,23 @@ We compare the thief scheduler against a weighted {Fair Scheduler} \cite{fair-1,
 %     \centering
 %     % \includegraphics[width=\linewidth]{figures/motivation/Class_Incrementality/class_distribution_change_sf_27.png}
 %     \includegraphics[width=\linewidth]{results/multicam/multicam_acc_vs_res_waymo.pdf}
-%      \caption{\small Waymo}
+%      \caption{Waymo}
 %     \label{fig:scalability-gpus-waymo}
 %   \end{subfigure}
   \begin{subfigure}[t]{0.5\linewidth}
     \centering
     \includegraphics[width=\linewidth]{results/multicam/cityscapes_across_resources.pdf} 
-    \caption{\small Cityscapes}
+    \caption{Cityscapes}
     \label{fig:scalability-gpus-cityscapes-golden}
   \end{subfigure}
   ~~~
   \begin{subfigure}[t]{0.5\linewidth}
     \centering
     \includegraphics[width=\linewidth]{results/multicam/waymo_across_resources.pdf} 
-    \caption{\small Waymo}
+    \caption{Waymo}
     \label{fig:scalability-gpus-waymo-golden}
   \end{subfigure}
-  \caption{\small \bf Multi-video performance: Our accuracy gain over baselines increases with more GPUs. \romil{Set x,y axis labels and use the custom size params for matplotlib formatting. Reviewer Q.: How do you partition 10 video streams over 8 GPUs?}}
+  \caption{\bf Multi-video performance: Our accuracy gain over baselines increases with more GPUs. \romil{Set x,y axis labels and use the custom size params for matplotlib formatting. Reviewer Q.: How do you partition 10 video streams over 8 GPUs?}}
   \label{fig:scalability-gpus}
 \end{figure}
 
@@ -171,7 +171,7 @@ This highlights a desirable behavior of \name that resource will more likely to 
 
 % \begin{figure}
 % 	\includegraphics[width=0.4\textwidth]{results/multicam/multicam_taskwise_acc_zurich_4_cityscapes.pdf}
-% 	\caption{\small \bf Timeseries of our performance vs. fair sharing. Again, adaptive resource sharing constantly outperforms fair sharing. \romil{Accuracy drops over time.}}
+% 	\caption{\bf Timeseries of our performance vs. fair sharing. Again, adaptive resource sharing constantly outperforms fair sharing. \romil{Accuracy drops over time.}}
 % 	\label{fig:multicam-timeseries}
 % \end{figure}
 
@@ -189,13 +189,13 @@ This suggests that \name can more easily scale to a large number of video source
 %   \begin{subfigure}[t]{\linewidth}
 %     \centering
 %     \includegraphics[width=0.9\linewidth]{results/multicam/multicam_individual_stream_acc_cityscapes.pdf} 
-%     \caption{\small Cityscapes Human Label}
+%     \caption{Cityscapes Human Label}
 %     %\label{fig:multicam-cities-cityscapes}
 %   \end{subfigure}
     \begin{subfigure}[t]{\linewidth}
     \centering
     \includegraphics[width=0.9\linewidth]{results/multicam/cityscapes_across_cities.pdf} 
-    %\caption{\small Cityscapes Golden Model}
+    %\caption{Cityscapes Golden Model}
     %\label{fig:multicam-cities-cityscapes}
   \end{subfigure}
 %   ~~~
@@ -203,7 +203,7 @@ This suggests that \name can more easily scale to a large number of video source
 %     \centering
 %     % \includegraphics[width=\linewidth]{figures/motivation/Class_Incrementality/class_distribution_change_sf_27.png}
 %     \includegraphics[width=\linewidth]{results/multicam/multicam_individual_stream_acc_waymo.pdf}
-%      \caption{\small Waymo}
+%      \caption{Waymo}
 %     \label{fig:multicam-cities-waymo}
 %   \end{subfigure}
   \caption{Multi-video performance: Ours (with continuous retraining) vs. Fair Share Scheduler. Compared across cities, we do consistently better. Some cities see bigger gains than others, which are thus prioritized by \name{}.}
@@ -217,7 +217,7 @@ With only a single GPU, increasing the number of video streams forces \name{} to
 \begin{figure}
  	%\includegraphics[width=0.4\textwidth]{figures/eval_placeholders/single-tradeoffs.pdf}
  	\includegraphics[width=\linewidth]{results/scalability/scalability_GPUs_cams_cityscapes.pdf}
-	\caption{\small \bf Throughput measured as number of video streams that can be concurrently supported for different resource sizes subject to accuracy thresholds.
+	\caption{\bf Throughput measured as number of video streams that can be concurrently supported for different resource sizes subject to accuracy thresholds.
 	%The accuracy threshold is a multiplicative factor of the maximum achievable mean accuracy for a workload given $\infty$ resources.
 	}
 	\label{fig:scalability-gpu-vs-cam-thresholded}
@@ -227,13 +227,13 @@ With only a single GPU, increasing the number of video streams forces \name{} to
 % \begin{figure}
 %  	%\includegraphics[width=0.4\textwidth]{figures/eval_placeholders/single-tradeoffs.pdf}
 %  	\includegraphics[width=\linewidth]{results/scalability/scalability_cams_fixedGPUs_cityscapes.pdf}
-% 	\caption{\small \bf Effect of adding more video streams on accuracy for different schedulers. When insufficient resources are provisioned, \name{} gracefully degrades to the No-retrain baseline, while the retraining decisions made by the fair scheduler reduce the mean inference accuracy.}
+% 	\caption{\bf Effect of adding more video streams on accuracy for different schedulers. When insufficient resources are provisioned, \name{} gracefully degrades to the No-retrain baseline, while the retraining decisions made by the fair scheduler reduce the mean inference accuracy.}
 % 	\label{fig:scalability-fixedGPUs-accuracy}
 % \end{figure}
 \begin{figure}
  	%\includegraphics[width=0.4\textwidth]{figures/eval_placeholders/single-tradeoffs.pdf}
  	\includegraphics[width=\linewidth]{results/scalability/scalability_cams_fixedGPUs_cityscapes_golden_model.pdf}
-	\caption{\small \bf Using golden model. Effect of adding more video streams on accuracy for different schedulers. When insufficient resources are provisioned, \name{} gracefully degrades to the No-retrain baseline, while the retraining decisions made by the fair scheduler reduce the mean inference accuracy.}
+	\caption{\bf Using golden model. Effect of adding more video streams on accuracy for different schedulers. When insufficient resources are provisioned, \name{} gracefully degrades to the No-retrain baseline, while the retraining decisions made by the fair scheduler reduce the mean inference accuracy.}
 	\label{fig:scalability-fixedGPUs-accuracy}
 \end{figure}
 
@@ -249,14 +249,14 @@ As in Figure~\ref{fig:multicam-cities}, we see the gains vary considerably acros
 %   \begin{subfigure}[t]{\linewidth}
 %     \centering
 %     \includegraphics[width=\linewidth]{results/singlecam/singlecam_acc_vs_cost_cityscapes.pdf} 
-%     \caption{\small Cityscapes}
+%     \caption{Cityscapes}
 %     \label{fig:singlecam-cities-cityscapes}
 %   \end{subfigure}
 %   \hfill
 %   \begin{subfigure}[t]{\linewidth}
 %     \centering
 %     \includegraphics[width=\linewidth]{results/singlecam/singlecam_acc_vs_cost_waymo.pdf}
-%     \caption{\small Waymo}
+%     \caption{Waymo}
 %     \label{fig:singlecam-cities-waymo}
 %   \end{subfigure}
 %   \caption{Single-video performance - different videos have different payoffs for retraining.}% In \ref{fig:singlecam-cities-cityscapes}, V2 demonstrates large benefits to retraining compared to V4.}
@@ -268,14 +268,14 @@ As in Figure~\ref{fig:multicam-cities}, we see the gains vary considerably acros
   \begin{subfigure}[t]{\linewidth}
     \centering
     \includegraphics[width=\linewidth]{results/singlecam/singlecam_acc_vs_cost_golden_cityscapes.pdf} 
-    \caption{\small Cityscapes}
+    \caption{Cityscapes}
     \label{fig:singlecam-cities-cityscapes-golden}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{\linewidth}
     \centering
     \includegraphics[width=\linewidth]{results/singlecam/singlecam_acc_vs_cost_golden_waymo.pdf}
-    \caption{\small Waymo}
+    \caption{Waymo}
     \label{fig:singlecam-cities-waymo-golden}
   \end{subfigure}
   \caption{Single-video performance - different videos have different payoffs for retraining.}% In \ref{fig:singlecam-cities-cityscapes}, V2 demonstrates large benefits to retraining compared to V4.}
@@ -339,14 +339,14 @@ Achieving the same accuracy in our simulations required increasing the downlink 
 % \begin{figure} [t!]
 %  	%\includegraphics[width=0.4\textwidth]{figures/eval_placeholders/single-tradeoffs.pdf}
 %  	\includegraphics[width=\linewidth]{results/ablation_waymo.pdf}
-% 	\caption{\small \bf {\name} factor analysis by removing  dynamic resource allocation and reducing the hyperparameter space.}
+% 	\caption{\bf {\name} factor analysis by removing  dynamic resource allocation and reducing the hyperparameter space.}
 % 	\label{fig:factor-analysis}
 % \end{figure}
 
 \begin{figure} [t!]
  	%\includegraphics[width=0.4\textwidth]{figures/eval_placeholders/single-tradeoffs.pdf}
  	\includegraphics[width=\linewidth]{results/ablation_cityscapes_golden.pdf}
-	\caption{\small \bf {\name} factor analysis by removing  dynamic resource allocation and reducing the hyperparameter space.}
+	\caption{\bf {\name} factor analysis by removing  dynamic resource allocation and reducing the hyperparameter space.}
 	\label{fig:factor-analysis}
 \end{figure}
 
@@ -369,7 +369,7 @@ Figure~\ref{fig:sensitivity-accuracy-error} shows that with upto 20\% errors in 
 
 \begin{figure}
 	\includegraphics[width=\linewidth]{results/sensitivity/sensitivity_profileerrors_cityscapes.pdf}
-	\caption{\small \bf Adding a controlled error $\epsilon$ to the accuracy prediction -  \name{}'s performance degrades, but only marginally.}
+	\caption{\bf Adding a controlled error $\epsilon$ to the accuracy prediction -  \name{}'s performance degrades, but only marginally.}
 	\label{fig:sensitivity-accuracy-error}
 \end{figure}
 
@@ -379,7 +379,7 @@ Figure~\ref{fig:sensitivity-accuracy-error} shows that with upto 20\% errors in 
 %   \begin{subfigure}[t]{0.5\linewidth}
 %     \centering
 %     \includegraphics[width=\linewidth]{results/sensitivity/sensitivity_profileerrors_cityscapes.pdf} 
-% 	\caption{\small \bf Adding errors to the profiler.}
+% 	\caption{\bf Adding errors to the profiler.}
 %     \label{fig:sensitivity-accuracy-error}
 %   \end{subfigure}
 %   ~~~
@@ -387,10 +387,10 @@ Figure~\ref{fig:sensitivity-accuracy-error} shows that with upto 20\% errors in 
 %     \centering
 %     % \includegraphics[width=\linewidth]{figures/motivation/Class_Incrementality/class_distribution_change_sf_27.png}
 %     \includegraphics[width=\linewidth]{results/sensitivity/sensitivity_delta_acc_runtime_cityscapes_48gpu.pdf}
-%      \caption{\small Effect of stealing parameter $\delta$ on the thief scheduler.}
+%      \caption{Effect of stealing parameter $\delta$ on the thief scheduler.}
 %     \label{fig:sensitivity-delta}
 %   \end{subfigure}
-%   \caption{\small \bf Sensitivity Analysis Results.}
+%   \caption{\bf Sensitivity Analysis Results.}
 %   \label{fig:sensitivity-group}
 % \end{figure}
 
@@ -407,7 +407,7 @@ One should pick a higher $\delta$ only when the scheduler is relatively slow com
     \centering
     \includegraphics[width=\linewidth]{results/sensitivity/sensitivity_delta_acc_runtime_cityscapes_48gpu.pdf}
   \end{subfigure}
-  \caption{\small \bf Effect of the $\delta$ parameter on the thief scheduler. Larger values decrease the accuracy but are faster to compute.}
+  \caption{\bf Effect of the $\delta$ parameter on the thief scheduler. Larger values decrease the accuracy but are faster to compute.}
   \label{fig:sensitivity-delta}
 \end{figure}
 
@@ -424,7 +424,7 @@ Ekya's performance is affected by the runtime efficiency of it's scheduler. The 
     \centering
     \includegraphics[width=\linewidth]{results/sensitivity/scheduler_resourcetime.pdf}
   \end{subfigure}
-  \caption{\small \bf Thief scheduler latency for scheduling 10 video streams with varying available resource quantities and retraining period durations. The scheduler latency is a tiny fraction compared to the duration of the retraining period.  }
+  \caption{\bf Thief scheduler latency for scheduling 10 video streams with varying available resource quantities and retraining period durations. The scheduler latency is a tiny fraction compared to the duration of the retraining period.  }
   \label{fig:sensitivity-schedlatency}
 \end{figure}
 
@@ -434,16 +434,16 @@ Ekya's performance is affected by the runtime efficiency of it's scheduler. The 
   \begin{subfigure}[t]{0.5\linewidth}
     \centering
     \includegraphics[width=\linewidth]{results/sys_impl/multicam_acc_vs_res_sysimpl_cityscapes.pdf} 
-    \caption{\small Cityscapes}
+    \caption{Cityscapes}
     \label{fig:sysimpl-result-cityscapes}
   \end{subfigure}
   ~~~
   \begin{subfigure}[t]{0.5\linewidth}
     \centering
     \includegraphics[width=\linewidth]{results/sys_impl/sysimpl_varyingcities_waymo.pdf} 
-    \caption{\small Waymo}
+    \caption{Waymo}
     \label{fig:sysimpl-result-waymo}
   \end{subfigure}
-  \caption{\small \bf End-to-end accuracy on the system implementation on 1 GPU with varying number of cities.}
+  \caption{\bf End-to-end accuracy on the system implementation on 1 GPU with varying number of cities.}
   \label{fig:sysimpl-result}
 \end{figure}

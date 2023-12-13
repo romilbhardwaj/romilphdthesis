@@ -1,8 +1,20 @@
-\section{Acknowledgements}
-\label{sec:acknowledgements}
+\section{Conclusion}
+\label{sec:ekya_conclusion}
 
-\cameratext{We thank the NSDI reviewers and our shepherd, Minlan Yu, for their invaluable feedback.
-% Romil Bhardwaj is partly supported by NSF CISE Expeditions Award CCF-1730628 and gifts from Amazon Web Services, Ant Group, Ericsson, Facebook, Futurewei, Google, Intel, Microsoft, Nvidia, Scotiabank, Splunk and VMware.
-%Zhengxu Xia and Junchen Jiang are partly supported by NSF (CNS-1901466), UChicago CERES Center, and a Google Faculty Research Award.
-This research is partly supported by NSF (CCF-1730628, CNS-1901466), UChicago CERES Center, a Google Faculty Research Award and gifts from Amazon, Ant Group, Ericsson, Facebook, Futurewei, Google, Intel, Microsoft, Nvidia, Scotiabank, Splunk and VMware.
-}
+%Continuous training of video DNN models deployed on edge servers avoids data drift that degrades the DNN accuracy. We proposed an efficient scheduler that allocates the edge's GPU resources between the retraining of DNNs and inference. Our scheduler optimizes for inference accuracy averaged over the duration of the retraining window, which is unlike prior systems for training and inference. While our scheduler is efficient and works well in practice, it may not always produce the optimal schedule. Designing an optimal scheduler for continuous retraining that is also efficient remains a challenge. Also, we use a simple predictor for accuracy (after retraining), and are working on making it more robust. 
+
+%Continuous learning enables efficient but limited edge DNNs to maintain high accuracy in the face of data drift 
+%Edge-base video analytics relies on specialized DNNs for compute efficiency, which are vulnerable to the problem of data drift. 
+Continuous learning enables edge DNNs to maintain high accuracy even with data drift, but it also poses a complex and fundamental tradeoff between retraining and inference. We introduce {\name}, an efficient system that maximizes inference accuracy by balancing multiple retraining and inference tasks. 
+%{\name} consists of two key components, a resource scheduler and a performance estimator. 
+{\name}'s resource scheduler makes the problem practical and tractable by pruning the large decision space and prioritizing promising retraining tasks. {\name}'s performance estimator provides essential accuracy estimation with very little overheads. Our evaluation with a diverse set of of video streams shows that {\name} achieves $29\%$ higher accuracy than a baseline scheduler, and the baseline needs $4\times$ more GPU resources to achieve {\name}'s accuracy. We conclude {\name} is a practical system for continuous learning for video analytics on the edge, and we hope that our findings will spur further research into the tradeoff between retraining and inference.
+
+
+% \section{Acknowledgements}
+% \label{sec:acknowledgements}
+
+% \cameratext{We thank the NSDI reviewers and our shepherd, Minlan Yu, for their invaluable feedback.
+% % Romil Bhardwaj is partly supported by NSF CISE Expeditions Award CCF-1730628 and gifts from Amazon Web Services, Ant Group, Ericsson, Facebook, Futurewei, Google, Intel, Microsoft, Nvidia, Scotiabank, Splunk and VMware.
+% %Zhengxu Xia and Junchen Jiang are partly supported by NSF (CNS-1901466), UChicago CERES Center, and a Google Faculty Research Award.
+% This research is partly supported by NSF (CCF-1730628, CNS-1901466), UChicago CERES Center, a Google Faculty Research Award and gifts from Amazon, Ant Group, Ericsson, Facebook, Futurewei, Google, Intel, Microsoft, Nvidia, Scotiabank, Splunk and VMware.
+% }

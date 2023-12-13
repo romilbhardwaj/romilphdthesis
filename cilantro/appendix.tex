@@ -13,6 +13,8 @@ From the TPC-DS query set, we created two workloads (setting scale factor to 100
 When a query is requested, we randomly pick a relevant query and dispatch it
 according to the trace. The performance metric of interest is  query latency.
 
+The queries used for the db serving workload were selected from the TPC-DS benchmark suite. The TPC-DS suite consists of 99 query templates out of which 27 were not compatible with the sqlite dialect and were discarded. The remainder were binned according to their mean latency when measured on a AWS m5.2xlarge instance. The chosen query types and their ids are listed in Table \ref{tab:querybinmap}
+
 
 \textbf{Prediction serving:}
 In prediction serving~\cite{crankshaw2017clipper}, a job processes arriving queries
@@ -29,7 +31,7 @@ The metric of interest is the serving latency.
 \textbf{ML training:}
 % Many real world machine learning deployments require that we continuously update the model
 % from an input stream of data
-% so as to account for changes in the data distribution~\cite{xiao2018gandiva}.
+% so as to account for changes in the data distribution~\cite{gandiva}.
 % \kkcomment{A good citation here.}
 We use CPUs to train a neural network with four hidden layers of size 64 each.
 We train our model on the naval propulsion~\cite{coraddu2016machine} dataset using

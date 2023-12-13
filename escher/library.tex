@@ -19,7 +19,7 @@ Finally, ESLs can optionally protect applications from invalid specification of 
 %     \centering
 %     \includegraphics[width=\linewidth]{escher/figures/clusteresl_useresl.pdf}
 %     \caption{
-%         \small Isolation mechanisms in ESCHER. To avoid resource conflicts between ESLs, ESCHER uses a two-layer design to isolate applications. A cluster ESL provides a resource domain (a set of nodes) to each user's application-level ESLs. This resource domain is dynamically adjusted by the cluster ESL's policy. The resource domain restricts a user ESL from creating resources outside their authorized pool. 
+%         Isolation mechanisms in ESCHER. To avoid resource conflicts between ESLs, ESCHER uses a two-layer design to isolate applications. A cluster ESL provides a resource domain (a set of nodes) to each user's application-level ESLs. This resource domain is dynamically adjusted by the cluster ESL's policy. The resource domain restricts a user ESL from creating resources outside their authorized pool. 
 %     }
 %     \label{fig:esl-isolation}
 %     %\vspace{-4mm}
@@ -51,7 +51,7 @@ t1.launch(resources+=coloc_res)
 t2.launch(resources+=coloc_res)
 t3.launch(resources+=dataloc_res)
 \end{minted}
-\caption{\small Using the big-data ESL to enforce task co-location. The ESL methods return a resource specification which is used to launch the co-located tasks.}
+\caption{Using the big-data ESL to enforce task co-location. The ESL methods return a resource specification which is used to launch the co-located tasks.}
 \label{listing:eslexample}
 \end{listing}
 
@@ -70,6 +70,6 @@ t3.launch(resources+=dataloc_res)
 
 \subsection{Fault tolerance}
 \label{sec:esl-faulttol}
-In the event of a node failure, ESCHER works in tandem with the fault-tolerance scheme of the underlying framework but also allows the application developers to specify custom fault-tolerance routines through an ESL. Most frameworks, including Ray\cite{ray-osdi} and Kubernetes\cite{kubernetes}, simply re-execute the tasks with the same resource requirement. However, since these resource requests include ephemeral resources which no longer exist, these re-executed tasks cannot be scheduled.
+In the event of a node failure, ESCHER works in tandem with the fault-tolerance scheme of the underlying framework but also allows the application developers to specify custom fault-tolerance routines through an ESL. Most frameworks, including Ray\cite{ray} and Kubernetes\cite{kubernetes}, simply re-execute the tasks with the same resource requirement. However, since these resource requests include ephemeral resources which no longer exist, these re-executed tasks cannot be scheduled.
 
 At the bare minimum, an ESL must ensure that ephemeral resources are restored at some other eligible node. To do this, ESCHER relies on the cluster framework to report failed nodes through the \lstinline{get_cluster_state} API. Once failed nodes are detected, an ESL can recreate the ephemeral resources on suitable nodes by replaying the \lstinline{set_resource} calls for the failed resources. If a candidate node is found, the resource is recreated, else the tasks must wait for the failed node to recover before they can be rescheduled. When a node is restored, it's resources are also reinitialized allowing any waiting tasks to get rescheduled. In addition to this basic policy, ESLs can define custom routines such as error reporting and logging after the ephemeral resources are restored.

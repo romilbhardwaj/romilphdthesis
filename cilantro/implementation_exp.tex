@@ -101,3 +101,42 @@ The exact implementation is described in the appendix.
 % manager.
 
 % \subsection{Workloads}
+
+\textbf{Evolutionary algorithm.}
+We describe the evolutionary algorithm used in all of our experiments,
+i.e to optimize the profiled information for the oracular welfare polices, to optimize the upper
+confidence bounds for the learning policies in \S\ref{sec:learningpolicies} and\S\ref{sec:msal},
+and the evolutionary algorithm baselines in \S\ref{sec:fixedclus} and\S\ref{sec:microservices}.
+The input to the algorithm is a data source which the algorithm can query using an allocation and
+obtain a feedback signal.
+This data source can either be
+a cheap analytically computable function
+available in memory, as is the case for the oracles and learning polices,
+or an expensive experiment, as is the case when used as a baseline to directly optimize for
+performance.
+The algorithm maintains a hash table mapping allocations to mean observed signal values.
+When it receives feedback for an allocation, it updates the mean value if the allocation has already
+been tried, or it creates a new entry and stores the feedback.
+
+Our evolutionary algorithm proceeds as follows.
+In has an initialization phase of 10 rounds.
+In the first 2 rounds, it always queries a resource-fair allocation.
+In the remaining  8 rounds, it queries a random allocation $\alloc$ such that
+$\sum_{j=1}^n\allocj=R$.
+On each subsequent round, it chooses a random allocation in the above manner with probability 0.1.
+With probability 0.9, it samples one of the existing allocations in the hash table based on the
+mean feedback value, performs a mutation operation, and queries the new allocation obtained
+via the mutation.
+We now to describe these two steps.
+\begin{itemize}
+\item \emph{Sampling:} Let $\{(\alloci, y_i\}_i$ be the (allocation, mean feedback) pairs in the
+hash table.
+Let $m, s$ denote the man and standard deviation of the $\{y_i\}$  values.
+We sample $\alloci$ with probability proportional to $\exp\big((y_i-m)/s\big)$.
+\item \emph{Mutation:}
+The mutation operation is composed of a sequence of steps to modify a given allocation $a$.
+At each step, we randomly sample one job $j$ which has an allocation of at least $2$ CPUs;
+we then sample any other job $k\neq j$; we then decrease $j$'s allocation by $1$ and increase
+$k$'s allocation by $1$.
+The number of steps is chosen uniformly at random between 1 and 20.
+\end{itemize}

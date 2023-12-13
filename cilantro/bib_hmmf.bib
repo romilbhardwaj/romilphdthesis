@@ -1135,34 +1135,14 @@ location = {Bern, Switzerland},
 series = {EuroSys '12}
 }
 
-@inproceedings{tailatscale,
-author = {Ferguson, Andrew D. and Bodik, Peter and Kandula, Srikanth and Boutin, Eric and Fonseca, Rodrigo},
-title = {Jockey: Guaranteed Job Latency in Data Parallel Clusters},
-year = {2012},
-isbn = {9781450312233},
-publisher = {Association for Computing Machinery},
-address = {New York, NY, USA},
-url = {https://doi.org/10.1145/2168836.2168847},
-doi = {10.1145/2168836.2168847},
-abstract = {Data processing frameworks such as MapReduce [8] and Dryad [11] are used today in
-business environments where customers expect guaranteed performance. To date, however,
-these systems are not capable of providing guarantees on job latency because scheduling
-policies are based on fair-sharing, and operators seek high cluster use through statistical
-multiplexing and over-subscription. With Jockey, we provide latency SLOs for data
-parallel jobs written in SCOPE. Jockey precomputes statistics using a simulator that
-captures the job's complex internal dependencies, accurately and efficiently predicting
-the remaining run time at different resource allocations and in different stages of
-the job. Our control policy monitors a job's performance, and dynamically adjusts
-resource allocation in the shared cluster in order to maximize the job's economic
-utility while minimizing its impact on the rest of the cluster. In our experiments
-in Microsoft's production Cosmos clusters, Jockey meets the specified job latency
-SLOs and responds to changes in cluster conditions.},
-booktitle = {Proceedings of the 7th ACM European Conference on Computer Systems},
-pages = {99–112},
-numpages = {14},
-keywords = {data parallel, MapReduce, Dryad, dynamic adaptation, scheduling, deadline, SLO},
-location = {Bern, Switzerland},
-series = {EuroSys '12}
+@article{tailatscale,
+title	= {The Tail at Scale},
+author	= {Jeffrey Dean and Luiz André Barroso},
+year	= {2013},
+URL	= {http://cacm.acm.org/magazines/2013/2/160173-the-tail-at-scale/fulltext},
+journal	= {Communications of the ACM},
+pages	= {74-80},
+volume	= {56}
 }
 
 @inproceedings{deathstarbench,

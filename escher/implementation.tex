@@ -1,7 +1,7 @@
 \section{Implementation}
 \label{sec:impl}
 \name{} is a design that can be applied to both centralized and decentralized schedulers.
-We built two prototypes of \name{}, on Kubernetes~\cite{kubernetes}, a container orchestration framework with a centralized scheduler, and Ray~\cite{ray-osdi}, a distributed execution framework with a decentralized scheduler.
+We built two prototypes of \name{}, on Kubernetes~\cite{kubernetes}, a container orchestration framework with a centralized scheduler, and Ray~\cite{ray}, a distributed execution framework with a decentralized scheduler.
 % Similarly, ESCHER on Ray inherits Ray's sequential scheduling of queued tasks, but batch scheduling can be performed using the queuing primitive from Section \ref{sec:sched:primitive}.}
 
 ESCHER inherits the scheduling properties of the parent cluster framework. For instance, it can utilize fractional and heterogeneous resources on Ray and Kubernetes. Since Ray and Kubernetes have a task-by-task scheduler, our current implementation also schedules in a greedy, task-by-task manner. However, ESCHER's queuing primitive can be used to extend a task-by-task scheduler to do batch scheduling.
@@ -21,7 +21,7 @@ The scheduler first finds a set of candidate nodes, then computes a policy-weigh
 Kubernetes also allows the definition of arbitrary string and integer pairs associated with nodes known as \textit{extended resources}. Extended resources are identical to regular resources in that they can be acquired and released by Pods, except they can be defined as arbitrary key value pairs.
 The extended resources API has conventionally been used by cluster operators for marking specialized hardware as a one-time operation when the cluster is initialized. In fact, application pods are not granted access to this API by default.  
 
-To implement the ESCHER \textit{set\_resource} API, we change the Kubernetes role-based access control to allow applications to directly invoke the extended resources API in Kubernetes. This grants applications the ability to create and update \textit{extended resources} directly using the \textit{patch\_node\_status} call.
+To implement the ESCHER \textit{set\_resource} API, we change the Kubernetes role-based access control to allow applications to directly invoke the extended resources API in Kubernetes. This grants applications the ability to create and update \textit{extended resources} using the \textit{patch\_node\_status} call.
 From a security perspective, ESCHER applications require access only to create and remove extended resources. The Kubernetes API should deny write access to physical resources. Additionally, we employ namespacing of resources to enforce isolation and prevent malicious applications from overriding other applications.
 
 To force the Kubernetes scheduler to act as a simple resource-matching scheduler, the scheduler is invoked with only hard resource constraints set in the filtering policy. Weights for all other policies are set to zero. Thus, the combination of \textit{extended resources} API with hard resource constraints makes it possible to implement ESCHER policies on Kubernetes \emph{without making any changes to the core Kubernetes scheduler}.
@@ -31,7 +31,7 @@ To force the Kubernetes scheduler to act as a simple resource-matching scheduler
 % Note that this implementation requires no changes to the core Kubernetes source. ESCHER's generality allows it to re-purpose existing APIs and scheduler modes in Kubernetes.
 
 \noindent\textbf{Ray Implementation.}
-Ray runs a scheduler per node, which collectively implement a bottom-up decentralized resource matching mechanism~\cite{ray-osdi}. Each node in the cluster has a set of key-value pairs signifying resource labels and their quantity, e.g., \texttt{\{"cpu": 8, "gpu": 1\}}.
+Ray runs a scheduler per node, which collectively implement a bottom-up decentralized resource matching mechanism~\cite{ray}. Each node in the cluster has a set of key-value pairs signifying resource labels and their quantity, e.g., \texttt{\{"cpu": 8, "gpu": 1\}}.
 Each task specifies its hard resource requirements with the same data structure.
 % A task can only be executed on a node whose available resources are a superset of the task's resource requirement.
 

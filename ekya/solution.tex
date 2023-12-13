@@ -99,34 +99,39 @@ We refer to {\name}'s scheduler as the ``thief'' scheduler and it iterates among
 
 %\item 
 {\bf (1)} It starts with a fair allocation for all video streams $v \in V$ (line 2 in Algorithm \ref{algo:thief_sched}). 
-In each step, it iterates over all the inference and retraining jobs of each video stream (lines 5-6), and {\em steals} a tiny quantum $\Delta$ of resources (in multiples of $\delta$; see Table \ref{tab:notations}, \S\ref{appendix:scheduler}) from each of the other jobs (lines 10-11).
+In each step, it iterates over all the inference and retraining jobs of each video stream (lines 5-6), and {\em steals} a tiny quantum $\Delta$ of resources (in multiples of $\delta$; see Table \ref{tab:notations}) from each of the other jobs (lines 10-11).
 
 %\item 
-{\bf (2)} With the new resource allocations ({\small temp\_alloc[]}), it then selects configurations for the jobs using the {\sf\footnotesize PickConfigs} method (line 14 and Algorithm \ref{algo:pickconfigs}, \S{\ref{appendix:scheduler}}) that iterates over all the configurations for inference and retraining for each video stream.  
-For inference jobs, among all the configurations whose accuracy is $\geq a_\text{MIN}$, {\sf\footnotesize PickConfigs} picks the configuration with the highest accuracy that can keep up with the inference of the live video stream given current allocation (line 3-4, Algorithm \ref{algo:pickconfigs}, \S{\ref{appendix:scheduler}}).  
+{\bf (2)} With the new resource allocations ({temp\_alloc[]}), it then selects configurations for the jobs using the {\sf\footnotesize PickConfigs} method (line 14 and Algorithm \ref{algo:pickconfigs}) that iterates over all the configurations for inference and retraining for each video stream.  
+For inference jobs, among all the configurations whose accuracy is $\geq a_\text{MIN}$, {\sf\footnotesize PickConfigs} picks the configuration with the highest accuracy that can keep up with the inference of the live video stream given current allocation (line 3-4, Algorithm \ref{algo:pickconfigs}).  
 
-For retraining jobs, {\sf\footnotesize PickConfigs} picks the configuration that maximizes the accuracy $A_T(v, \gamma, \lambda, \mathcal{R}, \mathcal{I})$ over the retraining window for each video $v$ (lines 6-12, Algorithm \ref{algo:pickconfigs}, \S{\ref{appendix:scheduler}}). {\sf\footnotesize EstimateAccuracy} (line 7, Algorithm \ref{algo:pickconfigs}, \S\ref{appendix:scheduler}) aggregates the instantaneous accuracies over the retraining window for a given pair of inference configuration (chosen above) and retraining configuration. {\name}'s micro-profiler (\S\ref{subsec:profiling}) provides the estimate of the accuracy and the time to retrain for a retraining configuration when $100\%$ of GPU is allocated, and {\sf\footnotesize EstimateAccuracy} proportionately scales the GPU-time for the current allocation (in {\small temp\_alloc[]}) and training data size. In doing so, it avoids configurations whose retraining durations exceed $\lVert T \rVert$ with the current allocation (first constraint in Eq. \ref{eqn:optimization}). %, while ensuring the total compute cost does not exceed the total GPU time. 
+For retraining jobs, {\sf\footnotesize PickConfigs} picks the hyperparameter configuration that maximizes the accuracy $A_T(v, \gamma, \lambda, \mathcal{R}, \mathcal{I})$ over the retraining window for each video $v$ (lines 6-12, Algorithm \ref{algo:pickconfigs}). {\sf\footnotesize EstimateAccuracy} (line 7, Algorithm \ref{algo:pickconfigs}) aggregates the instantaneous accuracies over the retraining window for a given pair of inference configuration (chosen above) and retraining configuration. {\name}'s micro-profiler (\S\ref{subsec:profiling}) provides the estimate of the accuracy and the time to retrain for a retraining configuration when $100\%$ of GPU is allocated, and {\sf\footnotesize EstimateAccuracy} proportionately scales the GPU-time for the current allocation (in {temp\_alloc[]}) and training data size. In doing so, it avoids configurations whose retraining durations exceed $\lVert T \rVert$ with the current allocation (first constraint in Eq. \ref{eqn:optimization}). %, while ensuring the total compute cost does not exceed the total GPU time. 
 %\S\ref{subsec:profiling} explains how we estimate the accuracy of retraining and \gaa{time to retrain} with each configuration. %\footnote{\S\ref{subsec:profiling} estimates the time to retrain when $100\%$ of the GPU is allocated to the retraining, and we linearly estimate the time taken to retrain for any given allocation and training data size inside {\sf PickConfigurations}.}
 %We proportionately scale the GPU-time for any given allocation and training data size in {\sf\footnotesize PickConfigs}. \S\ref{subsec:profiling} explains how we estimate the accuracy of retraining and the time to retrain when $100\%$ of the GPU is allocated. 
 
-% {\sf\small PickConfigurations} only checks the Pareto boundary of configurations (Figure \ref{fig:resource-profiles}). 
+% {\sfPickConfigurations} only checks the Pareto boundary of configurations (Figure \ref{fig:resource-profiles}). 
 
 %\item
 {\bf (3)} After reassigning the configurations, {\name} uses the estimated average inference accuracy (accuracy\_avg) over the retraining window (line 14 in Algorithm \ref{algo:thief_sched}) and keeps the new allocations only if it improves up on the accuracy from prior to stealing the resources (line 15 in Algorithm \ref{algo:thief_sched}).
 
-%using {\sf\small Estim} (line 14). 
+%using {\sfEstim} (line 14). 
 % the accuracy after stealing resources is higher than the accuracy prior to the stealing (line 14).
 %\end{packeditemize}
-%steals an additional quantum $\delta$ for the {\small thief\_job} 
-%The performance estimation module ({\sf\small Estim}) can produce the $\alpha_v(T)$ for all the video streams $v \in V$ with any given configuration and resource allocation, and we will explain it in next in \S\ref{subsec:profiling}.
+%steals an additional quantum $\delta$ for the {thief\_job} 
+%The performance estimation module ({\sfEstim}) can produce the $\alpha_v(T)$ for all the video streams $v \in V$ with any given configuration and resource allocation, and we will explain it in next in \S\ref{subsec:profiling}.
 
 
 The thief scheduler repeats the process till the accuracy stops increasing (lines 15-20 in Algorithm \ref{algo:thief_sched}) and until all the jobs have played the ``thief''. 
 Algorithm~\ref{algo:thief_sched} is invoked at the beginning of each retraining window, as well as on the completion of every training job during the window.% to reallocate resources to the other training and inference jobs.
 
 \input{ekya/algo_thiefsched.tex}
-%\input{algo_pickconfigurations}
+\input{ekya/algo_pickconfigurations}
 
+
+
+    
+
+    
 %{\name}'s scheduler starts with a {\em fair} resource allocation for all video streams $v \in V$; for any given resource allocation (of a retraining or inference job), it picks the configuration with the highest accuracy but whose resource demand is less than the allocation. % which maximize inference accuracy for this period. The configurations are picked by the configuration picking routine (\cref{algo:hyperparam_pick}), which uses the simulator $S$ to exhaustively evaluate all training configurations $\gamma_v \in \Gamma_v$ and inference configurations $\lambda_v \in \Lambda_v$ for all video streams $v \in V$.
 
 %After picking the configurations for the given fair resource allocation, the thief allocator iterates over every job, steals a tiny quantum of resource from the remaining jobs and evaluates the accuracy this resource allocation with the simulator $S$. If the accuracy increases, it tries stealing more resources till accuracy stops increasing. It then moves to the next job and repeats till all jobs have played the "thief" and arrived at the maximum pareto accuracy. Once this is done, the thief scheduler re-evaluates the hyperparameter configurations with the algorithm to verify if the current selection is optimal for the new resource allocation. If it is, the algorithm terminates. Else, new hyperparameters are selected and the process is repeated.
@@ -136,7 +141,7 @@ Algorithm~\ref{algo:thief_sched} is invoked at the beginning of each retraining 
 \mypara{Design rationale} 
 We call out the key aspects that makes the scheduler's decision efficient by pruning the search space. %improves its efficiency while potentially introducing sub-optimality to its decisions.
 %starting sequence of jobs
-%\item {\em Iterating through the jobs only once:} The thief scheduler orders the jobs ({\sf\small all\_jobs}) in descending order of the expected improvement in accuracy (\ie accuracy after the retraining compared to its current accuracy).  This prioritizes jobs with the most improvement to play the ``thief'' and give them more resource first, while ensuring a bounded computational complexity of the thief scheduler.
+%\item {\em Iterating through the jobs only once:} The thief scheduler orders the jobs ({\sfall\_jobs}) in descending order of the expected improvement in accuracy (\ie accuracy after the retraining compared to its current accuracy).  This prioritizes jobs with the most improvement to play the ``thief'' and give them more resource first, while ensuring a bounded computational complexity of the thief scheduler.
 
 \begin{itemize}
 %quantum of resource increments
@@ -161,8 +166,39 @@ Although one can reallocate GPU resource among jobs at finer temporal granularit
 Our micro-profiler (described next) speeds up the thief scheduler by giving it only the more promising configurations. Thus, the list $\Gamma$ used in Algorithm \ref{algo:thief_sched} is significantly smaller than the exhaustive set.  
 \end{itemize}
 
-% {\name}'s scheduler relies on an estimation module for accuracy ({\sf\small Estim}) that estimates the average inference accuracy over time, $\alpha_v(T)$ over all the video streams $v \in V$, given their retraining and inference configurations, and their respective resource allocations. The estimator {\sf\small Estim} calculates the expected time taken to finish the retraining for each video stream $v$, and then combines that with the reduced inference accuracy during the retraining and the improved inference accuracy after the retraining, to calculate $\alpha_v(T) \forall v$. \footnote{{\sf\footnotesize Estim} assumes that the inference configuration after the retraining is back to its old value that was being used prior to the retraining.} 
+% {\name}'s scheduler relies on an estimation module for accuracy ({\sfEstim}) that estimates the average inference accuracy over time, $\alpha_v(T)$ over all the video streams $v \in V$, given their retraining and inference configurations, and their respective resource allocations. The estimator {\sfEstim} calculates the expected time taken to finish the retraining for each video stream $v$, and then combines that with the reduced inference accuracy during the retraining and the improved inference accuracy after the retraining, to calculate $\alpha_v(T) \forall v$. \footnote{{\sf\footnotesize Estim} assumes that the inference configuration after the retraining is back to its old value that was being used prior to the retraining.} 
 
+\subsection{Complexity analysis}
+\label{complexity-analysis}
+\emph{Assuming} all the $A_T(v, \gamma, \lambda, \mathcal{R}, \mathcal{I})$ values are known, the above optimization problem can be reduced to a multi-dimensional binary knapsack problem, a NP-hard problem \cite{DBLP:journals/mor/MagazineC84}. 
+Specifically, the optimization problem is to pick binary options ($\phi_{v\gamma\lambda\mathcal{R}\mathcal{I}}$) to maximize overall accuracy while satisfying two capacity constraints (the first and second constraints in Eq~\ref{eqn:optimization}). %\ \forall v \in \mathcal{V}, \forall \gamma \in \Gamma, \forall \lambda \in \Lambda$ in a given window $T$.  
+%Specifically, the optimization problem is to maximize accuracy (i.e., value of an item) by making binary decisions ($\phi_{v\gamma\lambda\mathcal{R}\mathcal{I}}$) in the system decision space (i.e., whether putting an item in a knapsack or not). 
+%It is multidimensional because the decisions need to satisfy two constraints (the first and second constraints in Eq~\ref{eqn:optimization}).
+%It is multi-choice because the system can only make one decision for each video (the third constraint in Eq~\ref{eqn:optimization}). 
+%Hence, even when assuming that we know all the $A_T(v, \gamma, \lambda, \mathcal{R}, \mathcal{I})$ values, the problem is a multi-choice, multidimensional binary knapsack problem, which is known to be NP-hard \cite{DBLP:journals/mor/MagazineC84}. 
+In practice, however, getting all the $A_T(v, \gamma, \lambda, \mathcal{R}, \mathcal{I})$ is \emph{infeasible} 
+%because this requires we actually train the edge DNN $\forall \gamma\in\Gamma, \forall v \in \mathcal{V}$ and run inference with all the retrained DNNs as well as the non-retrained DNNs $\forall v \in \mathcal{V}, \forall \lambda \in \Lambda$. 
+because this requires training the edge DNN using all retraining configurations and running inference using all the retrained DNNs with all possible GPU allocations and inference configurations.%, for all the video streams.
+%In fact, doing so completely defeats the purpose of the resource optimization problem. 
+
+The uncertainty of $A_T(v, \gamma, \lambda, \mathcal{R}, \mathcal{I})$ resembles the multi-armed bandits (MAB) problem \cite{robbins1952some} to maximize the expected rewards given a limited number of trials for a set of options.
+%chooses among a set of options using trials, and by observing the reward at the end of each trial. %choosing among a set of slot machines at each round of play, and upon that selection observing a reward realization. 
+%The player aims to maximize the expected rewards given a limited number of trials. 
+%Because of data shift, the past experience on rewards ($A(v, T, \gamma, \lambda)$) can change significantly among different window, which means the underlying rewards are non-stationary and the optimal strategy is intractable without limiting the variation of rewards \cite{DBLP:conf/nips/GurZB14}. 
+Our optimization problem is more challenging than MAB for two reasons.
+%First, the cost of each trial ($C_T(v, \gamma, \lambda)$) varies significantly unlike the MAB problem where the cost of each trial is fixed.
+First, unlike the MAB problem, the cost of trials ($C_T(v, \gamma, \lambda)$) varies significantly, and the optimal solution may need to choose cheaper yet less rewarding options to maximize the overall accuracy.
+%Thus, the optimal solution may leverage cheaper yet less rewarding option to maximize the overall accuracy, instead of looking for the highest reward option. %which is unlike the MAB problem. 
+%Second, since we are optimizing for multiple players simultaneously using the same set of resources, the optimal solution may leverage cheaper yet less rewarding option to maximize the overall accuracy, which is unlike the MAB problem. 
+%As discussed above, it is a NP-hard multiple knapsack problem even if all the rewards are known. 
+%This is fundamentally different from the MAB problem, whose goal is to find and leverage the maximum rewarding option as often as possible because the cost of pulling each arm is fixed. 
+Second, getting the reward $A_T(v, \gamma, \lambda, \mathcal{R}, \mathcal{I})$ after each trial %is too expensive because this 
+requires "ground truth" labels that are obtained using the large golden model, which can only be used judiciously on resource-scarce edges (\S\ref{subsec:continuous}).
+%. As \S\ref{subsec:continuous} discussed, we have to be judicious about running the golden model on resource-constrained edges. 
+
+
+In summary, our optimization problem is computationally more complex than two fundamentally challenging problems (multi-dimensional knapsack and multi-armed bandits).  
+%Thus, we proceed to design an efficient approximate heuristic. 
 
 
 \subsection{Performance estimation with micro-profiling}
@@ -174,7 +210,7 @@ Our micro-profiler (described next) speeds up the thief scheduler by giving it o
 Specifically, at the beginning of each retraining window $T$, we need to {\em profile} for each video $v$ and each configuration $\gamma\in\Gamma$, the accuracy after retraining using $\gamma$ and the corresponding time taken to retrain.% computation cost for retraining.
 
 \mypara{Profiling in \name vs. hyperparameter tuning}
-While \name's profiling may look similar to hyperparameter tuning (e.g.,~\cite{DBLP:conf/nips/SnoekLA12,DBLP:journals/jmlr/LiJDRT17,hypersched,rubberband}) at first blush, there are two key differences. 
+While \name's profiling may look similar to hyperparameter tuning (e.g.,~\cite{snoek2012practical,hyperband,hypersched,rubberband}) at first blush, there are two key differences. 
 %First, \name needs not only the performance estimates of the single best configuration, but those of a broad set of candidate configurations as input to the joint retraining-inference scheduling. 
 First, \name needs the performance estimates of a broad set of candidate configurations for the thief scheduler, not just of the single best configuration, because the best configuration is jointly decided across the many retraining and inference jobs. 
 Second, in contrast to hyperparameter tuning which runs separately of the eventual inference/training, \name's profiling must share compute resource with all retraining and inference.% jobs, and thus must be optimized as a whole. 
@@ -249,7 +285,7 @@ Finally, {\name}'s micro-profiling also prunes out those configurations for micr
 \mypara{Annotating training data} 
 For both the micro-profiling as well as the retraining, {\name} acquires labels using a ``golden model'' (\S\ref{subsec:continuous}). This is a high-cost but high-accuracy model trained on a large dataset. %, and the use of such a golden model is consistent with literature in computer vision \cite{incremental-13, mullapudi2019, incremental-15, distribution-20}. 
 As explained in \S\ref{sec:background}, the golden model cannot keep up with inference on the live videos and we use it to label only a small subset of the videos for retraining. 
-\revtext{The delay of annotating training data with the golden model is accounted by the scheduler as follows: we subtract the data annotation delay from the retraining window and only pass the remaining time of the window to Algorithm \ref{algo:pickconfigs} (\S{\ref{appendix:scheduler}}).}
+\revtext{The delay of annotating training data with the golden model is accounted by the scheduler as follows: we subtract the data annotation delay from the retraining window and only pass the remaining time of the window to Algorithm \ref{algo:pickconfigs}.}
 % \revtext{The cost of annotating training data with the golden model is included in the scheduler by subtracting the label generation time from the size of the retraining window and passing this as the retraining window parameter to the Algorithm \ref{algo:pickconfigs} routine.}
 %\junchen{refer to section 2 when golden model labeling is first mentioned?} 
 %We use the \gaa{ResNet152} model trained on the MS-COCO dataset as our golden model. While the \gaa{cost of running the golden model is typically a small fraction of the retraining cost (measured to be under $3\%$),} note that the golden model is still significantly more expensive than the compressed edge models and are not conducive for inference on live video streams.

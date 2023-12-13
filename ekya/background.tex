@@ -6,7 +6,7 @@
 %We explain the edge computing setup for video analytics (\S\ref{subsec:edge}) and motivate continuous training of video DNNs (\S\ref{subsec:continuous}).
 
 
-\subsection{Edge Computing for Video Analytics}
+\subsection{Edge computing for video analytics}
 \label{subsec:edge}
 
 % edge computing setup: managed edge outposts & their specs, processing videos in a building or campus; typical video streams/edge
@@ -43,7 +43,7 @@ $3)$ Videos often contain {\em sensitive and private data} that users do not wan
 
 Thus, due to reasons of network cost and video privacy, it is preferred to run both inference and retraining on the edge compute device itself without relying on the cloud. In fact, with bandwidths typical in edge deployments, cloud-based solutions are slower and result in lower accuracies (\S\ref{subsec:eval-alternate}).
 
-\subsection{Compressed DNN Models and Data drift}
+\subsection{Compressed DNN models and data drift}
 \label{subsec:continuous}
 
 Advances in computer vision research have led to high-accuracy DNN models that %surpass human-level accuracy on general images and videos. These DNN models 
@@ -59,7 +59,7 @@ achieve high accuracy with a large number of weights, deep architectures, and co
 %  \begin{subfigure}[t]{0.5\linewidth}
 %    \centering
 %    \includegraphics[width=\linewidth]{ekya/ekya/figures/motivation/incr_learn_motivation/motivation_waymo_distchange_classdist.pdf} 
-%    \caption{\small Class distribution}
+%    \caption{Class distribution}
 %    \label{fig:class-distrib-motivation}
 %  \end{subfigure}
 %  ~~~
@@ -67,7 +67,7 @@ achieve high accuracy with a large number of weights, deep architectures, and co
 %    \centering
 %    % \includegraphics[width=\linewidth]{ekya/figures/motivation/Class_Incrementality/class_distribution_change_sf_27.png}
 %    \includegraphics[width=\linewidth]{ekya/figures/motivation/incr_learn_motivation/motivation_waymo_distchange_acc.pdf}
-%     \caption{\small Accuracy}
+%     \caption{Accuracy}
 %    \label{fig:class-distrib-motivation-acc}
 %  \end{subfigure}
 %  \caption{Impact of changing class distribution (left) on model accuracy in the Waymo data. Continuous learning results in higher and steady accuracy over time (right). \kh{Update the figures to include the one trained with first half of the tasks}}
@@ -106,43 +106,43 @@ Our approach is essentially that of supervising a low-cost ``student'' model wit
   \centering
   % Accuracy figure
   % Class distribution figure
-  \begin{subfigure}[t]{0.48\linewidth}
+  \begin{subfigure}[t]{0.42\linewidth}
     \centering
     % \includegraphics[width=\linewidth]{ekya/figures/motivation/incr_learn_motivation/motivation_jena_classdist.pdf}
     % \includegraphics[width=\linewidth]{ekya/figures/motivation/incr_learn_motivation/motivation_cityscapes_jena_classdist.pdf}
     \includegraphics[width=\linewidth]{ekya/figures/motivation/incr_learn_motivation/motivation_cityscapes_zurich_classdist.pdf}
-    \caption{\small Class Distribution}
+    \caption{Class Distribution}
     \label{fig:jena-classdist}
   \end{subfigure}
     ~~
-  \begin{subfigure}[t]{0.48\linewidth}
+  \begin{subfigure}[t]{0.42\linewidth}
     \centering
     % \includegraphics[width=\linewidth]{ekya/figures/motivation/incr_learn_motivation/motivation_jena_acc.pdf}
     % \includegraphics[width=\linewidth]{ekya/figures/motivation/incr_learn_motivation/motivation_cityscapes_jena_accuracy.pdf}
     \includegraphics[width=\linewidth]{ekya/figures/motivation/incr_learn_motivation/new_motivation_cityscapes_zurich_accuracy.pdf}
     
     
-    \caption{\small Accuracy}
+    \caption{Accuracy}
     \label{fig:jena-motivation}
   \end{subfigure}
     \hspace*{\fill}
   ~~
   % Sample Image Task 1
-  \begin{subfigure}[t]{0.46\linewidth}
+  \begin{subfigure}[t]{0.41\linewidth}
     \centering
     % \includegraphics[width=\linewidth]{ekya/figures/motivation/incr_learn_motivation/t1_marked.png}
     \includegraphics[width=\linewidth]{ekya/figures/motivation/incr_learn_motivation/motivation_datadrift_vs_acc.pdf}
-     \caption{\small Accuracy vs data drift}
+     \caption{Accuracy vs data drift}
     \label{fig:acc-datadrift}
   \end{subfigure}
   ~~
   % Sample Image Task 6
-  \begin{subfigure}[t]{0.46\linewidth}
+  \begin{subfigure}[t]{0.41\linewidth}
     \centering
     % \includegraphics[width=\linewidth]{ekya/figures/motivation/incr_learn_motivation/t6_marked.png}
     % \includegraphics[width=\linewidth]{ekya/figures/motivation/incr_learn_motivation/motivation_cityscapes_jena_win5.pdf}
     \includegraphics[width=\linewidth]{ekya/figures/motivation/incr_learn_motivation/person_classshift.pdf}
-    \caption{\small Person class variations}
+    \caption{Person class variations}
     \label{fig:personclass}
   \end{subfigure}
   
@@ -236,14 +236,14 @@ This makes the efficient ResNet18 more suited for edge deployments and continuou
 %  \begin{subfigure}[t]{0.5\linewidth}
 %    \centering
 %    \includegraphics[width=\linewidth]{ekya/figures/motivation/Class_Incrementality/new_class.eps}
-%    \caption{\small New classes over time}
+%    \caption{New classes over time}
 %        \label{fig:class-inc-motivation}
 %  \end{subfigure}
 %  ~~
 %  \begin{subfigure}[t]{0.5\linewidth}
 %    \centering
 %    \includegraphics[width=\linewidth]{ekya/figures/motivation/Class_Incrementality/new_class_acc.eps}
-%    \caption{\small Accuracy}
+%    \caption{Accuracy}
 %        \label{fig:class-inc-motivation-acc}
 %  \end{subfigure}
 %   \hfill

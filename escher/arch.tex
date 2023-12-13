@@ -21,12 +21,12 @@ This allows the application to make targeted placement decisions (Figure~\ref{fi
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.82\linewidth]{escher/figures/logicalres_demo.pdf}
-    \caption{\small Example using ephemeral resources for task placement. Applications create ephemeral resources (\emph{my-resource}) on the nodes where they wish to place a task and then launch a task requesting \emph{my-resource}. The resource-matching scheduler ensures the task is placed on the desired node.}
+    \caption{Example using ephemeral resources for task placement. Applications create ephemeral resources (\emph{my-resource}) on the nodes where they wish to place a task and then launch a task requesting \emph{my-resource}. The resource-matching scheduler ensures the task is placed on the desired node.}
     %  Assuming a minimalist framework scheduler that matches task resource requests to node resource availabilities,
     \label{fig:er-example}
 \end{figure}
 
-\subsection{ESCHER Workflow}
+\subsection{ESCHER workflow}
 \label{sec:arch:design}
 
 Figure~\ref{fig:esl-arch} describes the workings of an ESCHER scheduler. %, the main components of the scheduler design, and the workflow between them. 
@@ -68,7 +68,7 @@ Note that the scheduler does not need to satisfy any other constraints, such as 
     \centering
      \includegraphics[width=0.85\linewidth]{escher/figures/idea_esl_arch.pdf}
     \caption{
-        \small ESCHER task submission workflow with an ESL mediating the implementation. A task requests a supported scheduling policy from the ESL, which invokes the ESCHER API if necessary and returns the resource specification which would satisfy the policy. The task is launched with the returned resource specification.
+        ESCHER task submission workflow with an ESL mediating the implementation. A task requests a supported scheduling policy from the ESL, which invokes the ESCHER API if necessary and returns the resource specification which would satisfy the policy. The task is launched with the returned resource specification.
     }
     \label{fig:esl-arch}
     \vspace{-2mm}
@@ -97,7 +97,7 @@ Since distributed applications can have widely varying scheduling requirements, 
 
 % \subsubsection{\romilc{Example ESL - Ray Placement Groups}}
 % % How can I use ESLs? You can do affinity plus gangn scheduling with ESLs. Show how they can compose. 
-% \romilc{Ray\cite{ray-osdi} utilizes ephemeral resources to implement a ESL called the placement groups API. Placement groups allow users to atomically reserve groups of resources across multiple nodes (i.e., gang scheduling). They can be then used to schedule Ray tasks and actors to be packed as close as possible for locality (PACK qualifier), or spread apart (SPREAD qualifier).}
+% \romilc{Ray\cite{ray} utilizes ephemeral resources to implement a ESL called the placement groups API. Placement groups allow users to atomically reserve groups of resources across multiple nodes (i.e., gang scheduling). They can be then used to schedule Ray tasks and actors to be packed as close as possible for locality (PACK qualifier), or spread apart (SPREAD qualifier).}
 
 % \romilc{Ray placement groups operate by creating bundles of resources which can be atomically reserved by tasks. These bundles are reserved by creating ephemeral resources which replace the physical resources with unique virtual instances which are unique to a specific task. In other words, once a placement group is created, the original physical resources are consumed by the placement group, and ephemeral resources are then consumed by the task. The ESL manages the lifecycle of these ephemeral resources by creating them when tasks request a placement group and releasing them when the task ends.}
 
@@ -123,7 +123,7 @@ def get_cluster_status()
 
 \subsection{Fault tolerance}
 \label{sec:esl-faulttol}
-In the event of a node failure, ESCHER works in tandem with the fault-tolerance scheme of the underlying framework. Most frameworks~\cite{ray-osdi,kubernetes} simply re-execute the tasks with the same resource requirement. However, since these resource requests include ephemeral resources which no longer exist, these re-executed tasks cannot be scheduled.
+In the event of a node failure, ESCHER works in tandem with the fault-tolerance scheme of the underlying framework. Most frameworks~\cite{ray,kubernetes} simply re-execute the tasks with the same resource requirement. However, since these resource requests include ephemeral resources which no longer exist, these re-executed tasks cannot be scheduled.
 
 At the bare minimum, an ESL must ensure that ephemeral resources are restored at some other eligible node. To do this, ESCHER relies on the cluster framework to report failed nodes through the \lstinline{get_cluster_status} API. Once failed nodes are detected, an ESL can recreate the ephemeral resources on suitable nodes by replaying the \lstinline{set_resource} calls for the failed resources. If a candidate node is found, the resource is recreated, else the tasks must wait for the failed node to recover before they can be rescheduled. When a node is restored, its resources are also reinitialized, allowing any waiting tasks to get rescheduled. % In addition to this basic policy, ESLs can define application-specific recovery routines.% after the ephemeral resources are restored.
 

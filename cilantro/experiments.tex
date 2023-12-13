@@ -89,7 +89,7 @@ We evaluate Cilantro's fallback defaults for
 such instances.
 We re-run the same experiment in \S\ref{sec:fixedclus}, but for users
 \incmtt{db01}, \incmtt{mlt1}, \incmtt{mlt2}, \incmtt{db11}, and \incmtt{prs1}, we manually set
-the demand as described in \S\ref{sec:discussion}.
+the demand as described in \S\ref{sec:cilantro_discussion}.
 Since the true demands are not known a priori, users might under- or overstate them.
 To reflect this, we first
 compute the true demand for each user under the median load from our profiled data.
@@ -116,8 +116,15 @@ While Cilantro's decoupled design aids with generality, it may be susceptible to
 of the specific models used for the performance learners and load forecasters.
 Moreover, in many real environments, the feedback can be very noisy.
 To show that Cilantro is robust to both these effects, we perform the following
-microbenchmark in a synthetic 5 user environment (described in the Appendix) with the
+microbenchmark in a synthetic 5 user environment with the
 \cilantronjcs policy.
+
+We use 5 users whose load is obtained
+by the same twitter trace from the experiments, and whose synthetic performance function is given by
+$p_j(a, \ell) = 1/(1+e^{-(a/\ell - b_j)})$, where $a$ is the allocation and $\ell$ is the load.
+For the 5 users, we set $b_j\in \{0.1, 0.3, 0.5, 0.7, 0.9\}$.
+We set the SLO to be 0.95 for all users (note that $0\leq p_j\leq 1$.
+As the stochastic observation, we sample a Gaussian with standard deviation 0.2.
 As both feedback noise and model idiosyncrasies can be modeled with inaccurate confidence intervals,
 we introduce increasing levels of noise (5\%, 10\%, 20\%, 50\%) to the 
 upper and lower confidence bounds returned by the learners and forecasters.

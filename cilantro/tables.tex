@@ -14,7 +14,7 @@ $0.04 \pm 0.01$ &  $2.88 \pm 0.31$ &  $2.12 \pm 0.02$ & $0.81 \pm 0.16$ \\
 \bottomrule
 \end{tabular}
 \vspace{0.05in}
-\caption{\small
+\caption{
 Mean time taken (in seconds) by \cilantro{} to update the performance model and for
 computing a new allocation for each of the three fixed cluster sharing policies. 
 % \insertTableTextSpace
@@ -27,6 +27,7 @@ computing a new allocation for each of the three fixed cluster sharing policies.
 
 \newcommand{\insertTableMetrics}{
 \begin{table*}[t]
+\scriptsize % Setting size
 \centering
 \begin{tabular}{c|c|c|c|c}
 \toprule
@@ -75,7 +76,7 @@ Policy & Social Welfare, $(\socwel)$ & Egalitarian Welfare $(\egalwel)$ & NJC Fa
 \bottomrule
 \end{tabular}
 \vspace{0.05in} 
-\caption{\small
+\caption{ 
 The social welfare~\eqref{eqn:socwel}, egalitarian welfare~\eqref{eqn:egalwel},
 NJC fairness metric~\eqref{eqn:njcfair}, and the effective resource usage~\eqref{eqn:effresusage}
 for all 13 methods.
@@ -105,7 +106,7 @@ Policy & Performance & Cost \\
 \midrule
 \end{tabular}
 \label{tab:autoscaling}
-\caption{\small
+\caption{ 
 Autoscaling experiment with Cilantro and baselines. Cilantro's performance is the closest to the specified threshold of 0.95 while minimizing cost.
 }
 \vspace{-2em}
@@ -143,7 +144,7 @@ Query Bin & TPC-DS Query Ids  & Mean Execution Time (s)\\
 \bottomrule
 \end{tabular}
 \vspace{0.05in}
-\caption{\small Details of the bins created from TPC-DS queries. Each user's workload is generated using these bins. Execution time is profiled on a SQLite3 database running on AWS m5.2xlarge instance with one allocated CPU core.}
+\caption{Details of the bins created from TPC-DS queries. Each user's workload is generated using these bins. Execution time is profiled on a SQLite3 database running on AWS m5.2xlarge instance with one allocated CPU core.}
 \label{tab:querybinmap}
 \end{table}
 }
@@ -180,7 +181,7 @@ Query Bin & TPC-DS Query Ids  & Mean Execution Time (s)\\
                                               & mlt7     & 500  & \incmtt{quadratic}        \\
 \bottomrule
 \end{tabular}
-\caption{\small
+\caption{ 
 SLO and utility functions used for jobs in experiments in \S\ref{sec:fixedclus}. For Latency based SLOs, the SLO implies the fraction of queries that completed under 2 seconds. For Throughput based SLOs, the SLO is the desired query rate, measured in queries per second.
 }
 \label{tab:expjobsetup}
@@ -193,7 +194,7 @@ SLO and utility functions used for jobs in experiments in \S\ref{sec:fixedclus}.
 % \centering
 % \includegraphics[width=\linewidth]{figs/Table.png}
 % \vspace{-0.1in}
-% \caption{\small
+% \caption{ 
 % Comparing Cilantro against related work. Cilantro \rbcomment{TODO - Make table in latex once approved. Create grouping RW PM PO. Move supports multiple policies to second.}
 % \kkcomment{Supports multiple allocation objectives. Parties is not fixed cluster.}
 % \label{tab:relatedworktable}
@@ -217,7 +218,7 @@ SLO and utility functions used for jobs in experiments in \S\ref{sec:fixedclus}.
 \newcommand\colonewidth{1}
 \newcommand\colschedwidth{2}
 \begin{table*}[ht]
-\small
+\tiny
 \begin{threeparttable}
 \begin{tabular}{p{1 cm}ccccccccccccc}
 % ======= Copy only Tabular part from tablesgenerator.com, paste here. Add \makecell and \\ to create new line in text cells. Add citations and \rot to headers.==========
@@ -228,13 +229,11 @@ SLO and utility functions used for jobs in experiments in \S\ref{sec:fixedclus}.
 \multicolumn{1}{|c|}{\textbf{\makecell{Cluster size}}}                             & \multicolumn{1}{c|}{\cellcolor[HTML]{FFF2CC}Fix}                                & \multicolumn{1}{c|}{Var}                                & \multicolumn{1}{c|}{Fix}                                & \multicolumn{1}{c|}{Var}                                & \multicolumn{1}{c|}{Fix}                                & \multicolumn{1}{c|}{Fix}                                & \multicolumn{1}{c|}{Fix}                                & \multicolumn{1}{c|}{Var}                                & \multicolumn{1}{c|}{Fix}                                & \multicolumn{1}{c|}{Var}                                & \multicolumn{1}{c|}{Var}                                & \multicolumn{1}{c|}{Fix}                                & \multicolumn{1}{c|}{Fix}                                \\ \hline
 % ======= Paste Done ==========
 \end{tabular}
-\begin{tablenotes}[flushleft]\footnotesize
+\begin{tablenotes}[flushleft]\tiny
 \item abbr. RW = Real-world metrics, e.g., latency, PM = Proxy metrics e.g., CPU util., PO = Performance oblivious, Fix = Fixed size, Var = Variable size
 \item [1] Supports multiple objectives, but only performance oblivious ones
 \end{tablenotes}
-\vspace{0.5em}
-\vspace{-0.05in}
-\caption{\small Cilantro and related work. Cilantro uses real-world metrics (e.g., latency) to build performance models online, which can be used to derive custom policies for different objectives.}
+\caption{Cilantro and related work. Cilantro uses real-world metrics (e.g., latency) to build performance models online, which can be used to derive custom policies for different objectives.}
 \vspace{-1em}
 \label{tab:relatedwork}
 \end{threeparttable}
