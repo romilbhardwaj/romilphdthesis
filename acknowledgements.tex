@@ -1,21 +1,41 @@
 \begin{acknowledgements}
-Thanks!
 
-% This is not my thesis. It is the product of 
+It would be inaccurate to call this \textit{my} dissertation. This dissertation is the product of many people's efforts, and I am grateful to all of them for their contributions.
 
-% Ion
+First and foremost, I would like to thank my advisor, Ion Stoica, for his guidance and support throughout this PhD. Ion showed me beauty in simplicity, and the power of simple ideas. His relentless emphasis on driving impact by finding the right problems and solving them with the most effortless yet powerful solutions continues to inspire me. When times got challenging, he has always been a source of encouragement and support. I am immensely grateful for his mentorship.
 
-% Thesis committee - Ganesh, Joseph Gonzalez, Scott Shenker. Other faculty - Raluca, Mike Jordan
+My thesis committee members, Ganesh Ananthanarayanan, Joseph Gonzalez, and Scott Shenker, have been instrumental in shaping my research. Ganesh taught me how to formulate problems and succinctly present them, Joey's endless enthusiasm and leadership by example has been a constant source of inspiration, and Scott's sharp (and witty) insights have always been a delight. I have also had the pleasure of interacting with many other faculty members at Berkeley, including Prabal Dutta, Raluca Ada Popa and Michael Jordan, whose feedback and guidance has been invaluable.
 
-% ESCHER and the Ray team - Alexey, Robert, Philipp, Richard, Stephanie, Eric.
+I have had the privilege of working with two amazing postdocs during my PhD - Alexey Tumanov and Kirthevasan Kandasamy. Not only have they been great mentors who shaped my research and writing, but they have also been great friends with whom I have shared many memorable moments. Without them this PhD would have been much harder.
 
-% Ekya - Ganesh, Junchen, Zhengxu, Kevin, Nikos, 
+I have been fortunate to collaborated with many brilliant people during my PhD. I would like to thank Alexey Tumanov, Robert Nishihara, Philipp Moritz, Richard Liaw, Stephanie Wang, and Eric Liang for their contributions to the ESCHER project. They took me under their wing and taught me how to build impactful open-source systems like Ray. In 2019 I interned at Microsoft Research, where I had the pleasure of working on Ekya with Ganesh Ananthanarayanan, Junchen Jiang, Zhengxu Xia, Kevin Hsieh and Nikolaos Karianakis. I would also like to thank my collaborators on the Cilantro project - Kirthevasan Kandasamy, Wenshuo Guo, Benjamin Hindman, and Asim Biswal. 
 
-% Cilantro - Kirthi, Wenshuo, Benjamin Hindman, Asim
+More recently, I have been working on SkyPilot with Zongheng Yang, Zhanghao Wu, Wei-Lin Chiang, Michael Luo, Woosuk Kwon, Siyuan Zhuang, Doyoung Kim, Tian Xia, Tyler Griggs and Ziming Mao. Building SkyPilot has been a very rewarding experience, and I am thankful to my collaborators without whom it would not have been possible.
 
-% SkyPilot - Zongheng, Zhanghao, Wei-Lin, Michael, Woosuk, Siyuan, Doyoung, Tian, Tyler, Ziming
+I am also thankful to Anant Sahai and the CS182 Spring 2023 staff for encouraging me to challenge myself when I was a TA. It was an incredible learning experience and I appreciate the freedom I was given to experiment with pedagogy and styles for teaching ML Systems.
 
-% TA 182 - Anant Sahai and CS182 staff. Encouraged me to challenge myself.
+The lab would not be functional without the staff of RISELab - Boban, Dave, Ivan, Jon, Kailee and Kattt - who keep it up and running. Thank you for making our lives so much easier.
+
+I will always cherish the wonderful time spent with friends in Berkeley - Shishir Patil, Samyukta Yagati, Paras Jain, Justin Wong, Tianjun Zhang, Silvery Fu, Wen Zhang, Hong Zhang, Melih Elibol, Yeshwanth Cherapanamjeri, Tarun Kathuria and many others. Sukrit Kalra has been a great cook, roommate, colleague and friend - I greatly enjoyed our conversations and time spent together. 
+
+Prior to coming to Berkeley, I was fortunate to be mentored by wonderful people at IIIT-Delhi and Microsoft Research. I would like to thank Mayank Vatsa, Richa Singh, and Amarjeet Singh for introducing me to research during my undergraduate studies at IIIT-Delhi. At Microsoft Research, I was lucky to have worked with Ramachandran Ramjee, Krishna Chintalapudi, Muthian Sivathanu and the systems group on the Gandiva, AutoCalib and Skip-Correlation projects. Ram was an incredible mentor - he gave me the space to pursue my interests while providing direction when I needed it. I aspire to have his zen-like approach to problems one day. 
+
+Whenever I needed a break from research, I could always count on my friends to cheer me up. Apoorva Mittal and Yash Vijay have always been there for me and have never let me feel away from home. There's never a dull moment with Sanchit Saini and Ayushi Aggarwal around. Apoorv Narang and Garen Checkley are the best kept secret of San Francisco - their cooking is par excellence and being in their company is always a joy. More importantly, they introduced me to Kaia, the most adorable dog whom I've had the honor of being friends with. I would also like to thank Shivani Sinha for pushing me to follow my dreams. 
+
+I wouldn't be writing this if it weren't for my family. I am indebted to my parents, Anshu Bhardwaj and Rattan Bhardwaj, for their unconditional love and making countless sacrifices to provide me the right environment to thrive. My brother, Rijul Bhardwaj, is not only my closest friend, but also one of my earliest mentors. From writing mods for Half-Life together to setting up DHCP server for Age of Empires LAN game to overclocking our Nvidia 6200 GPU to run Crysis - much of my interest in computer science stems from early experiences shared with him. In a similar vein, my sister-in-law has been a wonderful friend and counsel - I am grateful for her love and support. I would also like to thank my niece, Ritvi, for bringing so much joy to our lives. Finally, I have nothing but love and gratitude for Jayasi, who has been my partner, best friend, and confidant. Thank you for your unwavering love and support - I am lucky to be sharing my life with you.
+
+
+% Thesis committee - Ganesh (taught me how to write papers), Joseph Gonzalez (always encouraging), Scott Shenker (sharp and witty insights). Other faculty - Raluca, Mike Jordan - had the pleasure of working with them.
+
+% ESCHER and the Ray team - Alexey Tumanov, Robert, Philipp, Richard, Stephanie, Eric. My first project, took me under their wing, learnt how to build impactful systems like Ray.
+
+% Ekya - Ganesh, Junchen, Zhengxu, Kevin, Nikos. Showed how to formulate problems and succinctly present them. Thanks for their patience and guidance. 
+
+% Cilantro - Kirthi, Wenshuo, Benjamin Hindman, Asim. 
+
+% SkyPilot - Zongheng Yang, Zhanghao Wu, Wei-Lin Chiang, Michael Luo, Woosuk Kwon, Siyuan Zhuang, Doyoung Kim, Tian Xia, Tyler Griggs, Ziming Mao
+
+% TA 182 - Anant Sahai and CS182 Spring 2023 staff. Encouraged me to challenge myself.
 
 % Other Berkeley folks - Shishir, Sukrit, Samyukta Yagati, Paras Jain, Justin Wong, Tianjun Zhang, Silvery, Wen, Hong Zhang, Melih, Yeshwanth.
 
