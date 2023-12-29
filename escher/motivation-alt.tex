@@ -29,7 +29,7 @@ We now give a motivating example that is insufficiently served by existing sched
 \label{sec:escher_motivation:example}
 
 % As model size increases, 
-As applications become increasingly diverse, the cluster schedulers must evolve to support novel scheduling policies required by these applications. Consider distributed training, which has emerged as a dominant ML workload. 
+As applications become increasingly diverse, cluster schedulers must evolve to support novel scheduling policies required by these applications. Consider distributed training, a dominant ML workload today. 
 Multiple training jobs are often scheduled simultaneously due to multi-tenancy and individual users submitting multiple training runs in parallel to evaluate different model architectures.
 This requires several distinct scheduling policies: % \rliaw{we can say something stronger here right? it's not simply an issue of supporting, there's also a hierarchical relationship}
 \begin{compactitem}

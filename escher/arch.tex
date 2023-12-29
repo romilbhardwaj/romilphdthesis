@@ -6,7 +6,7 @@
 A scheduling policy is defined by a set of temporal and spatial dependencies between tasks and nodes. We call these dependencies \emph{scheduling constraints}. 
 %More precisely, scheduling constraints specify "when" and "where" (i.e., on which node) should a set of tasks be executed. Given the set of all tasks $W$, a scheduler must provide a schedule in the form of a one-to-many mapping of $S_t$ from $W$ to resources $R$ over all instants of time $T$.
 %\[S_t: W \rightarrow R \quad \forall t \in T \]
-The key idea in \name{} is to map these scheduling constraints to resource requirements by introducing a new resource type, \emph{ephemeral resources}.
+The key idea in \name{} is to map these scheduling constraints to resource requirements by introducing a new kind of resource, \emph{ephemeral resources}.
 
  An ephemeral resource is a logical (i.e., non-physical) resource attribute that the application can dynamically associate with a node. Like physical resources, ephemeral resources have an associated capacity and can be acquired and released by tasks. 
 We call these resources \emph{ephemeral} because the application can create, modify, and destroy them at runtime.

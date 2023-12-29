@@ -5,6 +5,9 @@
 % The Current Maintainer of this work is Paul Vojta.
 
 \documentclass[oldfontcommands]{ucbthesis}
+
+\setlength{\parskip}{0.3em} % Add gap between paragraphs
+
 \pdfsuppresswarningpagegroup=1 
 \pdfminorversion=7
 \usepackage{biblatex}
@@ -62,7 +65,7 @@
 \usepackage{listings}
 \usepackage{upgreek}
 \usepackage[normalem]{ulem}
-\usepackage{hyperref}
+\usepackage[pdftex,pdfauthor={Romil Bhardwaj},pdftitle={Efficient Resource Management for Machine Learning}, breaklinks=true, colorlinks=true, linkcolor=red, citecolor=red, urlcolor=red]{hyperref}
 
 % ========= Cilantro Packages ==========
 % \usepackage{usenix-2020-09}
@@ -72,7 +75,7 @@
 % \setlength{\emergencystretch}{2em} %prevent overruns to gutter
 
 % \usepackage[]{cite}           
-\usepackage{xcolor}     
+% \usepackage{xcolor}     
 % \usepackage[utf8]{inputenc} % allow utf-8 input
 % \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
 % \usepackage{authblk}
@@ -90,7 +93,7 @@
 % \usepackage{times}
 \usepackage{calc}
 \usepackage{mathtools}
-\usepackage{color}
+% \usepackage{color}
 % \usepackage{graphicx} % more modern
 
 % \usepackage{DejaVuSans}
@@ -117,7 +120,7 @@
 \usepackage{threeparttable, tablefootnote}
 % \usepackage{eqparbox}
 % \usepackage{xspace}
-% Add my definitions file
+% Add kirthe's definitions file
 \usepackage{kk}
 \usepackage{defns_cilantro}
 
@@ -240,7 +243,10 @@
 	% ESCHER
 	\include{conclusion/conclusion}
 	
+	\begingroup
+	\setlength{\emergencystretch}{8em}
 	\printbibliography
+	\endgroup
 	
 	% \appendix
 	% \chapter{More Monticello Candidates}

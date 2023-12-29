@@ -1,13 +1,13 @@
 \chapter{Conclusion}
 \label{ch_conclusion}
 
-In this thesis, we explored the use of scheduling techniques to improve resource efficiency of machine learning workloads and bridge the compute supply-demand gap.
+In this dissertation, we explored the use of scheduling techniques to improve resource efficiency of machine learning workloads and bridge the compute supply-demand gap.
 
 At the ML application layer, we targeted a specific machine learning workload - continuous learning in resource constrained settings - and developed Ekya to balance resource allocation between inference and re-training. In doing so, we discovered that selecting optimal configurations for retraining and identifying most promising tasks for allocating GPU cycles can yield upto $4\times$ improvements in GPU efficiency.
 
 At the cluster management layer, we found that the traditional resource-demand based scheduling model where users specify exact amount of resources needed for their jobs results in inefficient use of resources. Instead, we built Cilantro to automatically produce resource allocations based on a job's performance and the user's objective. A key component of Cilantro is the use online learning, which generates progressively accurate models for a job's performance for a given resource allocation. As a result, Cilantro improves efficiency when sharing resources in two important settings - multi-tenant clusters and microservices serving a common application. 
 
-Finally, at the the cluster orchestration layer, we discovered that ML applications are highly sensitive to the exact placement and scheduling of their tasks. ESCHER grants flexibility to these applications to exercise precise scheduling control over their tasks, without requiring tedious and brittle changes to the underlying cluster manager.
+Finally, at the cluster orchestration layer, we discovered that ML applications are highly sensitive to the exact placement and scheduling of their tasks. ESCHER grants flexibility to these applications to exercise precise scheduling control over their tasks, without requiring tedious and brittle changes to the underlying cluster manager.
 
 In building these systems, we observed some common trends that we highlight as lessons learnt below. We also discuss some future directions for bridging the compute supply-demand gap.
 
@@ -25,8 +25,8 @@ ESCHER is an example of increasing flexibility while minimizing complexity throu
 
 \section{Future Work}
 
-% \subsubsection{Improving Resource Availability}
-To bridge the compute supply-demand gap, this thesis has primarily focused on easing resource demand by improving the efficiency of machine learning workloads. However, there is extensive work to be done on the supply side, particularly in the context of resource availability.
+\subsubsection{Improving resource availability}
+To bridge the compute supply-demand gap, this dissertation has primarily focused on easing resource demand by improving the efficiency of machine learning workloads. However, there is extensive work to be done on the supply side, particularly in the context of resource availability.
 
 Compute resources today are fragmented across silos such as clouds and on-prem clusters, making them challenging to access and utilize efficiently. For instance, consider a user with an on-premise cluster and access to multiple clouds. Getting access to a Nvidia A100 GPU for this user entails first checking availability on their on-premise cluster. If a GPU is not available on-premise, they must check availability across different clouds and regions in each cloud. Exploiting availability becomes even more important when using spot instances because these resources may be reclaimed at any time and must be replaced with available spot instances from other clouds and regions.
 % Worse yet, they must also check individual geographic regions, making the search space exponentially large and challenging to manually navigate.
@@ -37,13 +37,15 @@ There is still much work to be done in this space. For instance, having a global
 
 Another approach to improving supply is by sharing idle resources across users. Building systems and primitives for sharing resources across users would require not only providing isolation and performance guarantees (which have been extensively studied), but also designing incentive mechanisms to encourage users to share their resources with others who are not in their trust network.
 
-To conclude, we believe that bridging the compute supply-demand gap is critical to the success of machine learning. It will require a combination of easing resource demand by improving efficiency and increasing resource supply through hardware advancements and availability improvements. We hope that the work in this thesis will serve as a stepping stone towards this goal.
+\subsubsection{Supporting and leveraging Large Language Models (LLMs)}
+Large language models (LLMs) are a new class of machine learning models that have emerged as a powerful tool for natural language processing (NLP) tasks. These models are trained on large amounts of text data and can be fine-tuned to perform a variety of NLP tasks such as question answering, summarization, and translation. For systems researchers, LLMs present a unique opportunity to explore new research directions and challenges.
 
-% Finally, the heterogeneity of hardware and software across different environments presents opportunities for improving efficiency through 
+\textbf{Making LLMs resource efficient.} At the core of LLMs are transformer models, which are a class of neural networks that are highly compute intensive. For instance, training GPT-4\cite{openai2023gpt4} in 2023 is estimated to have required 21 billion petaFLOPs\cite{mlmodelflops} of compute and is expected to have cost more than \$100 million to train. Naturally, making LLMs more resource efficient is critical to their success.
 
+There are many approaches to improving the efficiency of LLMs, each operating at a different layer. At the model layer, most of the compute is spent on the attention mechanism, which computes the relationship between each pair of tokens in the input sequence. Techniques such as flash attention\cite{dao2022flashattention} add I/O awareness to reduce computation cost, while other approaches such as longformer\cite{beltagy2020longformer} build local and global caches to make query lookup more efficient. At the request batching layer, Orca\cite{orca} uses iteration-level scheduling and vLLM \cite{kwon2023efficient} allows large batch sizes by proposing virtual paging for managing the QKV cache. For fine-tuning, LoRA\cite{hu2022lora} reduces the number of trainable parameters by fine-tuning only a subset of specialized parameters. However, these works have focused on optimizing the performance of a single LLM in isolation. Improving efficiency in multi-tenant environments, where multiple LLMs are trained and served simultaneously on the pool of resources, presents interesting avenues for future work.
 
-% \subsubsection{Fine-grained GPU Sharing}
-% GPUs are critical for accelerating machine learning workloads, but are difficult to share due to the high cost of context switching and moving data in and out of the GPU. As a result, GPUs are often statically allocated to jobs, which can lead to low utilization.  Sharing GPUs, both spatially (i.e., run multiple tasks on the same GPU in parallel) and temporally (i.e., time-slice a GPU between multiple tasks, running one task at a time), can improve utilization, but are often coarse-grained and do not allow sharing at the granularity of individual tasks. Just like how CPU sharing has specific primitives (i.e., threads), we believe that GPU sharing will also require new abstractions to support finer-grained sharing. 
+\textbf{Using LLMs to interface with resource management systems.} As shown in Chapter \ref{ch_escher}, resource management systems can benefit from application-awareness. However, expressing application specific knowledge to the resource management system can be challenging for users since they must understand and interface with a cluster manager.
 
+LLMs present a unique opportunity here - they can allow users to express their scheduling requirements and performance considerations in natural language. The LLM can translate these requirements into a policy that is expressed through ESCHER's ephemeral resources, effectively "compiling" the user's requirements into a intermediate representation (IR) of ephemeral resources. When the task is submitted, the ESCHER scheduler ensures the policy is executed by matching the ephemeral resources to available resources. This approach allows users to express their scheduling requirements in a natural language, while retaining the clean separation of concerns between the application and the resource management system provided by ESCHER.
 
-% \subsubsection{Expressing policies with LLMs}
+To conclude, we believe that bridging the compute supply-demand gap is critical to the success of machine learning. It will require a combination of easing resource demand by improving efficiency and increasing resource supply through hardware advancements and availability improvements. We hope that the work in this dissertation will serve as a stepping stone towards this goal.

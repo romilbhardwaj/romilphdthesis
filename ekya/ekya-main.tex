@@ -77,7 +77,7 @@
 \chapter{Ekya: Efficient Continuous Learning on the Edge}
 \label{ch_ekya}
 
-We start by examining the bottom layer of the stack - the ML application layer. An emerging class of ML applications are {\em continuous learning} applications, which continuously retrain their models on new data to adapt to changes in the data distribution. 
+We start by examining the bottom layer of the ML stack - the ML application layer. An emerging class of ML applications are {\em continuous learning} applications, which continuously retrain their models on new data to adapt to changes in the data distribution. 
 
 Continuous learning is particularly important for video analytics applications which use edge compute servers for processing videos. 
 Compressed models that are deployed on the edge servers for inference suffer from {\em data drift} where the live video data diverges from the training data. Continuous learning handles data drift by periodically retraining the models on new data. However, since edge servers are resource-constrained, retraining models on the edge servers can impact the inference accuracy and requires careful resource management.
